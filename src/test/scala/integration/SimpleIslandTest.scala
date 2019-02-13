@@ -1,7 +1,6 @@
 package integration
 
 import com.diatom.TScored
-import com.diatom.agent.TFitnessFunction
 import com.diatom.island.SingleIslandDumi
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -31,8 +30,9 @@ class SimpleIslandTest extends FlatSpec with Matchers {
 
   def createFunc() = Set(listLength to 1 toList)
 
-  def mutateFunc(s: Set[Solution]) = {
-    s.map(sol => {
+  def mutateFunc(s: Set[TScored[Solution]]): Set[Solution] = {
+    s.map(scoredSol => {
+      val sol = scoredSol.solution
       val i = util.Random.nextInt(sol.length)
       val j = util.Random.nextInt(sol.length)
       val tmp = sol(j)
@@ -46,25 +46,25 @@ class SimpleIslandTest extends FlatSpec with Matchers {
     s.filter(_.score.values.sum < cutoff)
   }
 
-  case class Fitness1() extends TFitnessFunction[Solution] {
-    override def score(s: Solution): Double = {
-      (for (partialList <- s.inits) yield {
-        partialList match {
-          case Nil => 0
-          case head :: tail => tail.count(_ < head)
-        }
-      }).sum
-    }
+  def numInversions(s: Solution): Double = {
+    (for (partialList <- s.inits) yield {
+      partialList match {
+        case Nil => 0
+        case head :: tail => tail.count(_ < head)
+      }
+    }).sum
   }
 
-  val create = Set(createFunc _)
-  val mutate = Set(mutateFunc _)
-  val delete = Set(deleteFunc _)
-  val fitnesses = Set(Fitness1())
-  val pareto = SingleIslandDumi[Solution](create, mutate, delete, fitnesses).run()
+  val pareto: Set[Solution] = SingleIslandDumi.builder[Solution]()
+    .addCreator(createFunc)
+    .addMutator(mutateFunc)
+    .addDeletor(deleteFunc)
+    .addFitness(numInversions _)
+    .build()
+    .run()
 
   "Single Island Dumi" should "be able to sort a list" in {
-    pareto should contain (1 to listLength toList)
+    pareto should contain(1 to listLength toList)
   }
 
 }

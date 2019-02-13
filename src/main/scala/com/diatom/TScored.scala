@@ -1,9 +1,15 @@
 package com.diatom
 
-import com.diatom.agent.TFitnessFunction
-
+/**
+  * Represents a solution scored by mutliple fitness functions.
+  */
 trait TScored[Sol] {
-  def score: Map[TFitnessFunction[Sol], Double]
+  /**
+    * Maps the name of fitness functions to the score of the solution with respect to them.
+    */
+  def score: Map[String, Double]
+
+  def solution: Sol
 
   /**
     * Does this solution dominate that one?
@@ -13,6 +19,5 @@ trait TScored[Sol] {
     * @param that a scored solution.
     * @return whether this solution dominates that one
     */
-  //TODO implement this
   def dominates(that: TScored[Sol]): Boolean = ???
 }
