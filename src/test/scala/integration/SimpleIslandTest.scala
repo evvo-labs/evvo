@@ -1,7 +1,7 @@
 package integration
 
-import com.diatom.TScored
-import com.diatom.island.SingleIslandDumi
+import com.diatom.{CreatorFunctionType, TScored}
+import com.diatom.island.SingleIslandEvvo
 import org.scalatest.{FlatSpec, Matchers}
 
 /**
@@ -55,11 +55,11 @@ class SimpleIslandTest extends FlatSpec with Matchers {
     }).sum
   }
 
-  val pareto: Set[Solution] = SingleIslandDumi.builder[Solution]()
+  val pareto: Set[Solution] = SingleIslandEvvo.builder[Solution]()
     .addCreator(createFunc)
     .addMutator(mutateFunc)
     .addDeletor(deleteFunc)
-    .addFitness(numInversions _)
+    .addFitness(numInversions)
     .build()
     .run()
 

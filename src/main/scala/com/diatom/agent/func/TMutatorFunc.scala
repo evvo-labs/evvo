@@ -18,3 +18,4 @@ trait TMutatorFunc[Sol] extends TAgentFunc {
 }
 
 case class MutatorFunc[Sol](mutate: MutatorFunctionType[Sol]) extends TMutatorFunc[Sol]
+

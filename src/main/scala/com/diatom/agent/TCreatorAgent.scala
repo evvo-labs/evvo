@@ -1,13 +1,15 @@
 package com.diatom.agent
 
-import com.diatom.CreatorFunctionType
+import com.diatom.population.TPopulation
+import com.diatom.agent.func.TCreatorFunc
+
 
 trait TCreatorAgent[Sol] extends TAgent[Sol] {
 
 }
 
-case class CreatorAgent[Sol](creatorFunc: CreatorFunctionType[Sol]) extends TCreatorAgent[Sol] {
-  override def start(): Unit = ???
+case class CreatorAgent[Sol](creatorFunc: TCreatorFunc[Sol], pop: TPopulation[Sol])
+  extends AAgent[Sol](pop) with TCreatorAgent[Sol] {
 
-  override def stop(): Unit = ???
+  override def step(): Unit = pop.addSolutions(creatorFunc.create())
 }
