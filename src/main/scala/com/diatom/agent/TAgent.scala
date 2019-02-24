@@ -12,7 +12,7 @@ trait TAgent[Sol] {
   def stop(): Unit
 }
 
-abstract class AAgent[Sol](pop: TPopulation[Sol]) extends TAgent[Sol] {
+abstract class AAgent[Sol] extends TAgent[Sol] {
   // consider factoring this out into a separate component and using
   // composition instead of inheriting a thread field. This will reduce the
   // number of tests needed by centralizing
@@ -28,7 +28,6 @@ abstract class AAgent[Sol](pop: TPopulation[Sol]) extends TAgent[Sol] {
   }
 
   override def start(): Unit = {
-    println(thread.isAlive)
     if (!thread.isAlive) {
       thread.start()
     } else {

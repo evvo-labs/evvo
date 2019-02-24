@@ -7,10 +7,14 @@ trait TMutatorAgent[Sol] extends TAgent[Sol] {
 
 }
 
-case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol], pop: TPopulation[Sol]) extends TMutatorAgent[Sol] {
+case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol], pop: TPopulation[Sol])
+  extends AAgent[Sol] with TMutatorAgent[Sol] {
 
-  override def start(): Unit = ???
-
-  override def stop(): Unit = ???
+  def step(): Unit = {
+    pop.addSolutions(
+      mutate.mutate(
+        pop.getSolutions(
+          mutate.numInputs)))
+  }
 
 }

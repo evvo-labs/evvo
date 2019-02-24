@@ -18,8 +18,8 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
 
     val pop: TPopulation[Sol] = new PopulationActorRef[Sol](system, fitnesses)
     val creatorAgents = creators.map(c => CreatorAgent(c, pop))
-    val mutatorAgents = mutators.map(m => MutatorAgent(m))
-    val deletorAgents = deletors.map(d => DeletorAgent(d))
+    val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
+    val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
     Set()
   }
 }

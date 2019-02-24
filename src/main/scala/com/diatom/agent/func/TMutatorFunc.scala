@@ -14,7 +14,10 @@ trait TMutatorFunc[Sol] extends TAgentFunc {
     */
   def mutate: MutatorFunctionType[Sol]
 
-  //  def numInputs: Int
+  /**
+    * @return the number of solutions to pass to mutate.
+    */
+  def numInputs: Int = 32
 }
 
 case class MutatorFunc[Sol](mutate: MutatorFunctionType[Sol]) extends TMutatorFunc[Sol]

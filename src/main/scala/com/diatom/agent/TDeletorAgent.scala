@@ -7,10 +7,11 @@ trait TDeletorAgent[Sol] extends TAgent[Sol] {
 
 }
 
-case class DeletorAgent[Sol](delete: TDeletorFunc[Sol], pop: TPopulation[Sol]) extends TDeletorAgent[Sol] {
+case class DeletorAgent[Sol](delete: TDeletorFunc[Sol], pop: TPopulation[Sol])
+  extends AAgent[Sol] with TDeletorAgent[Sol] {
 
-  override def start(): Unit = ???
-
-  override def stop(): Unit = ???
+  override protected def step(): Unit = {
+    delete.delete(pop.getSolutions(delete.numInputs))
+  }
 }
 

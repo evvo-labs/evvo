@@ -15,12 +15,10 @@ trait TDeletorFunc[Sol] extends TAgentFunc {
     */
   def delete: DeletorFunctionType[Sol]
 
-  //  /**
-  //    * The size of the set to give to the deletion function.
-  //    * If -1, .
-  //    * @return
-  //    */
-  //  def numInputs: Int
+    /**
+      * @return The size of the set to give to the deletion function.
+      */
+    def numInputs: Int = 32
 }
 
 case class DeletorFunc[Sol](delete: DeletorFunctionType[Sol]) extends TDeletorFunc[Sol]

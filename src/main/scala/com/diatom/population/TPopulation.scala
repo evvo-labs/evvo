@@ -1,9 +1,14 @@
 package com.diatom.population
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import com.diatom.TScored
 import com.diatom.agent.TFitnessFunc
+import akka.pattern.ask
+import akka.util.Timeout
 
-import scala.collection.mutable
+import scala.concurrent.duration._
+import scala.collection.{TraversableOnce, mutable}
+import scala.concurrent.Await
 
 /**
   * A population is the set of all solutions current in an evolutionary process.
@@ -18,6 +23,22 @@ trait TPopulation[Sol] {
     * @param solutions the solutions to add
     */
   def addSolutions(solutions: TraversableOnce[Sol]): Unit
+
+  /**
+    * Selects a random sample of the population.
+    *
+    * @param n the number of solutions.
+    * @return n solutions.
+    */
+  def getSolutions(n: Int): Set[TScored[Sol]]
+
+  /**
+    * Remove the given solutions from the population.
+    *
+    * @param solutions the solutions to remove
+    */
+  def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit
+
 }
 
 /**
@@ -36,10 +57,20 @@ case class PopulationActorRef[Sol](popActor: ActorRef) extends TPopulation[Sol] 
     this(system.actorOf(PopulationActorRef.props(fitnessFunctions)))
   }
 
+
   override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
     popActor ! PopulationActorRef.AddSolutions(solutions)
   }
 
+  override def getSolutions(n: Int): Set[TScored[Sol]] = {
+    implicit val timeout = Timeout(5.seconds)
+    val solutions = popActor ? PopulationActorRef.GetSolutions(n)
+    Await.result(solutions, 5.seconds).asInstanceOf[Set[TScored[Sol]]]
+  }
+
+  override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
+    popActor ! PopulationActorRef.DeleteSolutions(solutions)
+  }
 }
 
 object PopulationActorRef {
@@ -48,9 +79,12 @@ object PopulationActorRef {
   }
 
   case class AddSolutions[Sol](solutions: TraversableOnce[Sol])
+
+  case class GetSolutions[Sol](n: Int)
+
+  case class DeleteSolutions[Sol](solutions: TraversableOnce[TScored[Sol]])
+
 }
-
-
 
 
 /**
@@ -63,13 +97,25 @@ private case class Population[Sol](fitnessFunctions: TraversableOnce[TFitnessFun
 
   import PopulationActorRef._
 
-  private val pop = mutable.Set[Sol]()
+  private val pop = mutable.Set[TScored[Sol]]()
 
   override def receive: Receive = {
     case AddSolutions(solutions: TraversableOnce[Sol]) => addSolutions(solutions)
+    case GetSolutions(n: Int) => sender ! getSolutions(n)
+    case DeleteSolutions(solutions: TraversableOnce[TScored[Sol]]) => deleteSolutions(solutions)
   }
 
+
   override def addSolutions(solutions: TraversableOnce[Sol]): Unit = pop ++ solutions
+
+  override def getSolutions(n: Int): Set[TScored[Sol]] = {
+    // TODO: This can't be the final impl, inefficient space and time
+    util.Random.shuffle(pop).take(n).toSet
+  }
+
+  override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
+    pop -- solutions
+  }
 }
 
 
