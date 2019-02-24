@@ -21,3 +21,5 @@ trait TScored[Sol] {
     */
   def dominates(that: TScored[Sol]): Boolean = ???
 }
+
+case class Scored[Sol](score: Map[String, Double], solution: Sol) extends TScored[Sol]
