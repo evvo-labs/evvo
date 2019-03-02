@@ -6,22 +6,36 @@ import com.diatom.agent._
 import com.diatom._
 import com.diatom.population.{PopulationActorRef, TPopulation}
 
+/**
+  * A single-island evolutionary system, which will run on one computer (although on multiple
+  * CPU cores).
+  */
 case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
                                  mutators: Vector[TMutatorFunc[Sol]],
                                  deletors: Vector[TDeletorFunc[Sol]],
-                                 fitnesses: Vector[TFitnessFunc[Sol]]) {
+                                 fitnesses: Vector[TFitnessFunc[Sol]]) extends TIsland[Sol] {
 
   val system: ActorSystem = ActorSystem("evvo")
 
 
-  def run(): Set[Sol] = {
+  def run(): TParetoFrontier[Sol] = {
 
     val pop: TPopulation[Sol] = new PopulationActorRef[Sol](system, fitnesses)
     val creatorAgents = creators.map(c => CreatorAgent(c, pop))
     val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
     val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
-    Set()
+
+    creatorAgents.foreach(_.start())
+    mutatorAgents.foreach(_.start())
+    deletorAgents.foreach(_.start())
+    ParetoFrontier(Set())
   }
+
+
+  override def forceKill(): Unit = {
+    // TODO test & implement forceKill
+  }
+
 }
 
 object SingleIslandEvvo {

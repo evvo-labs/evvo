@@ -14,6 +14,8 @@ import scala.concurrent.duration._
 class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
   with WordSpecLike with Matchers with BeforeAndAfter {
 
+  // TODO reimplement this using http://doc.scalatest.org/3.0.1/#org.scalatest.PropSpec@testMatrix
+
   type S = Int
 
   var probe: TestProbe = _

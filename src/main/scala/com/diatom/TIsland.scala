@@ -5,7 +5,7 @@ package com.diatom
   */
 trait TIsland[Solution] {
 
-  def run(terminationCriteria: TTerminationCriteria): TParetoFrontier[Solution]
+  def run(): TParetoFrontier[Solution]
 
   /**
     * Kills the island (including all of its associated actors) and loses all state.
@@ -22,5 +22,4 @@ trait TIsland[Solution] {
     def paretoFrontier(paretoFrontier: TParetoFrontier[Solution]): Boolean = false
 
   }
-
 }

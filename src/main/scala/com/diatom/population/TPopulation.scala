@@ -1,7 +1,7 @@
 package com.diatom.population
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import com.diatom.TScored
+import com.diatom.{Scored, TScored}
 import com.diatom.agent.TFitnessFunc
 import akka.pattern.ask
 import akka.util.Timeout
@@ -74,6 +74,15 @@ case class PopulationActorRef[Sol](popActor: ActorRef) extends TPopulation[Sol] 
 }
 
 object PopulationActorRef {
+  /**
+    * @return a PopulationActorRef scoring solutions by the given fitness functions.
+    */
+  def from[Sol](fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]])
+               (implicit system: ActorSystem)
+  : TPopulation[Sol] = {
+    PopulationActorRef(Population.from(fitnessFunctions))
+  }
+
   def props[Sol](fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]]): Props = {
     Props(Population(fitnessFunctions))
   }
@@ -83,38 +92,61 @@ object PopulationActorRef {
   case class GetSolutions[Sol](n: Int)
 
   case class DeleteSolutions[Sol](solutions: TraversableOnce[TScored[Sol]])
-
 }
-
 
 /**
   * The actor that maintains the population.
   *
   * @tparam Sol the type of the solutions in the population
   */
-private case class Population[Sol](fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]])
+private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[Sol]])
   extends TPopulation[Sol] with Actor {
 
   import PopulationActorRef._
-
+  private val fitnessFunctions = fitnessFunctionsIter.toSet
   private val pop = mutable.Set[TScored[Sol]]()
 
   override def receive: Receive = {
     case AddSolutions(solutions: TraversableOnce[Sol]) => addSolutions(solutions)
     case GetSolutions(n: Int) => sender ! getSolutions(n)
     case DeleteSolutions(solutions: TraversableOnce[TScored[Sol]]) => deleteSolutions(solutions)
+    case x: Any => throw new IllegalArgumentException(s"bad message: ${x}")
   }
 
 
-  override def addSolutions(solutions: TraversableOnce[Sol]): Unit = pop ++ solutions
+  override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
+    println(s"pop = ${pop}")
+    pop ++= solutions.map(score)
+    println(s"pop = ${pop}")
+  }
+
+  private def score(solution: Sol): TScored[Sol] = {
+    val scores = fitnessFunctions.map(func => {
+      (func.toString, func.score(solution))
+    }).toMap
+    Scored(scores, solution)
+  }
+
 
   override def getSolutions(n: Int): Set[TScored[Sol]] = {
     // TODO: This can't be the final impl, inefficient space and time
-    util.Random.shuffle(pop).take(n).toSet
+    println("getSolutinos called")
+    util.Random.shuffle(pop.toVector).take(n).toSet
   }
 
   override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
     pop -- solutions
+  }
+}
+
+private object Population {
+  /**
+    * @return a Population scoring solutions by the given fitness functions.
+    */
+  def from[Sol](fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]])
+               (implicit system: ActorSystem)
+  : ActorRef = {
+    system.actorOf(Props(Population(fitnessFunctions)))
   }
 }
 

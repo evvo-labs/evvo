@@ -11,6 +11,11 @@ trait TFitnessFunc[Sol] {
     * @return the score, according to this objective
     */
   def score: Sol => Double
+
+  // TODO remove default
+  def name: String = this.toString
 }
 
-case class FitnessFunc[Sol](score: Sol => Double) extends TFitnessFunc[Sol]
+case class FitnessFunc[Sol](score: Sol => Double) extends TFitnessFunc[Sol] {
+  // TODO add names to fitness functions.
+}

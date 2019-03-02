@@ -3,7 +3,7 @@ package integration
 import com.diatom.TScored
 import com.diatom.island.SingleIslandEvvo
 import com.diatom.tags.Integration
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{FlatSpec, Matchers, WordSpec}
 
 /**
   * Tests a single island cluster.
@@ -11,7 +11,7 @@ import org.scalatest.{FlatSpec, Matchers}
   * The behavior under test is that an Island can sort a list given the proper mutator and fitness
   * function, and terminate successfully returning a set of lists.
   */
-class SimpleIslandTest extends FlatSpec with Matchers {
+class SimpleIslandTest extends WordSpec with Matchers {
 
   /** High level concept for the test:
     *
@@ -63,9 +63,12 @@ class SimpleIslandTest extends FlatSpec with Matchers {
     .addFitness(numInversions)
     .build()
     .run()
+    .solutions
 
-  "Single Island Dumi" should "be able to sort a list" taggedAs Integration in {
-    pareto should contain(1 to listLength toList)
+  "Single Island Evvo" should {
+    "be able to sort a list" taggedAs Integration in {
+      pareto should contain(1 to listLength toList)
+    }
   }
 
 }
