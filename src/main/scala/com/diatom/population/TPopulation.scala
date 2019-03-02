@@ -115,9 +115,7 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
 
   override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
-    println(s"pop = ${pop}")
     pop ++= solutions.map(score)
-    println(s"pop = ${pop}")
   }
 
   private def score(solution: Sol): TScored[Sol] = {
@@ -130,12 +128,11 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
   override def getSolutions(n: Int): Set[TScored[Sol]] = {
     // TODO: This can't be the final impl, inefficient space and time
-    println("getSolutinos called")
     util.Random.shuffle(pop.toVector).take(n).toSet
   }
 
   override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
-    pop -- solutions
+    pop --= solutions
   }
 }
 
