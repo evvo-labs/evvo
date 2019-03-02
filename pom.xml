@@ -111,11 +111,18 @@
           <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
           <junitxml>.</junitxml>
           <filereports>TestSuiteReport.txt</filereports>
-          <tagsToExclude>Slow</tagsToExclude>
+          <!--<tagsToExclude>com.diatom.tags.Slow</tagsToExclude>-->
         </configuration>
         <executions>
           <execution>
             <id>test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+          </execution>
+
+          <execution>
+            <id>alltests</id>
             <goals>
               <goal>test</goal>
             </goals>

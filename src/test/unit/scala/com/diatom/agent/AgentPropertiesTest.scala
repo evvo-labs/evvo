@@ -71,7 +71,7 @@ class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
 
 
   "All agents" should {
-    "step when told to start, stop stepping when told to stop" in {
+    "step when told to start, stop stepping when told to stop" taggedAs Slow in {
       for (agent <- agents) {
         agent.start()
         probe.expectMsgType[Any](3.seconds)
@@ -85,7 +85,7 @@ class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
       assert(agentFunctionCalled.values.reduce(_ && _))
     }
 
-    "shouldn't do anything if started twice" in {
+    "not do anything if started twice" in {
       for (agent <- agents) {
         agent.start()
         agent.start()
@@ -94,7 +94,7 @@ class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
       }
     }
 
-    "shouldn't break if stopped twice" in {
+    "not break if stopped twice" in {
       for (agent <- agents) {
         agent.start()
         agent.stop()
@@ -102,7 +102,7 @@ class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
       }
     }
 
-    "should in fact stop when told to" taggedAs Slow in {
+    "stop when told to" taggedAs Slow in {
       for (agent <- agents) {
         agent.start()
         agent.stop()

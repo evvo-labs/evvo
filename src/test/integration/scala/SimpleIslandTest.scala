@@ -2,6 +2,7 @@ package integration
 
 import com.diatom.TScored
 import com.diatom.island.SingleIslandEvvo
+import com.diatom.tags.Integration
 import org.scalatest.{FlatSpec, Matchers}
 
 /**
@@ -63,7 +64,7 @@ class SimpleIslandTest extends FlatSpec with Matchers {
     .build()
     .run()
 
-  "Single Island Dumi" should "be able to sort a list" in {
+  "Single Island Dumi" should "be able to sort a list" taggedAs Integration in {
     pareto should contain(1 to listLength toList)
   }
 
