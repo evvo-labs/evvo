@@ -1,6 +1,6 @@
 package integration
 
-import com.diatom.{CreatorFunctionType, TScored}
+import com.diatom.TScored
 import com.diatom.island.SingleIslandEvvo
 import org.scalatest.{FlatSpec, Matchers}
 

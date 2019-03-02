@@ -16,5 +16,4 @@ case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol], pop: TPopulation[Sol])
         pop.getSolutions(
           mutate.numInputs)))
   }
-
 }

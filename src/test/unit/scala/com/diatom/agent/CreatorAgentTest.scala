@@ -1,13 +1,12 @@
-package com.diatom
+package com.diatom.agent
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorSystem
 import akka.testkit.{TestKit, TestProbe}
 import com.diatom.agent.func.CreatorFunc
-import com.diatom.agent.{CreatorAgent, TCreatorAgent}
 import com.diatom.population.PopulationActorRef
-import org.scalatest.{FlatSpec, Matchers, WordSpecLike}
+import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers, WordSpecLike}
+
 import scala.concurrent.duration._
-import org.scalatest.BeforeAndAfter
 
 
 class CreatorAgentTest extends TestKit(ActorSystem("CreatorAgentTest"))
@@ -30,32 +29,11 @@ class CreatorAgentTest extends TestKit(ActorSystem("CreatorAgentTest"))
 
   "A Creator Agent" should {
     "send the output of its creation function to the population when told to step" in {
-      // step should work multiple times
+      // step should work multiple times, 3 is arbitrary
       for (_ <- 1 to 3) {
         creatorAgent.step()
         probe.expectMsg(expectedMessage)
       }
-    }
-
-    "step when told to start, stop stepping when told to stop" in {
-      creatorAgent.start()
-      probe.expectMsg(3.seconds, expectedMessage)
-      creatorAgent.stop()
-      probe.expectNoMessage(3.seconds)
-    }
-
-    "shouldn't do anything if started twice" in {
-      creatorAgent.start()
-      creatorAgent.start()
-
-      creatorAgent.stop()
-      probe.expectNoMessage(3.seconds)
-    }
-
-    "shouldn't break if stopped twice" in {
-      creatorAgent.start()
-      creatorAgent.stop()
-      creatorAgent.stop()
     }
   }
 }
