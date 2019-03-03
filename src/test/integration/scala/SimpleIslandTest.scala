@@ -1,9 +1,10 @@
 package integration
 
 import com.diatom.TScored
-import com.diatom.island.SingleIslandEvvo
+import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
 import com.diatom.tags.Integration
 import org.scalatest.{FlatSpec, Matchers, WordSpec}
+import scala.concurrent.duration._
 
 /**
   * Tests a single island cluster.
@@ -56,17 +57,21 @@ class SimpleIslandTest extends WordSpec with Matchers {
     }).sum
   }
 
-  val pareto: Set[Solution] = SingleIslandEvvo.builder[Solution]()
-    .addCreator(createFunc)
-    .addMutator(mutateFunc)
-    .addDeletor(deleteFunc)
-    .addFitness(numInversions)
-    .build()
-    .run()
-    .solutions
+  val terminate = TerminationCriteria(5.seconds)
 
   "Single Island Evvo" should {
-    "be able to sort a list" taggedAs Integration in {
+    "be able to sort a list within five seconds" taggedAs Integration in {
+
+      val pareto: Set[Solution] = SingleIslandEvvo.builder[Solution]()
+        .addCreator(createFunc)
+        .addMutator(mutateFunc)
+        .addDeletor(deleteFunc)
+        .addFitness(numInversions)
+        .build()
+        .run(terminate)
+        .solutions
+        .map(_.solution)
+
       pareto should contain(1 to listLength toList)
     }
   }

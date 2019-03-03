@@ -4,8 +4,8 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.testkit.TestKit
 import akka.util.Timeout
-import com.diatom.population.PopulationActorRef.{DeleteSolutions, GetSolutions}
-import com.diatom.{Scored, TScored, agent}
+import com.diatom.population.PopulationActorRef.{DeleteSolutions, GetParetoFrontier, GetSolutions}
+import com.diatom.{Scored, TParetoFrontier, TScored, agent}
 import org.scalatest.{Assertion, AsyncWordSpecLike, BeforeAndAfter, Matchers}
 
 import scala.concurrent.duration._
@@ -43,10 +43,16 @@ class PopulationTest extends TestKit(ActorSystem("PopulationTest"))
       val sols = getSolutions(pop, 1)
       sols.map(_ should not be 'empty)
     }
+
+    "have an empty pareto frontier" in {
+      val paretoFront = (emptyPop ? PopulationActorRef.GetParetoFrontier)
+      .asInstanceOf[Future[TParetoFrontier[Double]]]
+      paretoFront.map(_.solutions shouldBe 'empty)
+    }
   }
 
-  var pop: ActorRef = _
   "A non-empty population" should {
+    var pop: ActorRef = Population.from(fitnesses)
     val popSize = 10
     before {
       pop = Population.from(fitnesses)
@@ -84,6 +90,12 @@ class PopulationTest extends TestKit(ActorSystem("PopulationTest"))
       pop ! PopulationActorRef.AddSolutions(Set(10.0))
       val sol = getSolutions(pop, popSize + 1)
       sol.map(_.size shouldBe popSize)
+    }
+
+    "have only one element in a one-dimensional pareto frontier" in {
+      val p = (pop ? PopulationActorRef.GetParetoFrontier)
+        .asInstanceOf[Future[TParetoFrontier[Double]]]
+      p.map(_.solutions.size shouldBe 1)
     }
   }
 }

@@ -6,6 +6,10 @@ import com.diatom.agent._
 import com.diatom._
 import com.diatom.population.{PopulationActorRef, TPopulation}
 
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple
   * CPU cores).
@@ -18,7 +22,7 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
   val system: ActorSystem = ActorSystem("evvo")
 
 
-  def run(): TParetoFrontier[Sol] = {
+  def run(terminationCriteria: TTerminationCriteria): TParetoFrontier[Sol] = {
 
     val pop: TPopulation[Sol] = new PopulationActorRef[Sol](system, fitnesses)
     val creatorAgents = creators.map(c => CreatorAgent(c, pop))
@@ -28,7 +32,14 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
     creatorAgents.foreach(_.start())
     mutatorAgents.foreach(_.start())
     deletorAgents.foreach(_.start())
-    ParetoFrontier(Set())
+
+    Thread.sleep(terminationCriteria.time.toMillis)
+
+    creatorAgents.foreach(_.stop())
+    mutatorAgents.foreach(_.stop())
+    deletorAgents.foreach(_.stop())
+
+    pop.getParetoFrontier()
   }
 
 
