@@ -83,7 +83,6 @@ class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
       }
       // need to make sure that each of the three core functions have been called,
       // and they have side effects that will turn the maping true
-      println(agentFunctionCalled)
       assert(agentFunctionCalled.values.reduce(_ && _))
     }
 

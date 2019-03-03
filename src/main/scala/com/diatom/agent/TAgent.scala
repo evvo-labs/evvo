@@ -21,7 +21,7 @@ abstract class AAgent[Sol] extends TAgent[Sol] {
       Try {
         while (!Thread.interrupted()) {
           step()
-          Thread.sleep(500) // TODO: This represents an initial strategy, replace it.
+          Thread.sleep(3) // TODO: This represents an initial strategy, replace it.
         }
       }
     }

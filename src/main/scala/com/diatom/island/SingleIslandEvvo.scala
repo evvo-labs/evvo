@@ -33,6 +33,7 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
     mutatorAgents.foreach(_.start())
     deletorAgents.foreach(_.start())
 
+    // TODO this is not optimal. fix wait time/add features to termination criteria
     Thread.sleep(terminationCriteria.time.toMillis)
 
     creatorAgents.foreach(_.stop())

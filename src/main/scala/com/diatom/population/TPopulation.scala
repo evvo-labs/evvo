@@ -143,6 +143,7 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
 
   override def getSolutions(n: Int): Set[TScored[Sol]] = {
+    println(population.size)
     // TODO: This can't be the final impl, inefficient space and time
     util.Random.shuffle(population.toVector).take(n).toSet
   }
@@ -157,7 +158,6 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
     // mutable set used here for performance, converted back to immutable afterwards
     val out: mutable.Set[TScored[Sol]] = mutable.Set()
-
     for (sol <- population) {
       // if, for all other elements in the population..
       if (population.forall(other => {
@@ -166,14 +166,13 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
         // there is at least one score that this solution beats other solutions at,
         // (then, that is the dimension along which this solution is non dominated)
         sol.score.zip(other.score).exists({
-          case ((name1, score1), (name2, score2)) => score1 > score2
+          case ((name1, score1), (name2, score2)) => score1 <= score2
         })
       })) {
         // then, we have found a non-dominated solution, so add it to the output.
         out.add(sol)
       }
     }
-
     ParetoFrontier(out.toSet)
   }
 }

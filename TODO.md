@@ -1,5 +1,4 @@
-- Tag tests and provide scripts/run configs that will run only the fast ones
 - find a way of parallelizing the tests, especially with async akka nonsense
 - Figure out implicits, and see where using them would improve our lives
 - make vars and vals different colors in intellij
-- make IntelliJ stop caring about unannotated members of test classes.
+- use some central controller to keep population size roughly constant

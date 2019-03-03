@@ -11,9 +11,8 @@ case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol], pop: TPopulation[Sol])
   extends AAgent[Sol] with TMutatorAgent[Sol] {
 
   def step(): Unit = {
-    pop.addSolutions(
-      mutate.mutate(
-        pop.getSolutions(
-          mutate.numInputs)))
+    val in = pop.getSolutions(mutate.numInputs)
+    val out = mutate.mutate(in)
+    pop.addSolutions(out)
   }
 }

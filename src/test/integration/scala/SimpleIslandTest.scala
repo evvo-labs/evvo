@@ -28,39 +28,45 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
   type Solution = List[Int]
 
-  val listLength = 100
+  val listLength = 10
 
-  def createFunc() = Set(listLength to 1 toList)
+  def createFunc(): Set[Solution] = {
+    val out = Vector.fill(10)((listLength to 1 by -1).toList).map(mutate).toSet
+    out
+  }
+
+  def mutate(sol: Solution): Solution = {
+    val i = util.Random.nextInt(sol.length)
+    val j = util.Random.nextInt(sol.length)
+    val tmp = sol(j)
+    sol.updated(j, sol(i)).updated(i, tmp)
+  }
 
   def mutateFunc(s: Set[TScored[Solution]]): Set[Solution] = {
     s.map(scoredSol => {
       val sol = scoredSol.solution
-      val i = util.Random.nextInt(sol.length)
-      val j = util.Random.nextInt(sol.length)
-      val tmp = sol(j)
-      sol.updated(j, sol(i)).updated(i, tmp)
+      val out = mutate(sol)
+      out
     })
   }
 
   def deleteFunc(s: Set[TScored[Solution]]): Set[TScored[Solution]] = {
     val sums = s.map(_.score.values.sum).toVector.sorted
     val cutoff = sums(s.size / 2)
-    s.filter(_.score.values.sum < cutoff)
+    s.filter(_.score.values.sum > cutoff)
   }
 
   def numInversions(s: Solution): Double = {
-    (for (partialList <- s.inits) yield {
-      partialList match {
-        case Nil => 0
-        case head :: tail => tail.count(_ < head)
-      }
+    (for ((elem, index) <- s.zipWithIndex) yield {
+      s.drop(index).count(_ < elem)
     }).sum
   }
 
-  val terminate = TerminationCriteria(5.seconds)
+
+  val terminate = TerminationCriteria(10.seconds)
 
   "Single Island Evvo" should {
-    "be able to sort a list within five seconds" taggedAs Integration in {
+    "be able to sort a list within ten seconds" taggedAs Integration in {
 
       val pareto: Set[Solution] = SingleIslandEvvo.builder[Solution]()
         .addCreator(createFunc)
