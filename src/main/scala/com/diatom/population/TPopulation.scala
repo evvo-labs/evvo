@@ -1,15 +1,16 @@
 package com.diatom.population
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import com.diatom.{ParetoFrontier, Scored, TParetoFrontier, TScored}
-import com.diatom.agent.TFitnessFunc
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
+import akka.event.{Logging, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
+import com.diatom.agent.TFitnessFunc
 import com.diatom.population.PopulationActorRef.GetParetoFrontier
+import com.diatom.{ParetoFrontier, Scored, TParetoFrontier, TScored}
 
-import scala.concurrent.duration._
 import scala.collection.{TraversableOnce, mutable}
-import scala.concurrent.{Await, Awaitable, Future}
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 /**
   * A population is the set of all solutions current in an evolutionary process.
@@ -55,16 +56,8 @@ trait TPopulation[Sol] {
   */
 case class PopulationActorRef[Sol](popActor: ActorRef) extends TPopulation[Sol] {
 
-  /**
-    * @param system           the actor system
-    * @param fitnessFunctions the definition of fitness in this population.
-    */
-  def this(system: ActorSystem, fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]]) = {
-    this(system.actorOf(PopulationActorRef.props(fitnessFunctions)))
-  }
-
   /** how long to wait for results, for non-unit-typed methods. */
-  implicit private val timeout = Timeout(5.seconds)
+  implicit private val timeout: Timeout = Timeout(5.seconds)
 
   override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
     popActor ! PopulationActorRef.AddSolutions(solutions)
@@ -88,6 +81,7 @@ case class PopulationActorRef[Sol](popActor: ActorRef) extends TPopulation[Sol] 
 }
 
 object PopulationActorRef {
+
   /**
     * @return a PopulationActorRef scoring solutions by the given fitness functions.
     */
@@ -102,9 +96,7 @@ object PopulationActorRef {
   }
 
   case class AddSolutions[Sol](solutions: TraversableOnce[Sol])
-
   case class GetSolutions[Sol](n: Int)
-
   case class DeleteSolutions[Sol](solutions: TraversableOnce[TScored[Sol]])
   case object GetParetoFrontier
 }
@@ -115,18 +107,18 @@ object PopulationActorRef {
   * @tparam Sol the type of the solutions in the population
   */
 private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[Sol]])
-  extends TPopulation[Sol] with Actor {
+  extends TPopulation[Sol] with Actor with ActorLogging {
 
   import PopulationActorRef._
+
   private val fitnessFunctions = fitnessFunctionsIter.toSet
   private val population = mutable.Set[TScored[Sol]]()
 
-  override def receive: Receive = {
+  override def receive: Receive = LoggingReceive(Logging.DebugLevel) {
     case AddSolutions(solutions: TraversableOnce[Sol]) => addSolutions(solutions)
     case GetSolutions(n: Int) => sender ! getSolutions(n)
     case DeleteSolutions(solutions: TraversableOnce[TScored[Sol]]) => deleteSolutions(solutions)
     case GetParetoFrontier => sender ! getParetoFrontier()
-    case x: Any => throw new IllegalArgumentException(s"bad message: ${x}")
   }
 
 
@@ -143,7 +135,6 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
 
   override def getSolutions(n: Int): Set[TScored[Sol]] = {
-    println(population.size)
     // TODO: This can't be the final impl, inefficient space and time
     util.Random.shuffle(population.toVector).take(n).toSet
   }
@@ -163,11 +154,11 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
       if (population.forall(other => {
         // (this part just ignores the solution that we are looking at)
         sol == other ||
-        // there is at least one score that this solution beats other solutions at,
-        // (then, that is the dimension along which this solution is non dominated)
-        sol.score.zip(other.score).exists({
-          case ((name1, score1), (name2, score2)) => score1 <= score2
-        })
+          // there is at least one score that this solution beats other solutions at,
+          // (then, that is the dimension along which this solution is non dominated)
+          sol.score.zip(other.score).exists({
+            case ((name1, score1), (name2, score2)) => score1 <= score2
+          })
       })) {
         // then, we have found a non-dominated solution, so add it to the output.
         out.add(sol)

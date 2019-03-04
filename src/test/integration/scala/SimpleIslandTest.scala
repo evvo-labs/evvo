@@ -28,7 +28,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
   type Solution = List[Int]
 
-  val listLength = 10
+  val listLength = 5
 
   def createFunc(): Set[Solution] = {
     val out = Vector.fill(10)((listLength to 1 by -1).toList).map(mutate).toSet
@@ -63,10 +63,10 @@ class SimpleIslandTest extends WordSpec with Matchers {
   }
 
 
-  val terminate = TerminationCriteria(10.seconds)
+  val terminate = TerminationCriteria(1.seconds)
 
   "Single Island Evvo" should {
-    "be able to sort a list within ten seconds" taggedAs Integration in {
+    "be able to sort a list of length 5 within 1 second" taggedAs Integration in {
 
       val pareto: Set[Solution] = SingleIslandEvvo.builder[Solution]()
         .addCreator(createFunc)
@@ -80,6 +80,8 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
       pareto should contain(1 to listLength toList)
     }
+
+    //TODO test list of length 100 so we can be sure we are manmaging population size
   }
 
 }

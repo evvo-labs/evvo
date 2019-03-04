@@ -1,11 +1,10 @@
 package com.diatom.agent
 
-import com.diatom.agent.func.TDeletorFunc
+import akka.actor.{ActorRef, ActorSystem, Props}
+import com.diatom.agent.func.{TDeletorFunc, TMutatorFunc}
 import com.diatom.population.TPopulation
 
-trait TDeletorAgent[Sol] extends TAgent[Sol] {
-
-}
+trait TDeletorAgent[Sol] extends TAgent[Sol]
 
 case class DeletorAgent[Sol](delete: TDeletorFunc[Sol], pop: TPopulation[Sol])
   extends AAgent[Sol] with TDeletorAgent[Sol] {
@@ -16,4 +15,12 @@ case class DeletorAgent[Sol](delete: TDeletorFunc[Sol], pop: TPopulation[Sol])
     pop.deleteSolutions(toDelete)
   }
 }
+
+object DeletorAgent {
+  def from[Sol](deletorFunc: TDeletorFunc[Sol], pop: TPopulation[Sol])
+               (implicit system: ActorSystem): ActorRef = {
+    system.actorOf(Props(DeletorAgent(deletorFunc, pop)))
+  }
+}
+
 

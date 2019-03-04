@@ -1,5 +1,7 @@
 package com.diatom.agent
 
+import akka.actor.{Actor, ActorRef}
+import akka.event.{Logging, LoggingReceive}
 import com.diatom.population.TPopulation
 
 import scala.util.Try
@@ -12,7 +14,12 @@ trait TAgent[Sol] {
   def stop(): Unit
 }
 
-abstract class AAgent[Sol] extends TAgent[Sol] {
+abstract class AAgent[Sol] extends TAgent[Sol] with Actor {
+  override def receive: Receive = LoggingReceive(Logging.DebugLevel) {
+    case StartAgent => start()
+    case StopAgent => stop()
+  }
+
   // consider factoring this out into a separate component and using
   // composition instead of inheriting a thread field. This will reduce the
   // number of tests needed by centralizing
@@ -47,4 +54,13 @@ abstract class AAgent[Sol] extends TAgent[Sol] {
     * Performs one operation on the population.
     */
   protected def step(): Unit
+}
+
+case object StartAgent
+case object StopAgent
+
+case class AgentActorRef[Sol](agent: ActorRef) extends TAgent[Sol] {
+  override def start(): Unit = agent ! StartAgent
+
+  override def stop(): Unit = agent ! StopAgent
 }

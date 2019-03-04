@@ -1,14 +1,11 @@
 package com.diatom.island
 
 import akka.actor.ActorSystem
-import com.diatom.agent.func._
-import com.diatom.agent._
 import com.diatom._
+import com.diatom.agent._
+import com.diatom.agent.func._
 import com.diatom.population.{PopulationActorRef, TPopulation}
-
-
-import scala.concurrent.Await
-import scala.concurrent.duration._
+import com.typesafe.config.ConfigFactory
 
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple
@@ -18,16 +15,29 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
                                  mutators: Vector[TMutatorFunc[Sol]],
                                  deletors: Vector[TDeletorFunc[Sol]],
                                  fitnesses: Vector[TFitnessFunc[Sol]]) extends TIsland[Sol] {
-
-  val system: ActorSystem = ActorSystem("evvo")
+  // TODO should be able to pass configurations, have multiple logging environments
+  private val config = ConfigFactory.parseString(
+    """
+      |akka {
+      |  loggers = ["akka.event.slf4j.Slf4jLogger"]
+      |  loglevel = "DEBUG"
+      |  logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
+      |  actor {
+      |    debug {
+      |      receive = true
+      |    }
+      |  }
+      |}
+    """.stripMargin)
+  implicit val system: ActorSystem = ActorSystem("evvo", config)
 
 
   def run(terminationCriteria: TTerminationCriteria): TParetoFrontier[Sol] = {
 
-    val pop: TPopulation[Sol] = new PopulationActorRef[Sol](system, fitnesses)
-    val creatorAgents = creators.map(c => CreatorAgent(c, pop))
-    val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
-    val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
+    val pop: TPopulation[Sol] = PopulationActorRef.from(fitnesses)
+    val creatorAgents = creators.map(c => AgentActorRef(CreatorAgent.from(c, pop)))
+    val mutatorAgents = mutators.map(m => AgentActorRef(MutatorAgent.from(m, pop)))
+    val deletorAgents = deletors.map(d => AgentActorRef(DeletorAgent.from(d, pop)))
 
     creatorAgents.foreach(_.start())
     mutatorAgents.foreach(_.start())
@@ -82,8 +92,7 @@ object SingleIslandEvvo {
 case class SingleIslandEvvoBuilder[Sol](creators: Set[TCreatorFunc[Sol]],
                                         mutators: Set[TMutatorFunc[Sol]],
                                         deletors: Set[TDeletorFunc[Sol]],
-                                        fitnesses: Set[TFitnessFunc[Sol]]
-                                       ) {
+                                        fitnesses: Set[TFitnessFunc[Sol]]) {
 
   def this() = {
     this(Set(), Set(), Set(), Set())
