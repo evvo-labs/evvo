@@ -39,11 +39,12 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
     val mutatorAgents = mutators.map(m => AgentActorRef(MutatorAgent.from(m, pop)))
     val deletorAgents = deletors.map(d => AgentActorRef(DeletorAgent.from(d, pop)))
 
+    // TODO can we put all of these in some combined pool? don't like having to manage each
     creatorAgents.foreach(_.start())
     mutatorAgents.foreach(_.start())
     deletorAgents.foreach(_.start())
 
-    // TODO this is not optimal. fix wait time/add features to termination criteria
+    // TODO this is not ideal. fix wait time/add features to termination criteria
     Thread.sleep(terminationCriteria.time.toMillis)
 
     creatorAgents.foreach(_.stop())

@@ -4,13 +4,16 @@ import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.event.{Logging, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
-import com.diatom.agent.TFitnessFunc
-import com.diatom.population.PopulationActorRef.GetParetoFrontier
+import com.diatom.agent.{PopulationInformation, TFitnessFunc, TPopulationInformation}
+import com.diatom.population.PopulationActorRef.{GetInformation, GetParetoFrontier}
 import com.diatom.{ParetoFrontier, Scored, TParetoFrontier, TScored}
 
 import scala.collection.{TraversableOnce, mutable}
 import scala.concurrent.Await
 import scala.concurrent.duration._
+
+
+// TODO this file is too large, split it into multiple
 
 /**
   * A population is the set of all solutions current in an evolutionary process.
@@ -46,6 +49,9 @@ trait TPopulation[Sol] {
     * @return the current pareto frontier of this population
     */
   def getParetoFrontier(): TParetoFrontier[Sol]
+
+  /** @return a diagnostic report on this island, for agents to determine how often to run. */
+  def getInformation(): TPopulationInformation
 }
 
 /**
@@ -63,6 +69,7 @@ case class PopulationActorRef[Sol](popActor: ActorRef) extends TPopulation[Sol] 
     popActor ! PopulationActorRef.AddSolutions(solutions)
   }
 
+
   override def getSolutions(n: Int): Set[TScored[Sol]] = {
     val solutions = popActor ? PopulationActorRef.GetSolutions(n)
     Await.result(solutions, 5.seconds)
@@ -77,6 +84,13 @@ case class PopulationActorRef[Sol](popActor: ActorRef) extends TPopulation[Sol] 
     val paretoFuture = popActor ? GetParetoFrontier
     Await.result(paretoFuture, 5.seconds)
       .asInstanceOf[TParetoFrontier[Sol]]
+  }
+
+  override def getInformation(): TPopulationInformation = {
+    // TODO test this (all all methods here?)
+    // it appears that replacing the body of this method with "null" passes all tests.
+    val infoFuture = popActor ? GetInformation
+    Await.result(infoFuture, 5.seconds).asInstanceOf[TPopulationInformation]
   }
 }
 
@@ -99,6 +113,7 @@ object PopulationActorRef {
   case class GetSolutions[Sol](n: Int)
   case class DeleteSolutions[Sol](solutions: TraversableOnce[TScored[Sol]])
   case object GetParetoFrontier
+  case object GetInformation
 }
 
 /**
@@ -113,12 +128,15 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
   private val fitnessFunctions = fitnessFunctionsIter.toSet
   private val population = mutable.Set[TScored[Sol]]()
+  private var populationVector = Vector[TScored[Sol]]()
+  private var getSolutionIndex = 0
 
   override def receive: Receive = LoggingReceive(Logging.DebugLevel) {
     case AddSolutions(solutions: TraversableOnce[Sol]) => addSolutions(solutions)
     case GetSolutions(n: Int) => sender ! getSolutions(n)
     case DeleteSolutions(solutions: TraversableOnce[TScored[Sol]]) => deleteSolutions(solutions)
     case GetParetoFrontier => sender ! getParetoFrontier()
+    case GetInformation => sender ! getInformation()
   }
 
 
@@ -136,7 +154,20 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
   override def getSolutions(n: Int): Set[TScored[Sol]] = {
     // TODO: This can't be the final impl, inefficient space and time
-    util.Random.shuffle(population.toVector).take(n).toSet
+    if (population.size <= n) {
+      population.toSet // no need to randomize, all elements will be included anyway
+    } else {
+      var out = Set[TScored[Sol]]()
+      while (out.size < n) {
+        if (!populationVector.isDefinedAt(getSolutionIndex)) {
+          populationVector = util.Random.shuffle(population.toVector)
+          getSolutionIndex = 0
+        }
+        out += populationVector(getSolutionIndex)
+        getSolutionIndex += 1
+      }
+      out
+    }
   }
 
   override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
@@ -166,9 +197,16 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
     }
     ParetoFrontier(out.toSet)
   }
+
+  override def getInformation(): TPopulationInformation = {
+    val out = PopulationInformation(population.size)
+    log.debug(s"getInformation returning ${out}")
+    out
+  }
 }
 
 private object Population {
+  //TODO figure out the exact convention around wrapper classes, companion objects, `from` methods
   /**
     * @return a Population scoring solutions by the given fitness functions.
     */

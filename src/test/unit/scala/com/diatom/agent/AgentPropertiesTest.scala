@@ -29,14 +29,14 @@ class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
     Set(1)
   }
   val creatorFunc = CreatorFunc(create)
-  var creatorAgent: CreatorAgent[S] = _
+  var creatorAgent: TAgent[S] = _
 
   val mutate: MutatorFunctionType[S] = (set: Set[TScored[S]]) => {
     agentFunctionCalled("mutate") = true
     set.map(_.solution + 1)
   }
   val mutatorFunc = MutatorFunc(mutate)
-  var mutatorAgent: MutatorAgent[S] = _
+  var mutatorAgent: TAgent[S] = _
   val mutatorInput: Set[TScored[S]] = Set[TScored[S]](Scored(Map("Score1" -> 3), 2))
 
   val delete: DeletorFunctionType[S] = set => {
@@ -44,25 +44,19 @@ class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
     set
   }
   val deletorFunc = func.DeletorFunc(delete)
-  var deletorAgent: DeletorAgent[S] = _
+  var deletorAgent: TAgent[S] = _
   val deletorInput: Set[TScored[S]] = mutatorInput
 
   var agents: Vector[TAgent[S]] = _
-
-
-  //  val expectedMessages: Vector[Any] = Vector(
-  //    PopulationActorRef.AddSolutions(create()),
-  //    PopulationActorRef.AddSolutions(mutate(mutatorInput)),
-  //    PopulationActorRef.DeleteSolutions(delete(deletorInput))
-  //  )
+  val strategy: TAgentStrategy = _ => 70.millis
 
   before {
     probe = TestProbe()
 
     pop = PopulationActorRef[S](probe.ref)
-    creatorAgent = CreatorAgent(creatorFunc, pop)
-    mutatorAgent = MutatorAgent(mutatorFunc, pop)
-    deletorAgent = DeletorAgent(deletorFunc, pop)
+    creatorAgent = AgentActorRef(CreatorAgent.from(creatorFunc, pop, strategy))
+    mutatorAgent = AgentActorRef(MutatorAgent.from(mutatorFunc, pop, strategy))
+    deletorAgent = AgentActorRef(DeletorAgent.from(deletorFunc, pop, strategy))
     agents = Vector(creatorAgent, mutatorAgent, deletorAgent)
 
     agentFunctionCalled = mutable.Map(
@@ -84,6 +78,7 @@ class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
       // need to make sure that each of the three core functions have been called,
       // and they have side effects that will turn the maping true
       assert(agentFunctionCalled.values.reduce(_ && _))
+      assert(agents.forall(_.numInvocations > 0))
     }
 
     "not do anything if started twice" in {
@@ -98,6 +93,7 @@ class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
     "not break if stopped twice" in {
       for (agent <- agents) {
         agent.start()
+
         agent.stop()
         agent.stop()
       }
@@ -112,6 +108,17 @@ class AgentPropertiesTest extends TestKit(ActorSystem("AgentPropertiesTest"))
         // but this is the best we can come up with
         Thread.sleep(3000)
         probe.expectNoMessage(3.seconds)
+      }
+    }
+
+    "repeat as often as their strategies say to" taggedAs Slow in {
+      for (agent <- agents) {
+        agent.start()
+        Thread.sleep(100)
+        agent.stop()
+        Thread.sleep(100)
+        // 2 is the ceiling of 100 / 70, we ought to have the agent run twice.
+        agent.numInvocations shouldBe 2
       }
     }
   }

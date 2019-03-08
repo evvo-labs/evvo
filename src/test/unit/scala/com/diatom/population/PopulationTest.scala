@@ -4,6 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.testkit.TestKit
 import akka.util.Timeout
+import com.diatom.agent.TPopulationInformation
 import com.diatom.population.PopulationActorRef.{DeleteSolutions, GetParetoFrontier, GetSolutions}
 import com.diatom.{Scored, TParetoFrontier, TScored, agent}
 import org.scalatest.{Assertion, AsyncWordSpecLike, BeforeAndAfter, Matchers}
@@ -48,6 +49,12 @@ class PopulationTest extends TestKit(ActorSystem("PopulationTest"))
       val paretoFront = (emptyPop ? PopulationActorRef.GetParetoFrontier)
       .asInstanceOf[Future[TParetoFrontier[Double]]]
       paretoFront.map(_.solutions shouldBe 'empty)
+    }
+
+    "has zero elements, according to getInformation()" in {
+      val info = (emptyPop ? PopulationActorRef.GetInformation)
+        .asInstanceOf[Future[TPopulationInformation]]
+      info.map(_.numSolutions shouldBe 0)
     }
   }
 
@@ -96,6 +103,12 @@ class PopulationTest extends TestKit(ActorSystem("PopulationTest"))
       val p = (pop ? PopulationActorRef.GetParetoFrontier)
         .asInstanceOf[Future[TParetoFrontier[Double]]]
       p.map(_.solutions.size shouldBe 1)
+    }
+
+    "have non-zero number of elements, according to getInformation()" in {
+      val info = (pop ? PopulationActorRef.GetInformation)
+        .asInstanceOf[Future[TPopulationInformation]]
+      info.map(_.numSolutions shouldBe 10)
     }
   }
 }

@@ -6,8 +6,9 @@
     <artifactId>diatom</artifactId>
     <version>0.0.0</version>
     <name>${project.artifactId}</name>
-    <description>My wonderfull scala app</description>
+    <description>My wonderful scala app</description>
     <inceptionYear>2018</inceptionYear>
+    <!--TODO pick a license-->
     <licenses>
         <license>
             <name>My License</name>
@@ -15,7 +16,6 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -100,6 +100,7 @@
                             <goal>testCompile</goal>
                         </goals>
                         <configuration>
+                            <recompileMode>incremental</recompileMode>
                             <args>
                                 <arg>-dependencyfile</arg>
                                 <arg>${project.build.directory}/.scala_dependencies</arg>
