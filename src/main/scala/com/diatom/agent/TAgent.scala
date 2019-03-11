@@ -43,8 +43,8 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
       Try {
         while (!Thread.interrupted()) {
           try {
-            step()
             numInvocations += 1
+            step()
           } catch {
             case e: Exception => {
               log.error(e.toString)
@@ -73,6 +73,7 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
   }
 
   override def stop(): Unit = {
+    log.debug(s"stopping after ${numInvocations} invocations")
     if (thread.isAlive) {
       thread.interrupt()
     } else {

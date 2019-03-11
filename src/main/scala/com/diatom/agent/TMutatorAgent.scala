@@ -37,7 +37,7 @@ case class MutatorAgentDefaultStrategy() extends TAgentStrategy {
   // this is bad. fix it.
   override def waitTime(populationInformation: TPopulationInformation): Duration = {
     if (populationInformation.numSolutions > 1000) {
-      20.millis
+      100.millis
     } else {
       1.millis
     }
