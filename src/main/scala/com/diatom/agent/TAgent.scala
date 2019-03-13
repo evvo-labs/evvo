@@ -27,7 +27,6 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
   extends TAgent[Sol] with Actor with ActorLogging {
   var numInvocations: Int = 0
 
-
   override def receive: Receive = LoggingReceive(Logging.DebugLevel) {
     case StartAgent => start()
     case StopAgent => stop()
@@ -53,7 +52,7 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
 
           Thread.sleep(waitTime.toMillis)
 
-          if (numInvocations % 100 == 0) {
+          if (numInvocations % 33 == 0) {
             // TODO this is blocking, on population.getInformation(), can't be in main loop
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)
@@ -102,4 +101,5 @@ case class AgentActorRef[Sol](agent: ActorRef) extends TAgent[Sol] {
     Await.result(agent ? GetNumInvocations, 5.seconds)
       .asInstanceOf[Int]
   }
+
 }

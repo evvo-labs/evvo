@@ -1,8 +1,11 @@
 package com.diatom.agent
 
+import java.util.UUID
+
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import com.diatom.population.TPopulation
 import com.diatom.agent.func.TCreatorFunc
+
 import scala.concurrent.duration._
 
 
@@ -29,7 +32,7 @@ object CreatorAgent {
 
   def from[Sol](creatorFunc: TCreatorFunc[Sol], pop: TPopulation[Sol], strat: TAgentStrategy)
                (implicit system: ActorSystem): ActorRef = {
-    system.actorOf(Props(CreatorAgent(creatorFunc, pop, strat)))
+    system.actorOf(Props(CreatorAgent(creatorFunc, pop, strat)), s"CreatorAgent${UUID.randomUUID()}")
   }
 }
 

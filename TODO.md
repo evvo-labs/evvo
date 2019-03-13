@@ -1,3 +1,6 @@
+- Visualising population based on logs
+- Implement some more fun to show problem for Khoury
+- Configuration
 - find a way of parallelizing the tests, especially with async akka nonsense
 - Figure out implicits, and see where using them would improve our lives
 - use some central controller to keep population size roughly constant

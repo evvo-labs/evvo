@@ -1,5 +1,7 @@
 package com.diatom.population
 
+import java.util.UUID
+
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.event.{Logging, LoggingReceive}
 import akka.pattern.ask
@@ -28,7 +30,7 @@ trait TPopulation[Sol] {
     *
     * @param solutions the solutions to add
     */
-  def addSolutions(solutions: TraversableOnce[Sol]): Unit
+  def addSolutions(solutions: TraversableOnce[Sol])(implicit sender: ActorRef): Unit
 
   /**
     * Selects a random sample of the population.
@@ -36,22 +38,22 @@ trait TPopulation[Sol] {
     * @param n the number of solutions.
     * @return n solutions.
     */
-  def getSolutions(n: Int): Set[TScored[Sol]]
+  def getSolutions(n: Int)(implicit sender: ActorRef): Set[TScored[Sol]]
 
   /**
     * Remove the given solutions from the population.
     *
     * @param solutions the solutions to remove
     */
-  def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit
+  def deleteSolutions(solutions: TraversableOnce[TScored[Sol]])(implicit sender: ActorRef): Unit
 
   /**
     * @return the current pareto frontier of this population
     */
-  def getParetoFrontier(): TParetoFrontier[Sol]
+  def getParetoFrontier()(implicit sender: ActorRef = null): TParetoFrontier[Sol]
 
   /** @return a diagnostic report on this island, for agents to determine how often to run. */
-  def getInformation(): TPopulationInformation
+  def getInformation()(implicit sender: ActorRef): TPopulationInformation
 }
 
 /**
@@ -65,28 +67,28 @@ case class PopulationActorRef[Sol](popActor: ActorRef) extends TPopulation[Sol] 
   /** how long to wait for results, for non-unit-typed methods. */
   implicit private val timeout: Timeout = Timeout(5.seconds)
 
-  override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
+  override def addSolutions(solutions: TraversableOnce[Sol])(implicit sender: ActorRef): Unit = {
     popActor ! PopulationActorRef.AddSolutions(solutions)
   }
 
 
-  override def getSolutions(n: Int): Set[TScored[Sol]] = {
+  override def getSolutions(n: Int)(implicit sender: ActorRef): Set[TScored[Sol]] = {
     val solutions = popActor ? PopulationActorRef.GetSolutions(n)
     Await.result(solutions, 5.seconds)
       .asInstanceOf[Set[TScored[Sol]]]
   }
 
-  override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
+  override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]])(implicit sender: ActorRef): Unit = {
     popActor ! PopulationActorRef.DeleteSolutions(solutions)
   }
 
-  override def getParetoFrontier(): TParetoFrontier[Sol] = {
+  override def getParetoFrontier()(implicit sender: ActorRef): TParetoFrontier[Sol] = {
     val paretoFuture = popActor ? GetParetoFrontier
     Await.result(paretoFuture, 5.seconds)
       .asInstanceOf[TParetoFrontier[Sol]]
   }
 
-  override def getInformation(): TPopulationInformation = {
+  override def getInformation()(implicit sender: ActorRef): TPopulationInformation = {
     // TODO test this (all all methods here?)
     // it appears that replacing the body of this method with "null" passes all tests.
     val infoFuture = popActor ? GetInformation
@@ -140,8 +142,9 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
   }
 
 
-  override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
+  override def addSolutions(solutions: TraversableOnce[Sol])(implicit sender: ActorRef): Unit = {
     population ++= solutions.map(score)
+    log.debug(f"Current population size ${population.size}")
   }
 
   private def score(solution: Sol): TScored[Sol] = {
@@ -152,7 +155,7 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
   }
 
 
-  override def getSolutions(n: Int): Set[TScored[Sol]] = {
+  override def getSolutions(n: Int)(implicit sender: ActorRef): Set[TScored[Sol]] = {
     // TODO: This can't be the final impl, inefficient space and time
     if (population.size <= n) {
       population.toSet // no need to randomize, all elements will be included anyway
@@ -170,11 +173,11 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
     }
   }
 
-  override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
+  override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]])(implicit sender: ActorRef): Unit = {
     population --= solutions
   }
 
-  override def getParetoFrontier(): TParetoFrontier[Sol] = {
+  override def getParetoFrontier()(implicit sender: ActorRef): TParetoFrontier[Sol] = {
     // TODO test this for performance, and optimize - this is likely to become a bottleneck
     // https://static.aminer.org/pdf/PDF/000/211/201/on_the_computational_complexity_of_finding_the_maxima_of_a.pdf
 
@@ -198,7 +201,7 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
     ParetoFrontier(out.toSet)
   }
 
-  override def getInformation(): TPopulationInformation = {
+  override def getInformation()(implicit sender: ActorRef): TPopulationInformation = {
     val out = PopulationInformation(population.size)
     log.debug(s"getInformation returning ${out}")
     out
@@ -213,7 +216,7 @@ private object Population {
   def from[Sol](fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]])
                (implicit system: ActorSystem)
   : ActorRef = {
-    system.actorOf(Props(Population(fitnessFunctions)))
+    system.actorOf(Props(Population(fitnessFunctions)), s"Population${UUID.randomUUID()}")
   }
 }
 
