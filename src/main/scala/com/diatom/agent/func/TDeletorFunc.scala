@@ -18,7 +18,7 @@ trait TDeletorFunc[Sol] extends TAgentFunc {
     /**
       * @return The size of the set to give to the deletion function.
       */
-    def numInputs: Int = 32
+    def numInputs: Int = 64
 }
 
 case class DeletorFunc[Sol](delete: DeletorFunctionType[Sol]) extends TDeletorFunc[Sol]

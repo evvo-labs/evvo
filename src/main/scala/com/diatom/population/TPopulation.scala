@@ -175,6 +175,7 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
   override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]])(implicit sender: ActorRef): Unit = {
     population --= solutions
+    log.debug(f"Current population size ${population.size}")
   }
 
   override def getParetoFrontier()(implicit sender: ActorRef): TParetoFrontier[Sol] = {
