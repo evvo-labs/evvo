@@ -117,6 +117,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
         .solutions
         .map(_.solution)
       pareto should contain(1 to listLength toList)
+      pareto.size shouldBe 1
     }
   }
 }

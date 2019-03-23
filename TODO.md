@@ -6,4 +6,4 @@
 - use some central controller to keep population size roughly constant
 - better naming convention, that works with multiple classes per file
 - https://github.com/levkhomich/akka-tracing or similar
-
+- make actor names show up in logs, instead of temp$aa

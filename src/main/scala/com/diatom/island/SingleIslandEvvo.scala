@@ -1,6 +1,8 @@
 package com.diatom.island
 
-import akka.actor.ActorSystem
+import java.util.Calendar
+
+import akka.actor.{ActorLogging, ActorSystem}
 import com.diatom._
 import com.diatom.agent._
 import com.diatom.agent.func._
@@ -20,7 +22,7 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
     """
       |akka {
       |  loggers = ["akka.event.slf4j.Slf4jLogger"]
-      |  loglevel = "DEBUG"
+      |  loglevel = "INFO"
       |  logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
       |  actor {
       |    debug {
@@ -45,13 +47,23 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
     deletorAgents.foreach(_.start())
 
     // TODO this is not ideal. fix wait time/add features to termination criteria
-    Thread.sleep(terminationCriteria.time.toMillis)
+    val startTime = Calendar.getInstance().toInstant.toEpochMilli
+
+    while (startTime + terminationCriteria.time.toMillis >
+      Calendar.getInstance().toInstant.toEpochMilli) {
+        val pareto = pop.getParetoFrontier()
+        println(f"pareto = ${pareto}")
+        Thread.sleep(500)
+    }
 
     creatorAgents.foreach(_.stop())
     mutatorAgents.foreach(_.stop())
     deletorAgents.foreach(_.stop())
 
-    pop.getParetoFrontier()
+    val pareto = pop.getParetoFrontier()
+    println(f"pareto = ${pareto}")
+
+    pareto
   }
 
 

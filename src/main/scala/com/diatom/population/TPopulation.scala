@@ -129,7 +129,7 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
   import PopulationActorRef._
 
   private val fitnessFunctions = fitnessFunctionsIter.toSet
-  private val population = mutable.Set[TScored[Sol]]()
+  private var population = mutable.Set[TScored[Sol]]()
   private var populationVector = Vector[TScored[Sol]]()
   private var getSolutionIndex = 0
 
@@ -143,7 +143,7 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
 
   override def addSolutions(solutions: TraversableOnce[Sol])(implicit sender: ActorRef): Unit = {
-    population ++= solutions.map(score)
+    population = mutable.Set(ParetoFrontier(population.toSet union solutions.map(score).toSet).solutions.toVector:_*)
     log.debug(f"Current population size ${population.size}")
   }
 
@@ -175,31 +175,13 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
   override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]])(implicit sender: ActorRef): Unit = {
     population --= solutions
-    log.debug(f"Current population size ${population.size}")
+    log.info(f"Current population size ${population.size}")
   }
 
   override def getParetoFrontier()(implicit sender: ActorRef): TParetoFrontier[Sol] = {
     // TODO test this for performance, and optimize - this is likely to become a bottleneck
     // https://static.aminer.org/pdf/PDF/000/211/201/on_the_computational_complexity_of_finding_the_maxima_of_a.pdf
-
-    // mutable set used here for performance, converted back to immutable afterwards
-    val out: mutable.Set[TScored[Sol]] = mutable.Set()
-    for (sol <- population) {
-      // if, for all other elements in the population..
-      if (population.forall(other => {
-        // (this part just ignores the solution that we are looking at)
-        sol == other ||
-          // there is at least one score that this solution beats other solutions at,
-          // (then, that is the dimension along which this solution is non dominated)
-          sol.score.zip(other.score).exists({
-            case ((name1, score1), (name2, score2)) => score1 <= score2
-          })
-      })) {
-        // then, we have found a non-dominated solution, so add it to the output.
-        out.add(sol)
-      }
-    }
-    ParetoFrontier(out.toSet)
+    ParetoFrontier(this.population.toSet)
   }
 
   override def getInformation()(implicit sender: ActorRef): TPopulationInformation = {

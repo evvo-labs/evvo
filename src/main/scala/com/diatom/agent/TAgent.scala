@@ -50,7 +50,7 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
             }
           }
 
-          Thread.sleep(waitTime.toMillis)
+            Thread.sleep(waitTime.toMillis)
 
           if (numInvocations % 33 == 0) {
             // TODO this is blocking, on population.getInformation(), can't be in main loop
