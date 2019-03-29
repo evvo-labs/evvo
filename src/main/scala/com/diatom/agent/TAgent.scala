@@ -1,13 +1,8 @@
 package com.diatom.agent
 
-import akka.pattern.ask
-import akka.actor.{Actor, ActorLogging, ActorRef}
-import akka.event.{Logging, LoggingReceive}
-import akka.util.Timeout
-import scala.concurrent.duration._
 import com.diatom.population.TPopulation
 
-import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.util.Try
 
 /**
@@ -15,16 +10,18 @@ import scala.util.Try
   */
 trait TAgent[Sol] {
   def start(): Unit
+
   def stop(): Unit
+
   def numInvocations: Int
 }
 
 // TODO all of the children classes have to pass a strategy and population,
-// which are also available in their top-level under different names, unless they override?
-// should look into abstract classes and case classes, and figure out what to do
+//      which are also available in their top-level under different names, unless they override?
+//      should look into abstract classes and case classes, and figure out what to do
 abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
                            protected val population: TPopulation[Sol])
-  extends TAgent[Sol]{
+  extends TAgent[Sol] {
   var numInvocations: Int = 0
 
   // consider factoring this out into a separate component and using
@@ -32,7 +29,7 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
   // number of tests needed by centralizing
   private val thread = new Thread {
     override def run(): Unit = {
-      var waitTime: Duration = 0.millis
+      var waitTime: Duration = strategy.waitTime(population.getInformation())
       Try {
         while (!Thread.interrupted()) {
           try {
@@ -40,17 +37,17 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
             step()
           } catch {
             case e: Exception => {
-//              log.error(e.toString)
+              //              log.error(e.toString)
             }
           }
 
-            Thread.sleep(waitTime.toMillis)
+          Thread.sleep(waitTime.toMillis)
 
           if (numInvocations % 33 == 0) {
             // TODO this is blocking, on population.getInformation(), can't be in main loop
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)
-//            log.debug(s"new waitTime: ${waitTime}")
+            //            log.debug(s"new waitTime: ${waitTime}")
           }
         }
       }
@@ -66,7 +63,7 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
   }
 
   override def stop(): Unit = {
-    println(s"stopping after ${numInvocations} invocations")
+    println(s"${this}: stopping after ${numInvocations} invocations")
     if (thread.isAlive) {
       thread.interrupt()
     } else {

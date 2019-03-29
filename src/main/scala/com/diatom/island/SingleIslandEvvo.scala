@@ -5,8 +5,7 @@ import java.util.Calendar
 import com.diatom._
 import com.diatom.agent._
 import com.diatom.agent.func._
-import com.diatom.population.{TPopulation, Population}
-import com.typesafe.config.ConfigFactory
+import com.diatom.population.{Population, TPopulation}
 
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple
@@ -35,7 +34,7 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
 
   def run(terminationCriteria: TTerminationCriteria): TParetoFrontier[Sol] = {
 
-    val pop: TPopulation[Sol] = Population.from(fitnesses)
+    val pop: TPopulation[Sol] = Population(fitnesses)
     val creatorAgents = creators.map(c => CreatorAgent.from(c, pop))
     val mutatorAgents = mutators.map(m => MutatorAgent.from(m, pop))
     val deletorAgents = deletors.map(d => DeletorAgent.from(d, pop))

@@ -1,16 +1,9 @@
 package com.diatom.population
 
-import java.util.UUID
-
-import akka.event.{Logging, LoggingReceive}
-import akka.pattern.ask
-import akka.util.Timeout
 import com.diatom.agent.{PopulationInformation, TFitnessFunc, TPopulationInformation}
 import com.diatom.{ParetoFrontier, Scored, TParetoFrontier, TScored}
 
 import scala.collection.{TraversableOnce, mutable}
-import scala.concurrent.Await
-import scala.concurrent.duration._
 
 
 // TODO this file is too large, split it into multiple
@@ -116,17 +109,3 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[So
     out
   }
 }
-
-object Population {
-  //TODO figure out the exact convention around wrapper classes, companion objects, `from` methods
-  /**
-    * @return a Population scoring solutions by the given fitness functions.
-    */
-  def from[Sol](fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]])
-  : TPopulation[Sol] = {
-    Population(fitnessFunctions)
-  }
-}
-
-
-

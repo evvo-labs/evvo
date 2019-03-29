@@ -1,11 +1,9 @@
 package com.diatom.agent
 
-import java.util.UUID
+import com.diatom.agent.func.TMutatorFunc
+import com.diatom.population.TPopulation
 
 import scala.concurrent.duration._
-import akka.actor.{ActorRef, ActorSystem, Props}
-import com.diatom.agent.func.{TCreatorFunc, TMutatorFunc}
-import com.diatom.population.TPopulation
 
 trait TMutatorAgent[Sol] extends TAgent[Sol]
 
@@ -15,6 +13,7 @@ case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol],
   extends AAgent[Sol](strat, pop) with TMutatorAgent[Sol] {
 
   def step(): Unit = {
+    //TODO validate size of input set
     val in = pop.getSolutions(mutate.numInputs)
     val out = mutate.mutate(in)
     pop.addSolutions(out)

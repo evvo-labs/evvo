@@ -106,9 +106,9 @@ class SimpleIslandTest extends WordSpec with Matchers {
     // is 8 really sufficient here?
     // maybe, because the algorithm we are using (without evolutionary computing, just
     // swapping random ones) is n! time.
-    "be able to sort a list of length 10 within 10 seconds" taggedAs Integration in {
+    "be able to sort a list of length 10 within 3 seconds" taggedAs Integration in {
       val listLength = 10
-      val timeout = 2
+      val timeout = 3
       val terminate = TerminationCriteria(timeout.seconds)
 
 

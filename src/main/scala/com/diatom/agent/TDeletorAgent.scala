@@ -1,9 +1,6 @@
 package com.diatom.agent
 
-import java.util.UUID
-
-import akka.actor.{ActorRef, ActorSystem, Props}
-import com.diatom.agent.func.{TDeletorFunc, TMutatorFunc}
+import com.diatom.agent.func.TDeletorFunc
 import com.diatom.population.TPopulation
 
 import scala.concurrent.duration._

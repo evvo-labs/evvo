@@ -10,7 +10,7 @@ trait TParetoFrontier[Sol] {
   def solutions: Set[TScored[Sol]]
 }
 
-case class ParetoFrontier[Sol](private val _solutions: Set[TScored[Sol]]) extends TParetoFrontier[Sol] {
+class ParetoFrontier[Sol](private val _solutions: Set[TScored[Sol]]) extends TParetoFrontier[Sol] {
 
   // TODO test this for performance, and optimize - this is likely to become a bottleneck
   // https://static.aminer.org/pdf/PDF/000/211/201/on_the_computational_complexity_of_finding_the_maxima_of_a.pdf
@@ -39,9 +39,10 @@ case class ParetoFrontier[Sol](private val _solutions: Set[TScored[Sol]]) extend
   }
 
   override def solutions: Set[TScored[Sol]] = paretoFrontier
+
+  override def toString: String = f"ParetoFrontier(${paretoFrontier}"
 }
 
 object ParetoFrontier {
-
   def apply[Sol](solutions: Set[TScored[Sol]]): ParetoFrontier[Sol] = new ParetoFrontier(solutions)
 }
