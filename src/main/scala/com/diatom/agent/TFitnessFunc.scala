@@ -1,5 +1,7 @@
 package com.diatom.agent
 
+import com.diatom.FitnessFunctionType
+
 /**
   * A real valued objective.
   */
@@ -16,6 +18,6 @@ trait TFitnessFunc[Sol] {
   def name: String = this.toString
 }
 
-case class FitnessFunc[Sol](score: Sol => Double) extends TFitnessFunc[Sol] {
+case class FitnessFunc[Sol](score: FitnessFunctionType[Sol]) extends TFitnessFunc[Sol] {
   // TODO add names to fitness functions.
 }

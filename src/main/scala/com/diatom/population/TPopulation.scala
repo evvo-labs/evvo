@@ -1,15 +1,12 @@
 package com.diatom.population
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import com.diatom.agent.{PopulationInformation, TFitnessFunc, TPopulationInformation}
 import com.diatom.{ParetoFrontier, Scored, TParetoFrontier, TScored}
-import com.diatom.agent.TFitnessFunc
-import akka.pattern.ask
-import akka.util.Timeout
-import com.diatom.population.PopulationActorRef.GetParetoFrontier
 
-import scala.concurrent.duration._
 import scala.collection.{TraversableOnce, mutable}
-import scala.concurrent.{Await, Awaitable, Future}
+
+
+// TODO this file is too large, split it into multiple
 
 /**
   * A population is the set of all solutions current in an evolutionary process.
@@ -45,68 +42,9 @@ trait TPopulation[Sol] {
     * @return the current pareto frontier of this population
     */
   def getParetoFrontier(): TParetoFrontier[Sol]
-}
 
-/**
-  * A interface to communicate with a population.
-  *
-  * @param popActor the actor ref to the population.
-  * @tparam Sol the type of the solutions in the population
-  */
-case class PopulationActorRef[Sol](popActor: ActorRef) extends TPopulation[Sol] {
-
-  /**
-    * @param system           the actor system
-    * @param fitnessFunctions the definition of fitness in this population.
-    */
-  def this(system: ActorSystem, fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]]) = {
-    this(system.actorOf(PopulationActorRef.props(fitnessFunctions)))
-  }
-
-  /** how long to wait for results, for non-unit-typed methods. */
-  implicit private val timeout = Timeout(5.seconds)
-
-  override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
-    popActor ! PopulationActorRef.AddSolutions(solutions)
-  }
-
-  override def getSolutions(n: Int): Set[TScored[Sol]] = {
-    val solutions = popActor ? PopulationActorRef.GetSolutions(n)
-    Await.result(solutions, 5.seconds)
-      .asInstanceOf[Set[TScored[Sol]]]
-  }
-
-  override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
-    popActor ! PopulationActorRef.DeleteSolutions(solutions)
-  }
-
-  override def getParetoFrontier(): TParetoFrontier[Sol] = {
-    val paretoFuture = popActor ? GetParetoFrontier
-    Await.result(paretoFuture, 5.seconds)
-      .asInstanceOf[TParetoFrontier[Sol]]
-  }
-}
-
-object PopulationActorRef {
-  /**
-    * @return a PopulationActorRef scoring solutions by the given fitness functions.
-    */
-  def from[Sol](fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]])
-               (implicit system: ActorSystem)
-  : TPopulation[Sol] = {
-    PopulationActorRef(Population.from(fitnessFunctions))
-  }
-
-  def props[Sol](fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]]): Props = {
-    Props(Population(fitnessFunctions))
-  }
-
-  case class AddSolutions[Sol](solutions: TraversableOnce[Sol])
-
-  case class GetSolutions[Sol](n: Int)
-
-  case class DeleteSolutions[Sol](solutions: TraversableOnce[TScored[Sol]])
-  case object GetParetoFrontier
+  /** @return a diagnostic report on this island, for agents to determine how often to run. */
+  def getInformation(): TPopulationInformation
 }
 
 /**
@@ -114,24 +52,19 @@ object PopulationActorRef {
   *
   * @tparam Sol the type of the solutions in the population
   */
-private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[Sol]])
-  extends TPopulation[Sol] with Actor {
+case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[Sol]])
+  extends TPopulation[Sol] {
 
-  import PopulationActorRef._
   private val fitnessFunctions = fitnessFunctionsIter.toSet
-  private val population = mutable.Set[TScored[Sol]]()
-
-  override def receive: Receive = {
-    case AddSolutions(solutions: TraversableOnce[Sol]) => addSolutions(solutions)
-    case GetSolutions(n: Int) => sender ! getSolutions(n)
-    case DeleteSolutions(solutions: TraversableOnce[TScored[Sol]]) => deleteSolutions(solutions)
-    case GetParetoFrontier => sender ! getParetoFrontier()
-    case x: Any => throw new IllegalArgumentException(s"bad message: ${x}")
-  }
+  private var population = mutable.Set[TScored[Sol]]()
+  private var populationVector = Vector[TScored[Sol]]()
+  private var getSolutionIndex = 0
 
 
   override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
+    //    population = mutable.Set(ParetoFrontier(population.toSet union solutions.map(score).toSet).solutions.toVector:_*)
     population ++= solutions.map(score)
+    //    log.debug(f"Current population size ${population.size}")
   }
 
   private def score(solution: Sol): TScored[Sol] = {
@@ -143,9 +76,21 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
 
 
   override def getSolutions(n: Int): Set[TScored[Sol]] = {
-    println(population.size)
     // TODO: This can't be the final impl, inefficient space and time
-    util.Random.shuffle(population.toVector).take(n).toSet
+    if (population.size <= n) {
+      population.toSet // no need to randomize, all elements will be included anyway
+    } else {
+      var out = Set[TScored[Sol]]()
+      while (out.size < n) {
+        if (!populationVector.isDefinedAt(getSolutionIndex)) {
+          populationVector = util.Random.shuffle(population.toVector)
+          getSolutionIndex = 0
+        }
+        out += populationVector(getSolutionIndex)
+        getSolutionIndex += 1
+      }
+      out
+    }
   }
 
   override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
@@ -155,38 +100,12 @@ private case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnes
   override def getParetoFrontier(): TParetoFrontier[Sol] = {
     // TODO test this for performance, and optimize - this is likely to become a bottleneck
     // https://static.aminer.org/pdf/PDF/000/211/201/on_the_computational_complexity_of_finding_the_maxima_of_a.pdf
+    ParetoFrontier(this.population.toSet)
+  }
 
-    // mutable set used here for performance, converted back to immutable afterwards
-    val out: mutable.Set[TScored[Sol]] = mutable.Set()
-    for (sol <- population) {
-      // if, for all other elements in the population..
-      if (population.forall(other => {
-        // (this part just ignores the solution that we are looking at)
-        sol == other ||
-        // there is at least one score that this solution beats other solutions at,
-        // (then, that is the dimension along which this solution is non dominated)
-        sol.score.zip(other.score).exists({
-          case ((name1, score1), (name2, score2)) => score1 <= score2
-        })
-      })) {
-        // then, we have found a non-dominated solution, so add it to the output.
-        out.add(sol)
-      }
-    }
-    ParetoFrontier(out.toSet)
+  override def getInformation(): TPopulationInformation = {
+    val out = PopulationInformation(population.size)
+    //    log.debug(s"getInformation returning ${out}")
+    out
   }
 }
-
-private object Population {
-  /**
-    * @return a Population scoring solutions by the given fitness functions.
-    */
-  def from[Sol](fitnessFunctions: TraversableOnce[TFitnessFunc[Sol]])
-               (implicit system: ActorSystem)
-  : ActorRef = {
-    system.actorOf(Props(Population(fitnessFunctions)))
-  }
-}
-
-
-

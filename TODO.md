@@ -1,4 +1,9 @@
+- Visualising population based on logs
+- Implement some more fun to show problem for Khoury
+- Configuration
 - find a way of parallelizing the tests, especially with async akka nonsense
 - Figure out implicits, and see where using them would improve our lives
-- make vars and vals different colors in intellij
 - use some central controller to keep population size roughly constant
+- better naming convention, that works with multiple classes per file
+- https://github.com/levkhomich/akka-tracing or similar
+- make actor names show up in logs, instead of temp$aa

@@ -2,6 +2,7 @@ package com.diatom.agent
 
 import com.diatom.population.TPopulation
 
+import scala.concurrent.duration._
 import scala.util.Try
 
 /**
@@ -9,19 +10,45 @@ import scala.util.Try
   */
 trait TAgent[Sol] {
   def start(): Unit
+
   def stop(): Unit
+
+  def numInvocations: Int
 }
 
-abstract class AAgent[Sol] extends TAgent[Sol] {
+// TODO all of the children classes have to pass a strategy and population,
+//      which are also available in their top-level under different names, unless they override?
+//      should look into abstract classes and case classes, and figure out what to do
+abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
+                           protected val population: TPopulation[Sol])
+  extends TAgent[Sol] {
+  var numInvocations: Int = 0
+
   // consider factoring this out into a separate component and using
   // composition instead of inheriting a thread field. This will reduce the
   // number of tests needed by centralizing
   private val thread = new Thread {
     override def run(): Unit = {
+      var waitTime: Duration = strategy.waitTime(population.getInformation())
       Try {
         while (!Thread.interrupted()) {
-          step()
-          Thread.sleep(3) // TODO: This represents an initial strategy, replace it.
+          try {
+            numInvocations += 1
+            step()
+          } catch {
+            case e: Exception => {
+              //              log.error(e.toString)
+            }
+          }
+
+          Thread.sleep(waitTime.toMillis)
+
+          if (numInvocations % 33 == 0) {
+            // TODO this is blocking, on population.getInformation(), can't be in main loop
+            val nextInformation = population.getInformation()
+            waitTime = strategy.waitTime(nextInformation)
+            //            log.debug(s"new waitTime: ${waitTime}")
+          }
         }
       }
     }
@@ -36,6 +63,7 @@ abstract class AAgent[Sol] extends TAgent[Sol] {
   }
 
   override def stop(): Unit = {
+    println(s"${this}: stopping after ${numInvocations} invocations")
     if (thread.isAlive) {
       thread.interrupt()
     } else {
