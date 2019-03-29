@@ -24,14 +24,8 @@ trait TAgent[Sol] {
 // should look into abstract classes and case classes, and figure out what to do
 abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
                            protected val population: TPopulation[Sol])
-  extends TAgent[Sol] with Actor with ActorLogging {
+  extends TAgent[Sol]{
   var numInvocations: Int = 0
-
-  override def receive: Receive = LoggingReceive(Logging.DebugLevel) {
-    case StartAgent => start()
-    case StopAgent => stop()
-    case GetNumInvocations => sender ! numInvocations
-  }
 
   // consider factoring this out into a separate component and using
   // composition instead of inheriting a thread field. This will reduce the
@@ -46,7 +40,7 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
             step()
           } catch {
             case e: Exception => {
-              log.error(e.toString)
+//              log.error(e.toString)
             }
           }
 
@@ -56,7 +50,7 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
             // TODO this is blocking, on population.getInformation(), can't be in main loop
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)
-            log.debug(s"new waitTime: ${waitTime}")
+//            log.debug(s"new waitTime: ${waitTime}")
           }
         }
       }
@@ -72,7 +66,7 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
   }
 
   override def stop(): Unit = {
-    log.debug(s"stopping after ${numInvocations} invocations")
+    println(s"stopping after ${numInvocations} invocations")
     if (thread.isAlive) {
       thread.interrupt()
     } else {
@@ -84,22 +78,4 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
     * Performs one operation on the population.
     */
   protected def step(): Unit
-}
-
-case object StartAgent
-case object StopAgent
-case object GetNumInvocations
-
-case class AgentActorRef[Sol](agent: ActorRef) extends TAgent[Sol] {
-  implicit val timeout: Timeout  = 5.seconds
-
-  override def start(): Unit = agent ! StartAgent
-
-  override def stop(): Unit = agent ! StopAgent
-
-  override def numInvocations: Int = {
-    Await.result(agent ? GetNumInvocations, 5.seconds)
-      .asInstanceOf[Int]
-  }
-
 }

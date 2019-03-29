@@ -23,14 +23,14 @@ case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol],
 
 object MutatorAgent {
   def from[Sol](mutatorFunc: TMutatorFunc[Sol], pop: TPopulation[Sol])
-               (implicit system: ActorSystem): ActorRef = {
+               : TMutatorAgent[Sol] = {
     val strat = MutatorAgentDefaultStrategy()
     MutatorAgent.from(mutatorFunc, pop, strat)
   }
 
   def from[Sol](mutatorFunc: TMutatorFunc[Sol], pop: TPopulation[Sol], strat: TAgentStrategy)
-               (implicit system: ActorSystem): ActorRef = {
-    system.actorOf(Props(MutatorAgent(mutatorFunc, pop, strat)), s"MutatorAgent${UUID.randomUUID()}")
+               : TMutatorAgent[Sol] = {
+    MutatorAgent(mutatorFunc, pop, strat)
   }
 }
 

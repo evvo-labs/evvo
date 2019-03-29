@@ -14,7 +14,7 @@ trait TCreatorAgent[Sol] extends TAgent[Sol]
 case class CreatorAgent[Sol](creatorFunc: TCreatorFunc[Sol],
                              pop: TPopulation[Sol],
                              strat: TAgentStrategy)
-  extends AAgent[Sol](strat, pop) with TCreatorAgent[Sol] with Actor {
+  extends AAgent[Sol](strat, pop) with TCreatorAgent[Sol]{
 
   override def step(): Unit = {
     val toAdd = creatorFunc.create()
@@ -24,15 +24,14 @@ case class CreatorAgent[Sol](creatorFunc: TCreatorFunc[Sol],
 
 
 object CreatorAgent {
-  def from[Sol](creatorFunc: TCreatorFunc[Sol], pop: TPopulation[Sol])
-               (implicit system: ActorSystem): ActorRef = {
+  def from[Sol](creatorFunc: TCreatorFunc[Sol], pop: TPopulation[Sol]): TCreatorAgent[Sol] = {
     val strat: TAgentStrategy = _ => 50.millis // TODO replace with sane default
     CreatorAgent.from(creatorFunc, pop, strat)
   }
 
   def from[Sol](creatorFunc: TCreatorFunc[Sol], pop: TPopulation[Sol], strat: TAgentStrategy)
-               (implicit system: ActorSystem): ActorRef = {
-    system.actorOf(Props(CreatorAgent(creatorFunc, pop, strat)), s"CreatorAgent${UUID.randomUUID()}")
+               : TCreatorAgent[Sol] = {
+    CreatorAgent(creatorFunc, pop, strat)
   }
 }
 
