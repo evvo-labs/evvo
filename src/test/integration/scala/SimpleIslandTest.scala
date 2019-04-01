@@ -103,9 +103,6 @@ class SimpleIslandTest extends WordSpec with Matchers {
       pareto should contain(1 to listLength toList)
     }
 
-    // is 8 really sufficient here?
-    // maybe, because the algorithm we are using (without evolutionary computing, just
-    // swapping random ones) is n! time.
     "be able to sort a list of length 10 within 3 seconds" taggedAs Integration in {
       val listLength = 10
       val timeout = 3
