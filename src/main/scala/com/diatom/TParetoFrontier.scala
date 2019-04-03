@@ -28,7 +28,10 @@ class ParetoFrontier[Sol](private val _solutions: Set[TScored[Sol]]) extends TPa
           // there is at least one score that this solution beats other solutions at,
           // (then, that is the dimension along which this solution is non dominated)
           sol.score.zip(other.score).exists({
-            case ((name1, score1), (name2, score2)) => score1 <= score2
+            case ((name1, score1), (name2, score2)) => score1 < score2
+          }) ||
+          sol.score.zip(other.score).forall({
+            case ((name1, score1), (name2, score2)) => score1 == score2
           })
       })) {
         // then, we have found a non-dominated solution, so add it to the output.
@@ -40,7 +43,10 @@ class ParetoFrontier[Sol](private val _solutions: Set[TScored[Sol]]) extends TPa
 
   override def solutions: Set[TScored[Sol]] = paretoFrontier
 
-  override def toString: String = f"ParetoFrontier(${paretoFrontier}"
+  override def toString: String = {
+    val contents = paretoFrontier.map(_.score).mkString("\n  ")
+    f"ParetoFrontier(\n  ${contents})"
+  }
 }
 
 object ParetoFrontier {

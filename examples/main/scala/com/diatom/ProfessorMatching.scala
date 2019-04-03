@@ -28,13 +28,13 @@ object ProfessorMatching {
     * @param sectionScheduleToPreference a mapping of preferences for each schedule
     * @param courseToPreference          a mappping of preferences for each course they want to teach
     * @param numSectionsToPreference     mapping from number of sections to preference
-    * @param prepsToPreference           a mapping of # unique classes to preference for that #
+    * @param numPrepsToPreference           a mapping of # unique classes to preference for that #
     */
   case class ProfPreferences(id: ProfID,
                              sectionScheduleToPreference: Map[SectionSchedule, Int],
                              courseToPreference: Map[CourseID, Int],
                              numSectionsToPreference: Map[Int, Int],
-                             prepsToPreference: Map[Int, Int])
+                             numPrepsToPreference: Map[Int, Int])
 
   object SectionSchedule extends Enumeration {
 
@@ -114,11 +114,34 @@ object ProfessorMatching {
   )
 
 
+  // =================================== FITNESS ===================================================
   val sumProfessorSchedulePreferences: FitnessFunctionType[Sol] = sol => {
     -sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         soFar + sections.foldLeft(0)((tot, sectionID) =>
           tot + idToProf(profID).sectionScheduleToPreference(idToSection(sectionID).schedule))
+    }
+  }
+
+  val sumProfessorCoursePreferences: FitnessFunctionType[Sol] = sol => {
+    -sol.foldLeft(0) {
+      case (soFar, (profID, sections)) =>
+        soFar + sections.foldLeft(0)((tot, sectionID) =>
+          tot + idToProf(profID).courseToPreference(idToSection(sectionID).course))
+    }
+  }
+
+  val sumProfessorSectionCountPreferences: FitnessFunctionType[Sol] = sol => {
+    -sol.foldLeft(0) {
+      case (soFar, (profID, sections)) =>
+        soFar + idToProf(profID).numSectionsToPreference(sections.size)
+    }
+  }
+
+  val sumProfessorNumPrepsPreferences: FitnessFunctionType[Sol] = sol => {
+    -sol.foldLeft(0) {
+      case (soFar, (profID, sections)) =>
+        soFar + idToProf(profID).numPrepsToPreference(sections.map(idToSection(_).course).size)
     }
   }
 
@@ -212,7 +235,10 @@ object ProfessorMatching {
   def main(args: Array[String]): Unit = {
 
     val island = SingleIslandEvvo.builder()
-      .addFitness(sumProfessorSchedulePreferences)
+      .addFitness(sumProfessorSchedulePreferences, "Sched")
+      .addFitness(sumProfessorCoursePreferences, "Course")
+      .addFitness(sumProfessorNumPrepsPreferences, "#Prep")
+      .addFitness(sumProfessorSectionCountPreferences, "#Section")
       .addCreator(validScheduleCreator)
       .addMutator(swapTwoCourses)
       .addMutator(balanceCourseload)

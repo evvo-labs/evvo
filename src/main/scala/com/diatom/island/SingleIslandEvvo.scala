@@ -117,8 +117,10 @@ case class SingleIslandEvvoBuilder[Sol](creators: Set[TCreatorFunc[Sol]] = Set[T
     this.copy(deletors = deletors + DeletorFunc(deletorFunc))
   }
 
-  def addFitness(fitnessFunc: FitnessFunctionType[Sol]): SingleIslandEvvoBuilder[Sol] = {
-    this.copy(fitnesses = fitnesses + FitnessFunc(fitnessFunc))
+  def addFitness(fitnessFunc: FitnessFunctionType[Sol], name: String = null)
+  : SingleIslandEvvoBuilder[Sol] = {
+    val realName = if (name == null) fitnessFunc.toString() else name
+    this.copy(fitnesses = fitnesses + FitnessFunc(fitnessFunc, realName))
   }
 
   def build(): SingleIslandEvvo[Sol] = {

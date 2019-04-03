@@ -5,7 +5,7 @@ import com.diatom.{Scored, TScored}
 import org.scalatest._
 
 class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
-  val identityFitness = FitnessFunc[Double](x => x)
+  val identityFitness = FitnessFunc[Double](x => x, "Identity")
   val fitnesses = Set(identityFitness)
 
 

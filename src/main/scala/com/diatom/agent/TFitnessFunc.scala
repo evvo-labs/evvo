@@ -8,16 +8,15 @@ import com.diatom.FitnessFunctionType
 trait TFitnessFunc[Sol] {
 
   /**
-    * The score, to be maximized.
+    * The score, to be minimized.
     * param: the solution to score
     * @return the score, according to this objective
     */
   def score: Sol => Double
 
-  // TODO remove default
-  def name: String = this.toString
+  def name: String
+
+  override def toString: String = s"Fitness[${this.name}]"
 }
 
-case class FitnessFunc[Sol](score: FitnessFunctionType[Sol]) extends TFitnessFunc[Sol] {
-  // TODO add names to fitness functions.
-}
+case class FitnessFunc[Sol](score: FitnessFunctionType[Sol], name: String) extends TFitnessFunc[Sol]

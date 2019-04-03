@@ -46,7 +46,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   var agents: Vector[TAgent[S]] = _
   val strategy: TAgentStrategy = _ => 70.millis
 
-  val fitnessFunc: TFitnessFunc[S] = FitnessFunc(_.toDouble)
+  val fitnessFunc: TFitnessFunc[S] = FitnessFunc(_.toDouble, "Double")
 
   before {
     pop = Population[S](Vector(fitnessFunc))
