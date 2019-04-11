@@ -105,7 +105,8 @@ object ProfessorMatching {
   }
 
   def readProblem(): Problem = {
-    DataReader.readFromJsonFile("preferences_mock.json")
+    DataReader.readFromJsonFile(
+      "examples/main/scala/com/diatom/professormatching/preferences_mock.json")
   }
 
   private val problem: Problem = readProblem()
@@ -131,9 +132,6 @@ object ProfessorMatching {
     -sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         soFar + sections.foldLeft(0)((tot, sectionID) => {
-          println(s"(profID, idToProf(profId)) = ${
-            (profID, idToProf(profID).courseToPreference)
-          }")
           tot + idToProf(profID)
             .courseToPreference(
               idToSection(sectionID).courseID)
