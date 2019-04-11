@@ -19,7 +19,7 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.scalatest:scalatest_2.12:3.0.5" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.scalactic:scalactic_2.12:3.0.5" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.scala-lang:scala-reflect:2.12.4" level="project" />
+    <orderEntry type="library" name="Maven: org.scala-lang:scala-reflect:2.12.4" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.scala-lang.modules:scala-xml_2.12:1.0.6" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.specs2:specs2-core_2.12:4.2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.specs2:specs2-matcher_2.12:4.2.0" level="project" />
@@ -31,5 +31,17 @@
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
+    <orderEntry type="library" name="Maven: io.circe:circe-core_2.12:0.11.1" level="project" />
+    <orderEntry type="library" name="Maven: io.circe:circe-numbers_2.12:0.11.1" level="project" />
+    <orderEntry type="library" name="Maven: org.typelevel:cats-core_2.12:1.5.0" level="project" />
+    <orderEntry type="library" name="Maven: org.typelevel:cats-macros_2.12:1.5.0" level="project" />
+    <orderEntry type="library" name="Maven: org.typelevel:cats-kernel_2.12:1.5.0" level="project" />
+    <orderEntry type="library" name="Maven: org.typelevel:machinist_2.12:0.6.6" level="project" />
+    <orderEntry type="library" name="Maven: io.circe:circe-parser_2.12:0.11.1" level="project" />
+    <orderEntry type="library" name="Maven: io.circe:circe-jawn_2.12:0.11.1" level="project" />
+    <orderEntry type="library" name="Maven: org.typelevel:jawn-parser_2.12:0.14.1" level="project" />
+    <orderEntry type="library" name="Maven: io.circe:circe-generic_2.12:0.11.1" level="project" />
+    <orderEntry type="library" name="Maven: com.chuusai:shapeless_2.12:2.3.3" level="project" />
+    <orderEntry type="library" name="Maven: org.typelevel:macro-compat_2.12:1.1.1" level="project" />
   </component>
 </module>

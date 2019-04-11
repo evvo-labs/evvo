@@ -37,10 +37,11 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
             step()
           } catch {
             case e: Exception => {
+              e.printStackTrace()
               //              log.error(e.toString)
             }
           }
-
+          // TODO: interrupt gracefully: currently causes exceptions to print when interrupted.
           Thread.sleep(waitTime.toMillis)
 
           if (numInvocations % 33 == 0) {

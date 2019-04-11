@@ -1,12 +1,11 @@
-package com.diatom
+package com.diatom.professormatching
 
-import java.time.{DayOfWeek, Instant}
 import java.time.LocalTime.parse
-import java.time.LocalTime
+import java.time.{DayOfWeek, LocalTime}
 
 import scala.concurrent.duration._
-import com.diatom.ProfessorMatching.SectionSchedule.SectionSchedule
 import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
+import com.diatom._
 
 /**
   * Matches professors with courses, assuming:
@@ -14,120 +13,131 @@ import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
   * - There are more than twice as many sections as professors
   */
 object ProfessorMatching {
-
+  // these are superclasses of base types so that you can use the base types to create them,
+  // but they are separate types so they can't be used interchangably
   type ProfID >: Int
   type SectionID >: Int
   type CourseID >: Int
+  type ScheduleID >: String
   type Sol = Map[ProfID, Set[SectionID]]
 
-  //  implicit def int2profid(i: Int) = i.asInstanceOf[ProfID]
+  case class Problem(profIDtoPref: Map[ProfID, ProfPreferences],
+                     sectionIDtoSection: Map[SectionID, Section],
+                     scheduleIDtoSchedule: Map[ScheduleID, SectionSchedule])
 
   /**
     *
     * @param id                          the professor's id
     * @param sectionScheduleToPreference a mapping of preferences for each schedule
-    * @param courseToPreference          a mappping of preferences for each course they want to teach
+    * @param courseToPreference          a mapping of preferences for each course they want to teach
     * @param numSectionsToPreference     mapping from number of sections to preference
-    * @param numPrepsToPreference           a mapping of # unique classes to preference for that #
+    * @param numPrepsToPreference        a mapping of # unique classes to preference for that #
     */
   case class ProfPreferences(id: ProfID,
-                             sectionScheduleToPreference: Map[SectionSchedule, Int],
+                             sectionScheduleToPreference: Map[ScheduleID, Int],
                              courseToPreference: Map[CourseID, Int],
                              numSectionsToPreference: Map[Int, Int],
                              numPrepsToPreference: Map[Int, Int])
 
-  object SectionSchedule extends Enumeration {
+  case class Section(id: SectionID, courseID: CourseID, scheduleID: ScheduleID)
 
-    case class SectionSchedule(timeSlots: TimeSlot*) extends super.Val {
-
-      def overlaps(that: SectionSchedule): Boolean = {
-        this.timeSlots.exists(t =>
-          that.timeSlots.exists(_.overlaps(t)))
-      }
+  case class SectionSchedule(id: ScheduleID, timeSlots: TimeSlot*) {
+    def overlaps(that: SectionSchedule): Boolean = {
+      this.timeSlots.exists(t =>
+        that.timeSlots.exists(_.overlaps(t)))
     }
+  }
 
-    case class TimeSlot(dayOfWeek: DayOfWeek,
-                        startTime: LocalTime,
-                        endTime: LocalTime) {
 
-      def overlaps(that: TimeSlot): Boolean = {
-        (this.dayOfWeek == that.dayOfWeek
-          && ((this.startTime.isBefore(that.startTime) && that.startTime.isBefore(this.endTime))
-          || (that.startTime.isBefore(this.startTime) && this.startTime.isBefore(that.endTime))))
+  case class TimeSlot(dayOfWeek: DayOfWeek,
+                      startTime: LocalTime,
+                      endTime: LocalTime) {
 
-      }
+    def overlaps(that: TimeSlot): Boolean = {
+      (this.dayOfWeek == that.dayOfWeek
+        && ((this.startTime.isBefore(that.startTime) && that.startTime.isBefore(this.endTime))
+        || (that.startTime.isBefore(this.startTime) && this.startTime.isBefore(that.endTime))))
+
     }
+  }
 
-
+  object SectionScheduleMap {
     // TODO: Add in all the timeslots for all schedules
     //       (https://registrar.northeastern.edu/app/uploads/semcrsseq-flsp-new.pdf)
-    val SCHED1 = SectionSchedule(
+    private val SCHED1 = SectionSchedule("1",
       TimeSlot(DayOfWeek.MONDAY, parse("08:00"), parse("09:05")),
       TimeSlot(DayOfWeek.WEDNESDAY, parse("08:00"), parse("09:05")),
       TimeSlot(DayOfWeek.THURSDAY, parse("08:00"), parse("09:05")))
 
-    val SCHED2 = SectionSchedule(
+    private val SCHED2 = SectionSchedule("2",
       TimeSlot(DayOfWeek.MONDAY, parse("09:15"), parse("10:20")),
       TimeSlot(DayOfWeek.WEDNESDAY, parse("09:15"), parse("10:20")),
       TimeSlot(DayOfWeek.THURSDAY, parse("09:15"), parse("10:20")))
 
-    val SCHEDP = SectionSchedule(
+    private val SCHEDP = SectionSchedule("P",
       TimeSlot(DayOfWeek.MONDAY, parse("08:00"), parse("10:20")),
       TimeSlot(DayOfWeek.WEDNESDAY, parse("08:00"), parse("10:20")),
       TimeSlot(DayOfWeek.THURSDAY, parse("08:00"), parse("10:20")))
-  }
 
-  import SectionSchedule._
-
-
-  case class Section(id: SectionID, course: CourseID, schedule: SectionSchedule)
-
-
-  def readProf(): Map[ProfID, ProfPreferences] = {
-    val schedulePref1 = Map(SCHED1 -> 5, SCHED2 -> 0, SCHEDP -> 3)
-    val coursePref1: Map[CourseID, Int] = Map(1 -> 5, 2 -> 0)
-    val numCoursePref1 = Map(0 -> 0, 1 -> 1, 2 -> 4, 3 -> 5, 4 -> 2)
-    val prepsPref1 = Map(0 -> 0, 1 -> 3, 2 -> 5, 3 -> 4, 4 -> 2)
-    val prof1 = ProfPreferences(1, schedulePref1, coursePref1, numCoursePref1, prepsPref1)
-
-    val schedulePref2 = Map(SCHED1 -> 0, SCHED2 -> 5, SCHEDP -> 3)
-    val coursePref2: Map[CourseID, Int] = Map(1 -> 0, 2 -> 5)
-    val numCoursePref2 = Map(0 -> 0, 1 -> 1, 2 -> 4, 3 -> 5, 4 -> 2)
-    val prepsPref2 = Map(0 -> 0, 1 -> 3, 2 -> 5, 3 -> 4, 4 -> 2)
-    val prof2 = ProfPreferences(2, schedulePref2, coursePref2, numCoursePref2, prepsPref2)
-
-    Map(
-      1 -> prof1,
-      2 -> prof2,
+    val scheduleIDtoSchedule: Map[ScheduleID, SectionSchedule] = Map(
+      "1" -> SCHED1,
+      "2" -> SCHED2,
+      "P" -> SCHEDP
     )
   }
 
-  val idToProf: Map[ProfID, ProfPreferences] = readProf()
+  // =================================== MAIN ===================================================
+  def main(args: Array[String]): Unit = {
 
-  val idToSection = Map[SectionID, Section](
-    1 -> Section(1, 1, SCHED1),
-    2 -> Section(2, 1, SCHED1),
-    3 -> Section(3, 1, SCHED2),
-    4 -> Section(4, 2, SCHED2),
-    5 -> Section(5, 2, SCHEDP),
-    6 -> Section(6, 2, SCHEDP),
-  )
+    val island = SingleIslandEvvo.builder()
+      .addFitness(sumProfessorSchedulePreferences, "Sched")
+      .addFitness(sumProfessorCoursePreferences, "Course")
+      .addFitness(sumProfessorNumPrepsPreferences, "#Prep")
+      .addFitness(sumProfessorSectionCountPreferences, "#Section")
+      .addCreator(validScheduleCreator)
+      //      .addMutator(swapTwoCourses)
+      //      .addMutator(balanceCourseload)
+      //      .addDeletor(deleteWorstHalf)
+      .build()
+
+    val pareto = island.run(TerminationCriteria(1.second))
+    println(pareto)
+  }
+
+  def readProblem(): Problem = {
+    DataReader.readFromJsonFile("preferences_mock.json")
+  }
+
+  private val problem: Problem = readProblem()
+  private val idToProf: Map[ProfID, ProfPreferences] = problem.profIDtoPref
+  private val idToSection = problem.sectionIDtoSection
+  private val idToSchedule = problem.scheduleIDtoSchedule
 
 
   // =================================== FITNESS ===================================================
   val sumProfessorSchedulePreferences: FitnessFunctionType[Sol] = sol => {
     -sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
-        soFar + sections.foldLeft(0)((tot, sectionID) =>
-          tot + idToProf(profID).sectionScheduleToPreference(idToSection(sectionID).schedule))
+        val prof = idToProf(profID)
+        soFar + sections.foldLeft(0)((tot, sectionID) => {
+          val section: Section = idToSection(sectionID)
+          val schedule: SectionSchedule = idToSchedule(section.scheduleID)
+          tot + prof.sectionScheduleToPreference(schedule.id)
+        })
     }
   }
 
   val sumProfessorCoursePreferences: FitnessFunctionType[Sol] = sol => {
     -sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
-        soFar + sections.foldLeft(0)((tot, sectionID) =>
-          tot + idToProf(profID).courseToPreference(idToSection(sectionID).course))
+        soFar + sections.foldLeft(0)((tot, sectionID) => {
+          println(s"(profID, idToProf(profId)) = ${
+            (profID, idToProf(profID).courseToPreference)
+          }")
+          tot + idToProf(profID)
+            .courseToPreference(
+              idToSection(sectionID).courseID)
+        })
     }
   }
 
@@ -141,13 +151,14 @@ object ProfessorMatching {
   val sumProfessorNumPrepsPreferences: FitnessFunctionType[Sol] = sol => {
     -sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
-        soFar + idToProf(profID).numPrepsToPreference(sections.map(idToSection(_).course).size)
+        soFar + idToProf(profID).numPrepsToPreference(sections.map(idToSection(_).courseID).size)
     }
   }
 
+  // =================================== CREATOR ==================================================
   val validScheduleCreator: CreatorFunctionType[Sol] = () => {
     Vector.fill(10)(idToProf.keysIterator.zipAll(
-      util.Random.shuffle(idToSection.keys)
+      util.Random.shuffle(idToSection.keys.toVector)
         .grouped(idToSection.size / idToProf.size + 1)
         .map(_.toSet),
       -1,
@@ -162,11 +173,12 @@ object ProfessorMatching {
     s.toVector(util.Random.nextInt(s.size))
   }
 
+  // =================================== MUTATOR ===================================================
   val swapTwoCourses: MutatorFunctionType[Sol] = (sols: Set[TScored[Sol]]) => {
     def swap(sol: Sol): Sol = {
       val prof1: ProfPreferences = idToProf(randomKey(idToProf))
       val prof2: ProfPreferences = {
-        var prof2maybe:ProfPreferences = null
+        var prof2maybe: ProfPreferences = null
         do {
           prof2maybe = idToProf(randomKey(idToProf))
         } while (prof2maybe == prof1)
@@ -220,7 +232,7 @@ object ProfessorMatching {
   }
 
 
-
+  // =================================== DELETOR ===================================================
   val deleteWorstHalf: DeletorFunctionType[Sol] = (s: Set[TScored[Sol]]) => {
     if (s.isEmpty) {
       s
@@ -230,22 +242,5 @@ object ProfessorMatching {
 
       s.toVector.sortBy(_.score(func)).take(s.size / 2).toSet
     }
-  }
-
-  def main(args: Array[String]): Unit = {
-
-    val island = SingleIslandEvvo.builder()
-      .addFitness(sumProfessorSchedulePreferences, "Sched")
-      .addFitness(sumProfessorCoursePreferences, "Course")
-      .addFitness(sumProfessorNumPrepsPreferences, "#Prep")
-      .addFitness(sumProfessorSectionCountPreferences, "#Section")
-      .addCreator(validScheduleCreator)
-      .addMutator(swapTwoCourses)
-      .addMutator(balanceCourseload)
-      .addDeletor(deleteWorstHalf)
-      .build()
-
-    val pareto = island.run(TerminationCriteria(1.second))
-    println(pareto)
   }
 }
