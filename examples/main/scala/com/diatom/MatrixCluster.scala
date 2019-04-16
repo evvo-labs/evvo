@@ -92,7 +92,7 @@ object MatrixCluster {
         .toSet
     }
 
-    def mutateMatrix: MutatorFunctionType[Solution] = (sols: Set[TScored[Solution]]) => {
+    def mutateMatrix: MutatorFunctionType[Solution] = (sols: IndexedSeq[TScored[Solution]]) => {
       def mutate(solution: Solution) = {
         val x1 = util.Random.nextInt(solution.matrix.length)
         val x2 = util.Random.nextInt(solution.matrix.length)
@@ -110,11 +110,11 @@ object MatrixCluster {
     }
 
 
-    def deleteDominated: DeletorFunctionType[Solution] = (s: Set[TScored[Solution]]) => {
-      s &~ ParetoFrontier(s).solutions
+    def deleteDominated: DeletorFunctionType[Solution] = (s: IndexedSeq[TScored[Solution]]) => {
+       s.filterNot(elem => ParetoFrontier(s).solutions.contains(elem))
     }
 
-    def deleteWorstHalf: DeletorFunctionType[Solution] = (s: Set[TScored[Solution]]) => {
+    def deleteWorstHalf: DeletorFunctionType[Solution] = (s: IndexedSeq[TScored[Solution]]) => {
       if (s.isEmpty) {
         s
       } else {
@@ -171,20 +171,17 @@ object MatrixCluster {
     val island = SingleIslandEvvo.builder[Solution]()
       .addCreator(createMatrix)
       .addMutator(mutateMatrix)
+      .addMutator(mutateMatrix)
+      .addMutator(mutateMatrix)
+      .addMutator(mutateMatrix)
       .addDeletor(deleteWorstHalf)
-      //      .addDeletor(deleteWorstHalf)
-      //      .addDeletor(deleteWorstHalf)
-      //      .addDeletor(deleteDominated)
-      //      .addDeletor(deleteDominated)
-      //      .addDeletor(deleteDominated)
-      //      .addDeletor(deleteDominated)
+      .addDeletor(deleteWorstHalf)
+      .addDeletor(deleteWorstHalf)
+      .addDeletor(deleteWorstHalf)
+      .addDeletor(deleteDominated)
+      .addDeletor(deleteDominated)
       .addFitness(numAdjacentEqual)
       .addFitness(allFloods)
-      //      .addFitness(floodFill(0))
-      //      .addFitness(floodFill(1))
-      //      .addFitness(floodFill(2))
-      //      .addFitness(floodFill(3))
-      //.addFitness(num2StepNeighborsEqual)
       .build()
 
     val pareto = island.run(TerminationCriteria(10.minutes))

@@ -26,10 +26,13 @@ trait TPopulation[Sol] {
   /**
     * Selects a random sample of the population.
     *
-    * @param n the number of solutions.
-    * @return n solutions.
+    * Returns an array instead of a set for performance to minimize the number of times
+    *         we call hashcode.
+    *
+    * @param n the number of unique solutions.
+    * @return n unique solutions.
     */
-  def getSolutions(n: Int): Set[TScored[Sol]]
+  def getSolutions(n: Int): Array[TScored[Sol]]
 
   /**
     * Remove the given solutions from the population.
@@ -75,18 +78,19 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[So
   }
 
 
-  override def getSolutions(n: Int): Set[TScored[Sol]] = {
+  override def getSolutions(n: Int): Array[TScored[Sol]] = {
     // TODO: This can't be the final impl, inefficient space and time
+//    println(s"(population.size, n) = ${(population.size, n)}")
     if (population.size <= n) {
-      population.toSet // no need to randomize, all elements will be included anyway
+      population.toArray // no need to randomize, all elements will be included anyway
     } else {
-      var out = Set[TScored[Sol]]()
-      while (out.size < n) {
+      var out = Array.ofDim[TScored[Sol]](n)
+      for (i <- out.indices) {
         if (!populationVector.isDefinedAt(getSolutionIndex)) {
           populationVector = util.Random.shuffle(population.toVector)
           getSolutionIndex = 0
         }
-        out += populationVector(getSolutionIndex)
+        out(i) = populationVector(getSolutionIndex)
         getSolutionIndex += 1
       }
       out

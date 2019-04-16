@@ -14,21 +14,21 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
 
     "not return any solutions" in {
       val sols = emptyPop.getSolutions(1)
-      sols shouldBe 'empty
+      sols.length shouldBe 0
     }
 
     "not do anything when deleted from" in {
       emptyPop.deleteSolutions(Seq(Scored(Map("a" -> 1.0), 1.0)))
 
       val sols = emptyPop.getSolutions(1)
-      sols shouldBe 'empty
+      sols.length shouldBe 0
     }
 
     "become non-empty when added to" in {
       val pop = Population(fitnesses)
       pop.addSolutions(Set(1.0))
       val sols = pop.getSolutions(1)
-      sols should not be 'empty
+      sols.length should not be 0
     }
 
     "have an empty pareto frontier" in {
@@ -54,7 +54,7 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
       val sol = pop.getSolutions(1)
       pop.deleteSolutions(sol)
       val remaining = pop.getSolutions(popSize)
-      remaining & sol shouldBe 'empty
+      remaining.toSet & sol.toSet shouldBe 'empty
     }
 
     "only remove the specified elements" in {
@@ -62,12 +62,12 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
       val sol = pop.getSolutions(1)
       pop.deleteSolutions(sol)
       val after = pop.getSolutions(popSize)
-      before &~ after shouldBe sol
+      before.toSet &~ after.toSet shouldBe sol.toSet
     }
 
     "return random subsections of the population" in {
       val multipleSolSelections: List[Set[TScored[Double]]] =
-        List.fill(12)(pop.getSolutions(popSize / 2))
+        List.fill(12)(pop.getSolutions(popSize / 2).toSet)
       assert(multipleSolSelections.toSet.size > 1)
     }
 
@@ -80,7 +80,7 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     "not allow duplicates" in {
       pop.addSolutions(Set(10.0))
       val sol = pop.getSolutions(popSize + 1)
-      sol.size shouldBe popSize
+      sol.length shouldBe popSize
     }
 
     "have only one element in a one-dimensional pareto frontier" in {
