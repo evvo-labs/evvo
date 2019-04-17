@@ -72,7 +72,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
       }).sum
     }
 
-
+    // TODO add convenience constructor for adding multiple duplicate mutators/creators/deletors
     SingleIslandEvvo.builder[Solution]()
       .addCreator(createFunc)
       .addMutator(mutateFunc)

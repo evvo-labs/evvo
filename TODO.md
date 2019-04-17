@@ -1,3 +1,7 @@
+- Add akka back in
+- Reimplement logging 
+- network parallelism & island exchange
+- better docs
 - Visualising population based on logs
 - Implement some more fun to show problem for Khoury
 - Configuration
