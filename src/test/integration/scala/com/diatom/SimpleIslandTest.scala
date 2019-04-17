@@ -1,7 +1,7 @@
 package com.diatom
 
 import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
-import com.diatom.tags.{Integration, Performance}
+import com.diatom.tags.{Integration, Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
@@ -89,7 +89,9 @@ class SimpleIslandTest extends WordSpec with Matchers {
   }
 
   "Single Island Evvo" should {
-    "be able to sort a list of length 5 within 1 second" taggedAs Performance in {
+    // at this point, the second test replaces this one, but we're leaving it in as something
+    //    we were proud of once
+    "be able to sort a list of length 5 within 1 second" taggedAs (Performance, Slow) in {
       val listLength = 5
       val timeout = 1
       val terminate = TerminationCriteria(timeout.seconds)
@@ -102,8 +104,8 @@ class SimpleIslandTest extends WordSpec with Matchers {
       pareto should contain(1 to listLength toList)
     }
 
-     val timeout = 5
-    f"be able to sort a list of length 10 within $timeout seconds" taggedAs Performance in {
+     val timeout = 1
+    f"be able to sort a list of length 10 within $timeout seconds" taggedAs (Performance, Slow) in {
       val listLength = 10
       val terminate = TerminationCriteria(timeout.seconds)
 

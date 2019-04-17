@@ -42,11 +42,11 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     }
   }
 
-  "A non-empty population" should {
-    var pop = Population(fitnesses)
+  "A non-empty population hashing on solutions" should {
+    var pop: Population[Double] = null
     val popSize = 10
     before {
-      pop = Population(fitnesses)
+      pop = Population(fitnesses, Population.Hashing.ON_SOLUTIONS)
       pop.addSolutions((1 to popSize).map(_.toDouble))
     }
 
@@ -77,12 +77,6 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
       sol.map(_.solution) should contain(11.0)
     }
 
-    "not allow duplicates" in {
-      pop.addSolutions(Set(10.0))
-      val sol = pop.getSolutions(popSize + 1)
-      sol.length shouldBe popSize
-    }
-
     "have only one element in a one-dimensional pareto frontier" in {
       val p = pop.getParetoFrontier()
       p.solutions.size shouldBe 1
@@ -91,6 +85,48 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     "have non-zero number of elements, according to getInformation()" in {
       val info = pop.getInformation()
       info.numSolutions shouldBe 10
+    }
+  }
+
+  val returnOne: FitnessFunc[Double] = FitnessFunc(x => 1, "one")
+  val uniqueScore: FitnessFunc[Double] = FitnessFunc({
+    var counter = 0
+    _ => {
+      counter += 1
+      counter
+    }
+  }, "one")
+  "A population hashing on solutions" should {
+
+    "not allow duplicate solutions" in {
+      val pop = Population(Vector(uniqueScore), Population.Hashing.ON_SOLUTIONS)
+      pop.addSolutions(Vector(1, 1))
+      val sol = pop.getSolutions(2)
+      sol.length shouldBe 1
+    }
+
+    "allow duplicate scores for different solutions" in {
+      val pop = Population(Vector(returnOne), Population.Hashing.ON_SOLUTIONS)
+      pop.addSolutions(Vector(1, 2))
+      val sol = pop.getSolutions(2)
+      sol.length shouldBe 2
+    }
+  }
+
+  "A population hashing on scores" should {
+
+    "not allow duplicate scores" in {
+      val pop = Population(Vector(returnOne), Population.Hashing.ON_SCORES)
+      pop.addSolutions(Vector(1, 2))
+      val sol = pop.getSolutions(2)
+      sol.length shouldBe 1
+    }
+
+    "allow duplicate solutions for different scores" in {
+      val pop = Population(Vector(uniqueScore), Population.Hashing.ON_SCORES)
+      pop.addSolutions(Vector(1, 1))
+      val sol = pop.getSolutions(2)
+      sol.length shouldBe 2
     }
   }
 }
