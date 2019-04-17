@@ -1,9 +1,8 @@
-package integration
+package com.diatom
 
-import com.diatom.{TIsland, TScored}
 import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
-import com.diatom.tags.Integration
-import org.scalatest.{FlatSpec, Matchers, WordSpec}
+import com.diatom.tags.{Integration, Performance}
+import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
 
@@ -37,7 +36,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
     * @return
     */
   def getEvvo(listLength: Int): TIsland[Solution] = {
-    def createFunc(): Set[Solution] = {
+    def createFunc: CreatorFunctionType[Solution] = () => {
       val out = Vector.fill(10)((listLength to 1 by -1).toList).map(mutate).toSet
       out
     }
@@ -49,7 +48,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
       sol.updated(j, sol(i)).updated(i, tmp)
     }
 
-    def mutateFunc(s: Set[TScored[Solution]]): Set[Solution] = {
+    def mutateFunc: MutatorFunctionType[Solution] = s => {
       s.map(scoredSol => {
         val sol = scoredSol.solution
         val out = mutate(sol)
@@ -57,7 +56,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
       })
     }
 
-    def deleteFunc(s: Set[TScored[Solution]]): Set[TScored[Solution]] = {
+    def deleteFunc: DeletorFunctionType[Solution] = s => {
       if (s.isEmpty) {
         s
       } else {
@@ -90,7 +89,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
   }
 
   "Single Island Evvo" should {
-    "be able to sort a list of length 5 within 1 second" taggedAs Integration in {
+    "be able to sort a list of length 5 within 1 second" taggedAs Performance in {
       val listLength = 5
       val timeout = 1
       val terminate = TerminationCriteria(timeout.seconds)
@@ -103,9 +102,9 @@ class SimpleIslandTest extends WordSpec with Matchers {
       pareto should contain(1 to listLength toList)
     }
 
-    "be able to sort a list of length 10 within 3 seconds" taggedAs Integration in {
+     val timeout = 5
+    f"be able to sort a list of length 10 within $timeout seconds" taggedAs Performance in {
       val listLength = 10
-      val timeout = 3
       val terminate = TerminationCriteria(timeout.seconds)
 
 

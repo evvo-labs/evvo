@@ -172,7 +172,7 @@ object ProfessorMatching {
   }
 
   // =================================== MUTATOR ===================================================
-  val swapTwoCourses: MutatorFunctionType[Sol] = (sols: Set[TScored[Sol]]) => {
+  val swapTwoCourses: MutatorFunctionType[Sol] = sols => {
     def swap(sol: Sol): Sol = {
       val prof1: ProfPreferences = idToProf(randomKey(idToProf))
       val prof2: ProfPreferences = {
@@ -195,7 +195,7 @@ object ProfessorMatching {
 
     sols.map(_.solution).map(swap)
   }
-  val balanceCourseload: MutatorFunctionType[Sol] = (sols: Set[TScored[Sol]]) => {
+  val balanceCourseload: MutatorFunctionType[Sol] = sols => {
     def swap(sol: Sol): Sol = {
       val prof1: ProfPreferences = idToProf(randomKey(idToProf))
       val prof2: ProfPreferences = {
@@ -231,7 +231,7 @@ object ProfessorMatching {
 
 
   // =================================== DELETOR ===================================================
-  val deleteWorstHalf: DeletorFunctionType[Sol] = (s: Set[TScored[Sol]]) => {
+  val deleteWorstHalf: DeletorFunctionType[Sol] = s => {
     if (s.isEmpty) {
       s
     } else {
