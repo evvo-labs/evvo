@@ -27,9 +27,9 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   val creatorFunc = CreatorFunc(create)
   var creatorAgent: TAgent[S] = _
 
-  val mutate: MutatorFunctionType[S] = (set: Set[TScored[S]]) => {
+  val mutate: MutatorFunctionType[S] = (seq: IndexedSeq[TScored[S]]) => {
     agentFunctionCalled("mutate") = true
-    set.map(_.solution + 1)
+    seq.map(_.solution + 1)
   }
   val mutatorFunc = MutatorFunc(mutate)
   var mutatorAgent: TAgent[S] = _

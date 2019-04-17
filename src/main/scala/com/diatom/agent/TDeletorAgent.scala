@@ -12,7 +12,7 @@ case class DeletorAgent[Sol](delete: TDeletorFunc[Sol], pop: TPopulation[Sol], s
 
   override protected def step(): Unit = {
     val in = pop.getSolutions(delete.numInputs)
-    if (in.size == delete.numInputs) {
+    if (in.length == delete.numInputs) {
       val toDelete = delete.delete(in)
       pop.deleteSolutions(toDelete)
     }

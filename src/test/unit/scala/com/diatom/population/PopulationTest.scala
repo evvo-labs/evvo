@@ -14,21 +14,21 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
 
     "not return any solutions" in {
       val sols = emptyPop.getSolutions(1)
-      sols shouldBe 'empty
+      sols.length shouldBe 0
     }
 
     "not do anything when deleted from" in {
       emptyPop.deleteSolutions(Seq(Scored(Map("a" -> 1.0), 1.0)))
 
       val sols = emptyPop.getSolutions(1)
-      sols shouldBe 'empty
+      sols.length shouldBe 0
     }
 
     "become non-empty when added to" in {
       val pop = Population(fitnesses)
       pop.addSolutions(Set(1.0))
       val sols = pop.getSolutions(1)
-      sols should not be 'empty
+      sols.length should not be 0
     }
 
     "have an empty pareto frontier" in {
@@ -42,11 +42,11 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     }
   }
 
-  "A non-empty population" should {
-    var pop = Population(fitnesses)
+  "A non-empty population hashing on solutions" should {
+    var pop: Population[Double] = null
     val popSize = 10
     before {
-      pop = Population(fitnesses)
+      pop = Population(fitnesses, Population.Hashing.ON_SOLUTIONS)
       pop.addSolutions((1 to popSize).map(_.toDouble))
     }
 
@@ -54,7 +54,7 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
       val sol = pop.getSolutions(1)
       pop.deleteSolutions(sol)
       val remaining = pop.getSolutions(popSize)
-      remaining & sol shouldBe 'empty
+      remaining.toSet & sol.toSet shouldBe 'empty
     }
 
     "only remove the specified elements" in {
@@ -62,12 +62,12 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
       val sol = pop.getSolutions(1)
       pop.deleteSolutions(sol)
       val after = pop.getSolutions(popSize)
-      before &~ after shouldBe sol
+      before.toSet &~ after.toSet shouldBe sol.toSet
     }
 
     "return random subsections of the population" in {
       val multipleSolSelections: List[Set[TScored[Double]]] =
-        List.fill(12)(pop.getSolutions(popSize / 2))
+        List.fill(12)(pop.getSolutions(popSize / 2).toSet)
       assert(multipleSolSelections.toSet.size > 1)
     }
 
@@ -75,12 +75,6 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
       pop.addSolutions(Set(11.0))
       val sol = pop.getSolutions(popSize + 1)
       sol.map(_.solution) should contain(11.0)
-    }
-
-    "not allow duplicates" in {
-      pop.addSolutions(Set(10.0))
-      val sol = pop.getSolutions(popSize + 1)
-      sol.size shouldBe popSize
     }
 
     "have only one element in a one-dimensional pareto frontier" in {
@@ -91,6 +85,48 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     "have non-zero number of elements, according to getInformation()" in {
       val info = pop.getInformation()
       info.numSolutions shouldBe 10
+    }
+  }
+
+  val returnOne: FitnessFunc[Double] = FitnessFunc(x => 1, "one")
+  val uniqueScore: FitnessFunc[Double] = FitnessFunc({
+    var counter = 0
+    _ => {
+      counter += 1
+      counter
+    }
+  }, "one")
+  "A population hashing on solutions" should {
+
+    "not allow duplicate solutions" in {
+      val pop = Population(Vector(uniqueScore), Population.Hashing.ON_SOLUTIONS)
+      pop.addSolutions(Vector(1, 1))
+      val sol = pop.getSolutions(2)
+      sol.length shouldBe 1
+    }
+
+    "allow duplicate scores for different solutions" in {
+      val pop = Population(Vector(returnOne), Population.Hashing.ON_SOLUTIONS)
+      pop.addSolutions(Vector(1, 2))
+      val sol = pop.getSolutions(2)
+      sol.length shouldBe 2
+    }
+  }
+
+  "A population hashing on scores" should {
+
+    "not allow duplicate scores" in {
+      val pop = Population(Vector(returnOne), Population.Hashing.ON_SCORES)
+      pop.addSolutions(Vector(1, 2))
+      val sol = pop.getSolutions(2)
+      sol.length shouldBe 1
+    }
+
+    "allow duplicate solutions for different scores" in {
+      val pop = Population(Vector(uniqueScore), Population.Hashing.ON_SCORES)
+      pop.addSolutions(Vector(1, 1))
+      val sol = pop.getSolutions(2)
+      sol.length shouldBe 2
     }
   }
 }
