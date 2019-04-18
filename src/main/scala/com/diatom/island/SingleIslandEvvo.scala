@@ -16,20 +16,20 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
                                  deletors: Vector[TDeletorFunc[Sol]],
                                  fitnesses: Vector[TFitnessFunc[Sol]]) extends TIsland[Sol] {
   // TODO should be able to pass configurations, have multiple logging environments
-//  private val config = ConfigFactory.parseString(
-//    """
-//      |akka {
-//      |  loggers = ["akka.event.slf4j.Slf4jLogger"]
-//      |  loglevel = "INFO"
-//      |  logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
-//      |  actor {
-//      |    debug {
-//      |      receive = true
-//      |    }
-//      |  }
-//      |}
-//    """.stripMargin)
-//  implicit val system: ActorSystem = ActorSystem("evvo", config)
+  //  private val config = ConfigFactory.parseString(
+  //    """
+  //      |akka {
+  //      |  loggers = ["akka.event.slf4j.Slf4jLogger"]
+  //      |  loglevel = "INFO"
+  //      |  logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
+  //      |  actor {
+  //      |    debug {
+  //      |      receive = true
+  //      |    }
+  //      |  }
+  //      |}
+  //    """.stripMargin)
+  //  implicit val system: ActorSystem = ActorSystem("evvo", config)
 
 
   def run(terminationCriteria: TTerminationCriteria): TParetoFrontier[Sol] = {
@@ -49,9 +49,9 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
 
     while (startTime + terminationCriteria.time.toMillis >
       Calendar.getInstance().toInstant.toEpochMilli) {
-        Thread.sleep(500)
-        val pareto = pop.getParetoFrontier()
-        println(f"pareto = ${pareto}")
+      Thread.sleep(500)
+      val pareto = pop.getParetoFrontier()
+      println(f"pareto = ${pareto}")
     }
 
     creatorAgents.foreach(_.stop())
@@ -100,21 +100,39 @@ object SingleIslandEvvo {
   * @param deletors  the functions to be used for deciding which solutions to delete.
   * @param fitnesses the objective functions to maximize.
   */
-case class SingleIslandEvvoBuilder[Sol](creators: Set[TCreatorFunc[Sol]] = Set[TCreatorFunc[Sol]](),
-                                        mutators: Set[TMutatorFunc[Sol]] = Set[TMutatorFunc[Sol]](),
-                                        deletors: Set[TDeletorFunc[Sol]] = Set[TDeletorFunc[Sol]](),
-                                        fitnesses: Set[TFitnessFunc[Sol]] = Set[TFitnessFunc[Sol]]()) {
+case class SingleIslandEvvoBuilder[Sol]
+(
+  creators: Set[TCreatorFunc[Sol]] = Set[TCreatorFunc[Sol]](),
+  mutators: Set[TMutatorFunc[Sol]] = Set[TMutatorFunc[Sol]](),
+  deletors: Set[TDeletorFunc[Sol]] = Set[TDeletorFunc[Sol]](),
+  fitnesses: Set[TFitnessFunc[Sol]] = Set[TFitnessFunc[Sol]]()
+) {
+  // TODO is specifying the number of threads the right approach? likely better to have
+  //      automatic allocation of compute time to different agents
+
 
   def addCreator(creatorFunc: CreatorFunctionType[Sol]): SingleIslandEvvoBuilder[Sol] = {
-    this.copy(creators = creators + CreatorFunc(creatorFunc))
+    this.copy(creators = creators + CreatorFunc(creatorFunc, creatorFunc.toString))
+  }
+
+  def addCreator(creatorFunc: TCreatorFunc[Sol]): SingleIslandEvvoBuilder[Sol] = {
+    this.copy(creators = creators + creatorFunc)
   }
 
   def addMutator(mutatorFunc: MutatorFunctionType[Sol]): SingleIslandEvvoBuilder[Sol] = {
-    this.copy(mutators = mutators + MutatorFunc(mutatorFunc))
+    this.copy(mutators = mutators + MutatorFunc(mutatorFunc, mutatorFunc.toString))
+  }
+
+  def addMutator(mutatorFunc: TMutatorFunc[Sol]): SingleIslandEvvoBuilder[Sol] = {
+    this.copy(mutators = mutators + mutatorFunc)
   }
 
   def addDeletor(deletorFunc: DeletorFunctionType[Sol]): SingleIslandEvvoBuilder[Sol] = {
-    this.copy(deletors = deletors + DeletorFunc(deletorFunc))
+    this.copy(deletors = deletors + DeletorFunc(deletorFunc, deletorFunc.toString))
+  }
+
+  def addDeletor(deletorFunc: TDeletorFunc[Sol]): SingleIslandEvvoBuilder[Sol] = {
+    this.copy(deletors = deletors + deletorFunc)
   }
 
   def addFitness(fitnessFunc: FitnessFunctionType[Sol], name: String = null)

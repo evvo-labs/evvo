@@ -6,7 +6,7 @@
     <artifactId>diatom</artifactId>
     <version>0.0.0</version>
     <name>${project.artifactId}</name>
-    <description>My wonderful scala app</description>
+    <description>The Scala evolutionary computing framework</description>
     <inceptionYear>2018</inceptionYear>
     <!--TODO pick a license-->
     <licenses>

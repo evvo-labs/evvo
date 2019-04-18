@@ -24,14 +24,14 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
     agentFunctionCalled("create") = true
     Set(1)
   }
-  val creatorFunc = CreatorFunc(create)
+  val creatorFunc = CreatorFunc(create, "create")
   var creatorAgent: TAgent[S] = _
 
   val mutate: MutatorFunctionType[S] = (seq: IndexedSeq[TScored[S]]) => {
     agentFunctionCalled("mutate") = true
     seq.map(_.solution + 1)
   }
-  val mutatorFunc = MutatorFunc(mutate)
+  val mutatorFunc = MutatorFunc(mutate, "mutate")
   var mutatorAgent: TAgent[S] = _
   val mutatorInput: Set[TScored[S]] = Set[TScored[S]](Scored(Map("Score1" -> 3), 2))
 
@@ -39,7 +39,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
     agentFunctionCalled("delete") = true
     set
   }
-  val deletorFunc = func.DeletorFunc(delete, 1)
+  val deletorFunc = func.DeletorFunc(delete, "delete", 1)
   var deletorAgent: TAgent[S] = _
   val deletorInput: Set[TScored[S]] = mutatorInput
 
