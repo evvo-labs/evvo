@@ -2,6 +2,7 @@ package com.diatom.island
 
 import java.util.Calendar
 
+import akka.actor.{Actor, ActorLogging}
 import com.diatom._
 import com.diatom.agent._
 import com.diatom.agent.func._
@@ -63,12 +64,6 @@ case class SingleIslandEvvo[Sol](creators: Vector[TCreatorFunc[Sol]],
 
     pareto
   }
-
-
-  override def forceKill(): Unit = {
-    // TODO test & implement forceKill
-  }
-
 }
 
 object SingleIslandEvvo {
@@ -107,10 +102,6 @@ case class SingleIslandEvvoBuilder[Sol]
   deletors: Set[TDeletorFunc[Sol]] = Set[TDeletorFunc[Sol]](),
   fitnesses: Set[TFitnessFunc[Sol]] = Set[TFitnessFunc[Sol]]()
 ) {
-  // TODO is specifying the number of threads the right approach? likely better to have
-  //      automatic allocation of compute time to different agents
-
-
   def addCreator(creatorFunc: CreatorFunctionType[Sol]): SingleIslandEvvoBuilder[Sol] = {
     this.copy(creators = creators + CreatorFunc(creatorFunc, creatorFunc.toString))
   }

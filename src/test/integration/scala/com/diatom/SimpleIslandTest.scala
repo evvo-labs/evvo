@@ -1,7 +1,8 @@
 package com.diatom
 
-import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
-import com.diatom.tags.{Integration, Performance, Slow}
+import com.diatom.island.{SingleIslandEvvo, TIsland, TerminationCriteria}
+import com.diatom.professormatching.ProfessorMatching.Sol
+import com.diatom.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
@@ -36,9 +37,8 @@ class SimpleIslandTest extends WordSpec with Matchers {
     * @return
     */
   def getEvvo(listLength: Int): TIsland[Solution] = {
-    def createFunc: CreatorFunctionType[Solution] = () => {
-      val out = Vector.fill(10)((listLength to 1 by -1).toList).map(mutate).toSet
-      out
+    val createFunc: CreatorFunctionType[Solution] = () => {
+      Vector((listLength to 1 by -1).toList)
     }
 
     def mutate(sol: Solution): Solution = {
@@ -48,7 +48,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
       sol.updated(j, sol(i)).updated(i, tmp)
     }
 
-    def mutateFunc: MutatorFunctionType[Solution] = s => {
+    val mutateFunc: MutatorFunctionType[Solution] = s => {
       s.map(scoredSol => {
         val sol = scoredSol.solution
         val out = mutate(sol)
@@ -56,7 +56,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
       })
     }
 
-    def deleteFunc: DeletorFunctionType[Solution] = s => {
+    val deleteFunc: DeletorFunctionType[Solution] = s => {
       if (s.isEmpty) {
         s
       } else {
@@ -66,7 +66,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
       }
     }
 
-    def numInversions(s: Solution): Double = {
+    val numInversions: FitnessFunctionType[Solution] = (s: Solution) => {
       (for ((elem, index) <- s.zipWithIndex) yield {
         s.drop(index).count(_ < elem)
       }).sum
@@ -74,16 +74,16 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
 
     SingleIslandEvvo.builder[Solution]()
-      .addCreator(createFunc _)
-      .addMutator(mutateFunc _)
-      .addMutator(mutateFunc _)
-      .addMutator(mutateFunc _)
-      .addMutator(mutateFunc _)
-      .addDeletor(deleteFunc _)
-      .addDeletor(deleteFunc _)
-      .addDeletor(deleteFunc _)
-      .addDeletor(deleteFunc _)
-      .addDeletor(deleteFunc _)
+      .addCreator(createFunc)
+      .addMutator(mutateFunc)
+      .addMutator(mutateFunc)
+      .addMutator(mutateFunc)
+      .addMutator(mutateFunc)
+      .addDeletor(deleteFunc)
+      .addDeletor(deleteFunc)
+      .addDeletor(deleteFunc)
+      .addDeletor(deleteFunc)
+      .addDeletor(deleteFunc)
       .addFitness(numInversions)
       .build()
   }

@@ -57,26 +57,26 @@
             <version>${spec2.version}</version>
             <scope>test</scope>
         </dependency>
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.typesafe.akka/akka-actor &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.typesafe.akka</groupId>-->
-<!--            <artifactId>akka-actor_2.12</artifactId>-->
-<!--            <version>2.5.21</version>-->
-<!--        </dependency>-->
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.typesafe.akka/akka-testkit &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.typesafe.akka</groupId>-->
-<!--            <artifactId>akka-testkit_2.12</artifactId>-->
-<!--            <version>2.5.21</version>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-actor -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_2.12</artifactId>
+            <version>2.5.21</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-testkit -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-testkit_2.12</artifactId>
+            <version>2.5.21</version>
+            <scope>test</scope>
+        </dependency>
 
-<!--        &lt;!&ndash; https://mvnrepository.com/artifact/com.typesafe.akka/akka-slf4j &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.typesafe.akka</groupId>-->
-<!--            <artifactId>akka-slf4j_2.12</artifactId>-->
-<!--            <version>2.5.21</version>-->
-<!--        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-slf4j -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_2.12</artifactId>
+            <version>2.5.21</version>
+        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>

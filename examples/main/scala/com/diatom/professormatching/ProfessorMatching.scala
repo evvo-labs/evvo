@@ -6,6 +6,7 @@ import java.time.{DayOfWeek, LocalTime}
 import scala.concurrent.duration._
 import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
 import com.diatom._
+import com.diatom.agent.func._
 
 /**
   * Matches professors with courses, assuming:
