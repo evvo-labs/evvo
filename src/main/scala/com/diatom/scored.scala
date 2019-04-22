@@ -1,5 +1,7 @@
 package com.diatom
 
+import com.diatom.HashingStrategy.HashingStrategy
+
 /**
   * Represents a solution scored by mutliple fitness functions.
   */
@@ -9,17 +11,32 @@ trait TScored[Sol] {
     */
   def score: Map[String, Double]
 
+
   def solution: Sol
 
-  /**
-    * Does this solution dominate that one?
-    * If the other solution has a different set of fitness functions than this one,
-    * always returns false.
-    *
-    * @param that a scored solution.
-    * @return whether this solution dominates that one
-    */
-  def dominates(that: TScored[Sol]): Boolean = ???
+  def hashStrategy: HashingStrategy.Value
+
+  override def hashCode(): Int = hashStrategy match {
+    case HashingStrategy.ON_SCORES => this.score.hashCode()
+    case HashingStrategy.ON_SOLUTIONS => this.solution.hashCode()
+  }
+
+  override def equals(obj: Any): Boolean = obj match {
+    case that: TScored[Sol] =>
+      hashStrategy match {
+        case HashingStrategy.ON_SCORES => this.score.equals(that.score)
+        case HashingStrategy.ON_SOLUTIONS => this.solution.equals(that.solution)
+      }
+    case _ => false
+  }
 }
 
-case class Scored[Sol](score: Map[String, Double], solution: Sol) extends TScored[Sol]
+object HashingStrategy extends Enumeration {
+  type HashingStrategy = Value
+  val ON_SOLUTIONS, ON_SCORES = Value
+}
+
+case class Scored[Sol](score: Map[String, Double],
+                       solution: Sol,
+                       hashStrategy: HashingStrategy = HashingStrategy.ON_SCORES)
+  extends TScored[Sol]

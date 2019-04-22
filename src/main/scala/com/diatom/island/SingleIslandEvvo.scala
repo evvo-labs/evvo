@@ -28,7 +28,10 @@ class SingleIslandEvvo[Sol]
   fitnesses: Vector[TFitnessFunc[Sol]]
 ) extends Actor with TIsland[Sol] with ActorLogging {
   // TODO rename this to Island? No need to have special case for 1-node system
+
+  // FIXME use akka ActorLogging logger in everywhere
   implicit val logger: Logger = LoggerFactory.getLogger(this.getClass)
+
   private val pop = Population(fitnesses)
   private val creatorAgents = creators.map(c => CreatorAgent(c, pop))
   private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
@@ -99,6 +102,8 @@ object SingleIslandEvvo {
                 deletors: TraversableOnce[TDeletorFunc[Sol]],
                 fitnesses: TraversableOnce[TFitnessFunc[Sol]])
   : TIsland[Sol] = {
+    // TODO validate that there is at least one of each creator/mutator/deletors/fitness
+
     val system = ActorSystem("SingleIslandEvvo")
     val props = Props(new SingleIslandEvvo[Sol](
       creators.toVector,

@@ -7,6 +7,7 @@ import scala.collection.mutable
   * Represents a set of solutions that are non-dominated.
   */
 trait TParetoFrontier[Sol] {
+  //TODO replace with IndexedSeq and provide alternate hashing here
   def solutions: Set[TScored[Sol]]
 }
 
@@ -15,9 +16,10 @@ class ParetoFrontier[Sol](private val _solutions: TraversableOnce[TScored[Sol]])
   // TODO test this for performance, and optimize - this is likely to become a bottleneck
   // https://static.aminer.org/pdf/PDF/000/211/201/on_the_computational_complexity_of_finding_the_maxima_of_a.pdf
 
-  // mutable set used here for performance, converted back to immutable afterwards
+  // TODO this needs to use the same hashing controls as the population - score vs identity hashing
 
   private val paretoFrontier = {
+    // mutable set used here for performance, converted back to immutable afterwards
     val out: mutable.Set[TScored[Sol]] = mutable.Set()
 
     for (sol <- _solutions) {
