@@ -10,7 +10,7 @@ trait TDeletorAgent[Sol] extends TAgent[Sol]
 
 case class DeletorAgent[Sol](delete: TDeletorFunc[Sol],
                              pop: TPopulation[Sol],
-                             strat: TAgentStrategy)
+                             strat: TAgentStrategy = DeletorAgentDefaultStrategy())
   extends AAgent[Sol](strat, pop, delete.name) with TDeletorAgent[Sol] {
 
   override protected def step(): Unit = {
@@ -24,17 +24,6 @@ case class DeletorAgent[Sol](delete: TDeletorFunc[Sol],
     }
   }
 }
-
-object DeletorAgent {
-  def from[Sol](deletorFunc: TDeletorFunc[Sol],
-                pop: TPopulation[Sol],
-                strat: TAgentStrategy = DeletorAgentDefaultStrategy())
-               (implicit log: Logger)
-  : TDeletorAgent[Sol] = {
-    DeletorAgent(deletorFunc, pop, strat)
-  }
-}
-
 
 case class DeletorAgentDefaultStrategy() extends TAgentStrategy {
   override def waitTime(populationInformation: TPopulationInformation): Duration = {

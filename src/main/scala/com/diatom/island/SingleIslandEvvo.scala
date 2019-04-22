@@ -30,9 +30,9 @@ class SingleIslandEvvo[Sol]
   // TODO rename this to Island? No need to have special case for 1-node system
   implicit val logger: Logger = LoggerFactory.getLogger(this.getClass)
   private val pop = Population(fitnesses)
-  private val creatorAgents = creators.map(c => CreatorAgent.from(c, pop))
-  private val mutatorAgents = mutators.map(m => MutatorAgent.from(m, pop))
-  private val deletorAgents = deletors.map(d => DeletorAgent.from(d, pop))
+  private val creatorAgents = creators.map(c => CreatorAgent(c, pop))
+  private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
+  private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
 
 
   //   TODO should be able to pass configurations, have multiple logging environments

@@ -11,24 +11,13 @@ trait TCreatorAgent[Sol] extends TAgent[Sol]
 
 case class CreatorAgent[Sol](create: TCreatorFunc[Sol],
                              pop: TPopulation[Sol],
-                             strat: TAgentStrategy)
+                             strat: TAgentStrategy = CreatorAgentDefaultStrategy())
   extends AAgent[Sol](strat, pop, create.name) with TCreatorAgent[Sol] {
 
   override def step(): Unit = {
     val toAdd = create.create()
     log.debug(s"created ${toAdd}")
     pop.addSolutions(toAdd)
-  }
-}
-
-
-object CreatorAgent {
-  def from[Sol](creatorFunc: TCreatorFunc[Sol],
-                pop: TPopulation[Sol],
-                strat: TAgentStrategy = CreatorAgentDefaultStrategy())
-               (implicit log: Logger)
-  : TCreatorAgent[Sol] = {
-    CreatorAgent(creatorFunc, pop, strat)
   }
 }
 

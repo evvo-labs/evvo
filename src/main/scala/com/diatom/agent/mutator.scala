@@ -10,7 +10,7 @@ trait TMutatorAgent[Sol] extends TAgent[Sol]
 
 case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol],
                              pop: TPopulation[Sol],
-                             strat: TAgentStrategy)
+                             strat: TAgentStrategy = MutatorAgentDefaultStrategy())
   extends AAgent[Sol](strat, pop, mutate.name) with TMutatorAgent[Sol] {
 
 
@@ -20,16 +20,6 @@ case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol],
     val out = mutate.mutate(in)
     log.debug(s"mutated: in=${in}, out=${out}", Array(in, out))
     pop.addSolutions(out)
-  }
-}
-
-object MutatorAgent {
-  def from[Sol](mutatorFunc: TMutatorFunc[Sol],
-                pop: TPopulation[Sol],
-                strat: TAgentStrategy = MutatorAgentDefaultStrategy())
-               (implicit log: Logger)
-  : TMutatorAgent[Sol] = {
-    MutatorAgent(mutatorFunc, pop, strat)
   }
 }
 

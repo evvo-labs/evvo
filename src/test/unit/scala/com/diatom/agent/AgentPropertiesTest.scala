@@ -53,9 +53,9 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
 
   before {
     pop = Population[S](Vector(fitnessFunc))
-    creatorAgent = CreatorAgent.from(creatorFunc, pop, strategy)
-    mutatorAgent = MutatorAgent.from(mutatorFunc, pop, strategy)
-    deletorAgent = DeletorAgent.from(deletorFunc, pop, strategy)
+    creatorAgent = CreatorAgent(creatorFunc, pop, strategy)
+    mutatorAgent = MutatorAgent(mutatorFunc, pop, strategy)
+    deletorAgent = DeletorAgent(deletorFunc, pop, strategy)
     agents = Vector(creatorAgent, mutatorAgent, deletorAgent)
 
     agentFunctionCalled = mutable.Map(
