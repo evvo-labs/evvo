@@ -3,7 +3,7 @@ package com.diatom
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import com.diatom.island.{EvvoIsland, TerminationCriteria}
+import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -169,8 +169,8 @@ object MatrixCluster {
         (0 until numClasses).map(c => floodFill(c)(sol)).sum
       }
 
-    implicit val system = ActorSystem("MatrixCluster")
-    val island = EvvoIsland.builder[Solution]()
+    implicit val system = ActorSystem("EvvoCluster")
+    val islandBuilder = EvvoIsland.builder[Solution]()
       .addCreator(createMatrix)
       .addMutator(mutateMatrix)
       .addMutator(mutateMatrix)
@@ -184,9 +184,9 @@ object MatrixCluster {
       .addDeletor(deleteDominated)
       .addFitness(numAdjacentEqual)
       .addFitness(allFloods)
-      .build()
+    val manager = new IslandManager[Solution](1, islandBuilder)
 
-    val pareto = island.run(TerminationCriteria(10.minutes))
+    val pareto = manager.run(TerminationCriteria(1.minute))
     println(s"pareto = ${pareto}")
 
   }

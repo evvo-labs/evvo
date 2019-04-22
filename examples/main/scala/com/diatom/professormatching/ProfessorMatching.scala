@@ -6,7 +6,7 @@ import java.time.{DayOfWeek, LocalTime}
 import akka.actor.ActorSystem
 
 import scala.concurrent.duration._
-import com.diatom.island.{EvvoIsland, TerminationCriteria}
+import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
 import com.diatom._
 import com.diatom.agent.func._
 
@@ -92,8 +92,7 @@ object ProfessorMatching {
   // =================================== MAIN ===================================================
   def main(args: Array[String]): Unit = {
 
-    implicit val system = ActorSystem("ProfessorMatching")
-    val island = EvvoIsland.builder()
+    val islandBuilder = EvvoIsland.builder()
       .addFitness(sumProfessorSchedulePreferences, "Sched")
       .addFitness(sumProfessorCoursePreferences, "Course")
       .addFitness(sumProfessorNumPrepsPreferences, "#Prep")
@@ -101,10 +100,9 @@ object ProfessorMatching {
       .addCreator(CreatorFunc(validScheduleCreator, "creator"))
       .addMutator(MutatorFunc(swapTwoCourses, "swapTwoCourses"))
       .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
-      .addDeletor(DeletorFunc(deleteWorstHalf, "deleteWorstHalf"))
-      .build()
+    val manager = new IslandManager[Sol](10, islandBuilder)
 
-    val pareto = island.run(TerminationCriteria(1.second))
+    val pareto = manager.run(TerminationCriteria(1.second))
     println(pareto)
   }
 

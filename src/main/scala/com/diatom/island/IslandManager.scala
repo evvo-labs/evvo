@@ -1,6 +1,9 @@
 package com.diatom.island
+import java.io.File
+
 import akka.actor.ActorSystem
 import com.diatom.{ParetoFrontier, TParetoFrontier, TScored}
+import com.typesafe.config.ConfigFactory
 import sun.security.provider.PolicyParser.ParsingException
 
 
@@ -9,10 +12,11 @@ import sun.security.provider.PolicyParser.ParsingException
   */
 class IslandManager[Sol](val numIslands: Int,
                          islandBuilder: EvvoIslandBuilder[Sol],
-                         val actorSystemName: String = "Evvo")
+                         val actorSystemName: String = "EvvoCluster")
   extends TEvolutionaryProcess[Sol] {
 
-  implicit val system: ActorSystem = ActorSystem(actorSystemName)
+  private val config = ConfigFactory.parseFile(new File("application.conf")).resolve()
+  implicit val system: ActorSystem = ActorSystem(actorSystemName, config)
 
   private val islands: Vector[TEvolutionaryProcess[Sol]] =
     Vector.fill(numIslands)(islandBuilder.build())

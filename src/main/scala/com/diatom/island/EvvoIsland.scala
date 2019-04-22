@@ -11,6 +11,7 @@ import com.diatom.agent._
 import com.diatom.agent.func._
 import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
+import akka.cluster.Cluster
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -27,8 +28,9 @@ class EvvoIsland[Sol]
   mutators: Vector[TMutatorFunc[Sol]],
   deletors: Vector[TDeletorFunc[Sol]],
   fitnesses: Vector[TFitnessFunc[Sol]]
-) extends Actor with TEvolutionaryProcess[Sol] with ActorLogging {
-  // TODO rename this to Island? No need to have special case for 1-node system
+) (implicit val system: ActorSystem)
+  extends Actor with TEvolutionaryProcess[Sol] with ActorLogging {
+  val cluster = Cluster(context.system)
 
   // FIXME use akka ActorLogging logger in everywhere
   implicit val logger: Logger = LoggerFactory.getLogger(this.getClass)
@@ -37,9 +39,6 @@ class EvvoIsland[Sol]
   private val creatorAgents = creators.map(c => CreatorAgent(c, pop))
   private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
   private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
-
-  private val config = ConfigFactory.parseFile(new File("application.conf"))
-  implicit val system: ActorSystem = ActorSystem("evvo", config)
 
   // for messages
   import com.diatom.island.EvvoIsland._
