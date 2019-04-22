@@ -20,13 +20,13 @@ import scala.concurrent.duration._
   * CPU cores). Because it is an Akka actor, generally people will use SingleIslandEvvo.Wrapped
   * to use it in a type-safe way, instead of throwing messages.
   */
-class SingleIslandEvvo[Sol]
+class EvvoIsland[Sol]
 (
   creators: Vector[TCreatorFunc[Sol]],
   mutators: Vector[TMutatorFunc[Sol]],
   deletors: Vector[TDeletorFunc[Sol]],
   fitnesses: Vector[TFitnessFunc[Sol]]
-) extends Actor with TIsland[Sol] with ActorLogging {
+) extends Actor with TEvolutionaryProcess[Sol] with ActorLogging {
   // TODO rename this to Island? No need to have special case for 1-node system
 
   // FIXME use akka ActorLogging logger in everywhere
@@ -55,14 +55,14 @@ class SingleIslandEvvo[Sol]
   implicit val system: ActorSystem = ActorSystem("evvo", config)
 
   // for messages
-  import com.diatom.island.SingleIslandEvvo._
+  import com.diatom.island.EvvoIsland._
 
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.run(t)
     case GetParetoFrontier => sender ! this.currentParetoFrontier()
   })
 
-  def run(terminationCriteria: TTerminationCriteria): TIsland[Sol] = {
+  def run(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Sol] = {
     log.info(s"Island running with terminationCriteria=${terminationCriteria}")
 
     // TODO can we put all of these in some combined pool? don't like having to manage each
@@ -80,6 +80,8 @@ class SingleIslandEvvo[Sol]
       log.info(f"pareto = ${pareto}")
     }
 
+    log.info(f"startTime=${startTime}, now=${Calendar.getInstance().toInstant.toEpochMilli}")
+
     creatorAgents.foreach(_.stop())
     mutatorAgents.foreach(_.stop())
     deletorAgents.foreach(_.stop())
@@ -90,7 +92,7 @@ class SingleIslandEvvo[Sol]
   override def currentParetoFrontier(): TParetoFrontier[Sol] = pop.getParetoFrontier()
 }
 
-object SingleIslandEvvo {
+object EvvoIsland {
   /**
     * @param creators  the functions to be used for creating new solutions.
     * @param mutators  the functions to be used for creating new solutions from current solutions.
@@ -101,19 +103,19 @@ object SingleIslandEvvo {
                 mutators: TraversableOnce[TMutatorFunc[Sol]],
                 deletors: TraversableOnce[TDeletorFunc[Sol]],
                 fitnesses: TraversableOnce[TFitnessFunc[Sol]])
-  : TIsland[Sol] = {
+               (implicit system: ActorSystem)
+  : TEvolutionaryProcess[Sol] = {
     // TODO validate that there is at least one of each creator/mutator/deletors/fitness
 
-    val system = ActorSystem("SingleIslandEvvo")
-    val props = Props(new SingleIslandEvvo[Sol](
+    val props = Props(new EvvoIsland[Sol](
       creators.toVector,
       mutators.toVector,
       deletors.toVector,
       fitnesses.toVector))
-    SingleIslandEvvo.Wrapper[Sol](system.actorOf(props, "SingleIslandEvvo"))
+    EvvoIsland.Wrapper[Sol](system.actorOf(props, s"EvvoIsland_${java.util.UUID.randomUUID()}"))
   }
 
-  def builder[Sol](): SingleIslandEvvoBuilder[Sol] = SingleIslandEvvoBuilder[Sol]()
+  def builder[Sol](): EvvoIslandBuilder[Sol] = EvvoIslandBuilder[Sol]()
 
   /**
     * This is a wrapper for ActorRefs containing SingleIslandEvvo actors, serving as an
@@ -121,10 +123,10 @@ object SingleIslandEvvo {
     *
     * @param ref the reference to wrap
     */
-  case class Wrapper[Sol](ref: ActorRef) extends TIsland[Sol] {
-    implicit val timeout: Timeout = Timeout(5.seconds)
+  case class Wrapper[Sol](ref: ActorRef) extends TEvolutionaryProcess[Sol] {
+    implicit val timeout: Timeout = Timeout(5.days)
 
-    override def run(terminationCriteria: TTerminationCriteria): TIsland[Sol] = {
+    override def run(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Sol] = {
       // Block forever, `run` is meant to be a blocking call.
       Await.result(ref ? Run(terminationCriteria), Duration.Inf)
       this
@@ -145,45 +147,45 @@ object SingleIslandEvvo {
   * @param deletors  the functions to be used for deciding which solutions to delete.
   * @param fitnesses the objective functions to maximize.
   */
-case class SingleIslandEvvoBuilder[Sol]
+case class EvvoIslandBuilder[Sol]
 (
   creators: Set[TCreatorFunc[Sol]] = Set[TCreatorFunc[Sol]](),
   mutators: Set[TMutatorFunc[Sol]] = Set[TMutatorFunc[Sol]](),
   deletors: Set[TDeletorFunc[Sol]] = Set[TDeletorFunc[Sol]](),
   fitnesses: Set[TFitnessFunc[Sol]] = Set[TFitnessFunc[Sol]]()
 ) {
-  def addCreator(creatorFunc: CreatorFunctionType[Sol]): SingleIslandEvvoBuilder[Sol] = {
+  def addCreator(creatorFunc: CreatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(creators = creators + CreatorFunc(creatorFunc, creatorFunc.toString))
   }
 
-  def addCreator(creatorFunc: TCreatorFunc[Sol]): SingleIslandEvvoBuilder[Sol] = {
+  def addCreator(creatorFunc: TCreatorFunc[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(creators = creators + creatorFunc)
   }
 
-  def addMutator(mutatorFunc: MutatorFunctionType[Sol]): SingleIslandEvvoBuilder[Sol] = {
+  def addMutator(mutatorFunc: MutatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(mutators = mutators + MutatorFunc(mutatorFunc, mutatorFunc.toString))
   }
 
-  def addMutator(mutatorFunc: TMutatorFunc[Sol]): SingleIslandEvvoBuilder[Sol] = {
+  def addMutator(mutatorFunc: TMutatorFunc[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(mutators = mutators + mutatorFunc)
   }
 
-  def addDeletor(deletorFunc: DeletorFunctionType[Sol]): SingleIslandEvvoBuilder[Sol] = {
+  def addDeletor(deletorFunc: DeletorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(deletors = deletors + DeletorFunc(deletorFunc, deletorFunc.toString))
   }
 
-  def addDeletor(deletorFunc: TDeletorFunc[Sol]): SingleIslandEvvoBuilder[Sol] = {
+  def addDeletor(deletorFunc: TDeletorFunc[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(deletors = deletors + deletorFunc)
   }
 
   def addFitness(fitnessFunc: FitnessFunctionType[Sol], name: String = null)
-  : SingleIslandEvvoBuilder[Sol] = {
+  : EvvoIslandBuilder[Sol] = {
     val realName = if (name == null) fitnessFunc.toString() else name
     this.copy(fitnesses = fitnesses + FitnessFunc(fitnessFunc, realName))
   }
 
-  def build(): TIsland[Sol] = {
-    SingleIslandEvvo.from[Sol](creators, mutators, deletors, fitnesses)
+  def build()(implicit system: ActorSystem): TEvolutionaryProcess[Sol] = {
+    EvvoIsland.from[Sol](creators, mutators, deletors, fitnesses)
   }
 
 }

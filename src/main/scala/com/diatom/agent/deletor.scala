@@ -17,7 +17,6 @@ case class DeletorAgent[Sol](delete: TDeletorFunc[Sol],
     val in = pop.getSolutions(delete.numInputs)
     if (in.length == delete.numInputs) {
       val toDelete = delete.delete(in)
-      log.debug(s"deleting ${toDelete} out of ${in}")
       pop.deleteSolutions(toDelete)
     } else {
       log.warn(s"not enough solutions in population: got ${in.length}, wanted ${delete.numInputs}")

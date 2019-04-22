@@ -1,6 +1,7 @@
 package com.diatom
 
-import com.diatom.island.{SingleIslandEvvo, TIsland, TerminationCriteria}
+import akka.actor.ActorSystem
+import com.diatom.island.{EvvoIsland, IslandManager, TEvolutionaryProcess, TerminationCriteria}
 import com.diatom.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
 
@@ -35,7 +36,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
     * @param listLength the length of the lists to sort.
     * @return
     */
-  def getEvvo(listLength: Int): TIsland[Solution] = {
+  def getEvvo(listLength: Int): TEvolutionaryProcess[Solution] = {
     val createFunc: CreatorFunctionType[Solution] = () => {
       Vector((listLength to 1 by -1).toList)
     }
@@ -59,9 +60,15 @@ class SimpleIslandTest extends WordSpec with Matchers {
       if (s.isEmpty) {
         s
       } else {
-        val sums = s.map(_.score.values.sum).toVector.sorted
-        val cutoff = sums(sums.size / 2)
-        s.filter(_.score.values.sum > cutoff)
+        try {
+          val sums = s.map(_.score.values.sum).toVector.sorted
+          val cutoff = sums(sums.size / 2)
+          s.filter(_.score.values.sum > cutoff)
+        } catch {
+          case e =>
+            println(s)
+            throw e
+        }
       }
     }
 
@@ -72,7 +79,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
     }
 
 
-    SingleIslandEvvo.builder[Solution]()
+    val islandBuilder = EvvoIsland.builder[Solution]()
       .addCreator(createFunc)
       .addMutator(mutateFunc)
       .addMutator(mutateFunc)
@@ -84,7 +91,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
       .addDeletor(deleteFunc)
       .addDeletor(deleteFunc)
       .addFitness(numInversions)
-      .build()
+    new IslandManager[Solution](5, islandBuilder)
   }
 
   "Single Island Evvo" should {
@@ -104,10 +111,25 @@ class SimpleIslandTest extends WordSpec with Matchers {
       pareto should contain(1 to listLength toList)
     }
 
-    val timeout = 1
-    f"be able to sort a list of length 10 within $timeout seconds" taggedAs(Performance, Slow) in {
+    val timeout = 300
+    f"be able to sort a list of length 10 within $timeout milliseconds" taggedAs(Performance, Slow) in {
       val listLength = 10
-      val terminate = TerminationCriteria(timeout.seconds)
+      val terminate = TerminationCriteria(timeout.millis)
+
+
+      val pareto: Set[Solution] = getEvvo(listLength)
+        .run(terminate)
+        .currentParetoFrontier()
+        .solutions
+        .map(_.solution)
+      pareto should contain(1 to listLength toList)
+      pareto.size shouldBe 1
+    }
+
+    val timeout100 = 10
+    f"be able to sort a list of length 30 within $timeout100 seconds" taggedAs(Performance, Slow) in {
+      val listLength = 30
+      val terminate = TerminationCriteria(timeout100.seconds)
 
 
       val pareto: Set[Solution] = getEvvo(listLength)

@@ -2,7 +2,6 @@ package com.diatom.agent
 
 import com.diatom.TPopulation
 import com.diatom.agent.func.TMutatorFunc
-import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration._
 
@@ -18,8 +17,8 @@ case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol],
     //TODO validate size of input set
     val in = pop.getSolutions(mutate.numInputs)
     val out = mutate.mutate(in)
-    log.debug(s"mutated: in=${in}, out=${out}", Array(in, out))
     pop.addSolutions(out)
+
   }
 }
 

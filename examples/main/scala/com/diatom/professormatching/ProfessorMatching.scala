@@ -3,8 +3,10 @@ package com.diatom.professormatching
 import java.time.LocalTime.parse
 import java.time.{DayOfWeek, LocalTime}
 
+import akka.actor.ActorSystem
+
 import scala.concurrent.duration._
-import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
+import com.diatom.island.{EvvoIsland, TerminationCriteria}
 import com.diatom._
 import com.diatom.agent.func._
 
@@ -90,7 +92,8 @@ object ProfessorMatching {
   // =================================== MAIN ===================================================
   def main(args: Array[String]): Unit = {
 
-    val island = SingleIslandEvvo.builder()
+    implicit val system = ActorSystem("ProfessorMatching")
+    val island = EvvoIsland.builder()
       .addFitness(sumProfessorSchedulePreferences, "Sched")
       .addFitness(sumProfessorCoursePreferences, "Course")
       .addFitness(sumProfessorNumPrepsPreferences, "#Prep")

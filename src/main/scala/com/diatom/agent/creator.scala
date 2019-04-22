@@ -16,7 +16,6 @@ case class CreatorAgent[Sol](create: TCreatorFunc[Sol],
 
   override def step(): Unit = {
     val toAdd = create.create()
-    log.debug(s"created ${toAdd}")
     pop.addSolutions(toAdd)
   }
 }

@@ -29,7 +29,7 @@ trait TPopulation[Sol] {
     * @param n the number of unique solutions.
     * @return n unique solutions.
     */
-  def getSolutions(n: Int): Array[TScored[Sol]]
+  def getSolutions(n: Int): IndexedSeq[TScored[Sol]]
 
   /**
     * Remove the given solutions from the population.
@@ -66,7 +66,7 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[So
 
   override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
     population ++= solutions.map(score)
-    log.debug(f"Added ${solutions.size} solutions, new population size ${population.size}")
+//    log.debug(f"Added ${solutions.size} solutions, new population size ${population.size}")
   }
 
   private def score(solution: Sol): TScored[Sol] = {
@@ -77,27 +77,26 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[So
   }
 
 
-  override def getSolutions(n: Int): Array[TScored[Sol]] = {
+  override def getSolutions(n: Int): Vector[TScored[Sol]] = {
     // TODO: This can't be the final impl, inefficient space and time
-    if (population.size <= n) {
-      population.toArray // no need to randomize, all elements will be included anyway
-    } else {
-      var out = Array.ofDim[TScored[Sol]](n)
-      for (i <- out.indices) {
-        if (!populationVector.isDefinedAt(getSolutionIndex)) {
-          populationVector = util.Random.shuffle(population.toVector)
-          getSolutionIndex = 0
-        }
-        out(i) = populationVector(getSolutionIndex)
-        getSolutionIndex += 1
-      }
-      out
-    }
+//    if (population.size <= n) {
+//      population.toVector // no need to randomize, all elements will be included anyway
+//    } else {
+//
+//      var out = Array.ofDim[TScored[Sol]](n)
+//      for (i <- out.indices) {
+//        if (!populationVector.isDefinedAt(getSolutionIndex)) {
+//          populationVector = util.Random.shuffle(population.toVector)
+//          getSolutionIndex = 0
+//        }
+//        out(i) = populationVector(getSolutionIndex)
+//        getSolutionIndex += 1
+//      }
+      util.Random.shuffle(population.toVector).take(n)
   }
 
   override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
     population --= solutions
-    log.debug(f"Removed ${solutions.size} solutions, new population size ${population.size}")
 
   }
 

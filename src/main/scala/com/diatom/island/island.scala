@@ -7,14 +7,14 @@ import scala.concurrent.duration.Duration
 /**
   * An evolutionary process with a set of actors that all act upon one set of solutions.
   */
-trait TIsland[Solution] {
+trait TEvolutionaryProcess[Solution] {
   /**
     * Run this island, until the specified termination criteria is met. This call will block
     * until the termination criteria is completed.
     *
     * @return this
     */
-  def run(terminationCriteria: TTerminationCriteria): TIsland[Solution]
+  def run(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Solution]
 
   //TODO add a runAsync(), will be required for a controller
 
