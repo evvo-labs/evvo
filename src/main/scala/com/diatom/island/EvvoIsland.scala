@@ -14,6 +14,7 @@ import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import java.io.File
 
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple
@@ -37,21 +38,7 @@ class EvvoIsland[Sol]
   private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
   private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
 
-
-  //   TODO should be able to pass configurations, have multiple logging environments
-  private val config = ConfigFactory.parseString(
-    """
-      |akka {
-      |  loggers = ["akka.event.slf4j.Slf4jLogger"]
-      |  loglevel = "INFO"
-      |  logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
-      |  actor {
-      |    debug {
-      |      receive = true
-      |    }
-      |  }
-      |}
-    """.stripMargin)
+  private val config = ConfigFactory.parseFile(new File("application.conf"))
   implicit val system: ActorSystem = ActorSystem("evvo", config)
 
   // for messages
