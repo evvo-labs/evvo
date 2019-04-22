@@ -1,8 +1,8 @@
 package com
 
 package object diatom {
-  type CreatorFunctionType[Sol] = () => Set[Sol]
-  type MutatorFunctionType[Sol] = Set[TScored[Sol]] => Set[Sol]
-  type DeletorFunctionType[Sol] = Set[TScored[Sol]] => Set[TScored[Sol]]
+  type CreatorFunctionType[Sol] = () => TraversableOnce[Sol]
+  type MutatorFunctionType[Sol] = IndexedSeq[TScored[Sol]] => TraversableOnce[Sol]
+  type DeletorFunctionType[Sol] = IndexedSeq[TScored[Sol]] => TraversableOnce[TScored[Sol]]
   type FitnessFunctionType[Sol] = Sol => Double
 }

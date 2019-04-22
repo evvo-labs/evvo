@@ -12,7 +12,7 @@ trait TAgentStrategy {
 }
 
 /**
-  * Represents information about the population: meant to be used in communication
+  * Information about the population: meant to be used in communication
   * between the population and strategies of agents. Provides enough information
   * for agents to base their decisions on.
   */

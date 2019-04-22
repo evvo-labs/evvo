@@ -1,12 +1,10 @@
-package com.diatom.population
+package com.diatom
 
 import com.diatom.agent.{PopulationInformation, TFitnessFunc, TPopulationInformation}
-import com.diatom.{ParetoFrontier, Scored, TParetoFrontier, TScored}
+import org.slf4j.LoggerFactory
 
 import scala.collection.{TraversableOnce, mutable}
 
-
-// TODO this file is too large, split it into multiple
 
 /**
   * A population is the set of all solutions current in an evolutionary process.
@@ -14,7 +12,6 @@ import scala.collection.{TraversableOnce, mutable}
   * @tparam Sol the type of the solutions in the population
   */
 trait TPopulation[Sol] {
-  // TODO add async calls for non-unit methods, that return a future
   /**
     * Adds the given solutions, if they are unique, subject to any additional constraints
     * imposed on the solutions by the population.
@@ -26,10 +23,13 @@ trait TPopulation[Sol] {
   /**
     * Selects a random sample of the population.
     *
-    * @param n the number of solutions.
-    * @return n solutions.
+    * Returns an array instead of a set for performance to minimize the number of times
+    * we call hashcode.
+    *
+    * @param n the number of unique solutions.
+    * @return n unique solutions.
     */
-  def getSolutions(n: Int): Set[TScored[Sol]]
+  def getSolutions(n: Int): IndexedSeq[TScored[Sol]]
 
   /**
     * Remove the given solutions from the population.
@@ -52,8 +52,11 @@ trait TPopulation[Sol] {
   *
   * @tparam Sol the type of the solutions in the population
   */
-case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[Sol]])
+case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[Sol]],
+                           hashing: HashingStrategy.Value = HashingStrategy.ON_SCORES)
   extends TPopulation[Sol] {
+
+  private val log = LoggerFactory.getLogger(this.getClass)
 
   private val fitnessFunctions = fitnessFunctionsIter.toSet
   private var population = mutable.Set[TScored[Sol]]()
@@ -62,39 +65,39 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[So
 
 
   override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
-    //    population = mutable.Set(ParetoFrontier(population.toSet union solutions.map(score).toSet).solutions.toVector:_*)
     population ++= solutions.map(score)
-    //    log.debug(f"Current population size ${population.size}")
+//    log.debug(f"Added ${solutions.size} solutions, new population size ${population.size}")
   }
 
   private def score(solution: Sol): TScored[Sol] = {
     val scores = fitnessFunctions.map(func => {
       (func.toString, func.score(solution))
     }).toMap
-    Scored(scores, solution)
+    Scored(scores, solution, hashing)
   }
 
 
-  override def getSolutions(n: Int): Set[TScored[Sol]] = {
+  override def getSolutions(n: Int): Vector[TScored[Sol]] = {
     // TODO: This can't be the final impl, inefficient space and time
-    if (population.size <= n) {
-      population.toSet // no need to randomize, all elements will be included anyway
-    } else {
-      var out = Set[TScored[Sol]]()
-      while (out.size < n) {
-        if (!populationVector.isDefinedAt(getSolutionIndex)) {
-          populationVector = util.Random.shuffle(population.toVector)
-          getSolutionIndex = 0
-        }
-        out += populationVector(getSolutionIndex)
-        getSolutionIndex += 1
-      }
-      out
-    }
+//    if (population.size <= n) {
+//      population.toVector // no need to randomize, all elements will be included anyway
+//    } else {
+//
+//      var out = Array.ofDim[TScored[Sol]](n)
+//      for (i <- out.indices) {
+//        if (!populationVector.isDefinedAt(getSolutionIndex)) {
+//          populationVector = util.Random.shuffle(population.toVector)
+//          getSolutionIndex = 0
+//        }
+//        out(i) = populationVector(getSolutionIndex)
+//        getSolutionIndex += 1
+//      }
+      util.Random.shuffle(population.toVector).take(n)
   }
 
   override def deleteSolutions(solutions: TraversableOnce[TScored[Sol]]): Unit = {
     population --= solutions
+
   }
 
   override def getParetoFrontier(): TParetoFrontier[Sol] = {
@@ -105,7 +108,8 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[So
 
   override def getInformation(): TPopulationInformation = {
     val out = PopulationInformation(population.size)
-    //    log.debug(s"getInformation returning ${out}")
+    log.debug(s"getInformation returning ${out}")
     out
   }
 }
+

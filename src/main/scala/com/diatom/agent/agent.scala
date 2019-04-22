@@ -1,6 +1,7 @@
 package com.diatom.agent
 
-import com.diatom.population.TPopulation
+import com.diatom.TPopulation
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
 import scala.util.Try
@@ -20,8 +21,11 @@ trait TAgent[Sol] {
 //      which are also available in their top-level under different names, unless they override?
 //      should look into abstract classes and case classes, and figure out what to do
 abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
-                           protected val population: TPopulation[Sol])
+                           protected val population: TPopulation[Sol],
+                           protected val name: String)
   extends TAgent[Sol] {
+
+  protected val log = LoggerFactory.getLogger(this.getClass)
   var numInvocations: Int = 0
 
   // consider factoring this out into a separate component and using
@@ -30,44 +34,46 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
   private val thread = new Thread {
     override def run(): Unit = {
       var waitTime: Duration = strategy.waitTime(population.getInformation())
-      Try {
+      try {
         while (!Thread.interrupted()) {
           try {
             numInvocations += 1
             step()
           } catch {
             case e: Exception => {
+              e.printStackTrace()
               //              log.error(e.toString)
             }
           }
-
           Thread.sleep(waitTime.toMillis)
 
           if (numInvocations % 33 == 0) {
-            // TODO this is blocking, on population.getInformation(), can't be in main loop
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)
             //            log.debug(s"new waitTime: ${waitTime}")
           }
         }
+      } catch {
+        case e: InterruptedException => () // ignore Interrupted exception, this is expected
       }
     }
   }
 
   override def start(): Unit = {
     if (!thread.isAlive) {
+      log.info(s"starting agent ${name}")
       thread.start()
     } else {
-      // TODO log a warning, you shouldn't be starting an already started agent
+      log.warn(s"trying to start already start agent")
     }
   }
 
   override def stop(): Unit = {
-    println(s"${this}: stopping after ${numInvocations} invocations")
     if (thread.isAlive) {
+      log.info(s"${this}: stopping after ${numInvocations} invocations")
       thread.interrupt()
     } else {
-      // TODO log a warning, you shouldn't be stopping an already stopped agent
+      log.warn(s"trying to stop already stopped agent")
     }
   }
 

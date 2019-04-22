@@ -2,7 +2,8 @@ package com.diatom
 
 import java.util.UUID
 
-import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
+import akka.actor.ActorSystem
+import com.diatom.island.{EvvoIsland, TerminationCriteria}
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -92,7 +93,7 @@ object MatrixCluster {
         .toSet
     }
 
-    def mutateMatrix: MutatorFunctionType[Solution] = (sols: Set[TScored[Solution]]) => {
+    def mutateMatrix: MutatorFunctionType[Solution] = (sols: IndexedSeq[TScored[Solution]]) => {
       def mutate(solution: Solution) = {
         val x1 = util.Random.nextInt(solution.matrix.length)
         val x2 = util.Random.nextInt(solution.matrix.length)
@@ -110,11 +111,11 @@ object MatrixCluster {
     }
 
 
-    def deleteDominated: DeletorFunctionType[Solution] = (s: Set[TScored[Solution]]) => {
-      s &~ ParetoFrontier(s).solutions
+    def deleteDominated: DeletorFunctionType[Solution] = (s: IndexedSeq[TScored[Solution]]) => {
+       s.filterNot(elem => ParetoFrontier(s).solutions.contains(elem))
     }
 
-    def deleteWorstHalf: DeletorFunctionType[Solution] = (s: Set[TScored[Solution]]) => {
+    def deleteWorstHalf: DeletorFunctionType[Solution] = (s: IndexedSeq[TScored[Solution]]) => {
       if (s.isEmpty) {
         s
       } else {
@@ -168,23 +169,21 @@ object MatrixCluster {
         (0 until numClasses).map(c => floodFill(c)(sol)).sum
       }
 
-    val island = SingleIslandEvvo.builder[Solution]()
+    implicit val system = ActorSystem("MatrixCluster")
+    val island = EvvoIsland.builder[Solution]()
       .addCreator(createMatrix)
       .addMutator(mutateMatrix)
+      .addMutator(mutateMatrix)
+      .addMutator(mutateMatrix)
+      .addMutator(mutateMatrix)
       .addDeletor(deleteWorstHalf)
-      //      .addDeletor(deleteWorstHalf)
-      //      .addDeletor(deleteWorstHalf)
-      //      .addDeletor(deleteDominated)
-      //      .addDeletor(deleteDominated)
-      //      .addDeletor(deleteDominated)
-      //      .addDeletor(deleteDominated)
+      .addDeletor(deleteWorstHalf)
+      .addDeletor(deleteWorstHalf)
+      .addDeletor(deleteWorstHalf)
+      .addDeletor(deleteDominated)
+      .addDeletor(deleteDominated)
       .addFitness(numAdjacentEqual)
       .addFitness(allFloods)
-      //      .addFitness(floodFill(0))
-      //      .addFitness(floodFill(1))
-      //      .addFitness(floodFill(2))
-      //      .addFitness(floodFill(3))
-      //.addFitness(num2StepNeighborsEqual)
       .build()
 
     val pareto = island.run(TerminationCriteria(10.minutes))
