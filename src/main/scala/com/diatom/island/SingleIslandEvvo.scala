@@ -6,18 +6,19 @@ import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.event.LoggingReceive
 import akka.pattern.ask
 import akka.util.Timeout
-import com.diatom._
+import com.diatom.{Population, _}
 import com.diatom.agent._
 import com.diatom.agent.func._
-import com.diatom.population.Population
 import com.typesafe.config.ConfigFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple
-  * CPU cores).
+  * CPU cores). Because it is an Akka actor, generally people will use SingleIslandEvvo.Wrapped
+  * to use it in a type-safe way, instead of throwing messages.
   */
 class SingleIslandEvvo[Sol]
 (
@@ -26,8 +27,8 @@ class SingleIslandEvvo[Sol]
   deletors: Vector[TDeletorFunc[Sol]],
   fitnesses: Vector[TFitnessFunc[Sol]]
 ) extends Actor with TIsland[Sol] with ActorLogging {
-
-
+  // TODO rename this to Island? No need to have special case for 1-node system
+  implicit val logger: Logger = LoggerFactory.getLogger(this.getClass)
   private val pop = Population(fitnesses)
   private val creatorAgents = creators.map(c => CreatorAgent.from(c, pop))
   private val mutatorAgents = mutators.map(m => MutatorAgent.from(m, pop))
@@ -50,7 +51,7 @@ class SingleIslandEvvo[Sol]
     """.stripMargin)
   implicit val system: ActorSystem = ActorSystem("evvo", config)
 
-
+  // for messages
   import com.diatom.island.SingleIslandEvvo._
 
   override def receive: Receive = LoggingReceive({
@@ -59,14 +60,12 @@ class SingleIslandEvvo[Sol]
   })
 
   def run(terminationCriteria: TTerminationCriteria): TIsland[Sol] = {
-    log.info("Island running with terminationCriteria=%s", terminationCriteria)
+    log.info(s"Island running with terminationCriteria=${terminationCriteria}")
 
     // TODO can we put all of these in some combined pool? don't like having to manage each
-    log.info("starting agents")
     creatorAgents.foreach(_.start())
     mutatorAgents.foreach(_.start())
     deletorAgents.foreach(_.start())
-    log.info("started agents")
 
     // TODO this is not ideal. fix wait time/add features to termination criteria
     val startTime = Calendar.getInstance().toInstant.toEpochMilli
@@ -78,11 +77,9 @@ class SingleIslandEvvo[Sol]
       log.info(f"pareto = ${pareto}")
     }
 
-    log.info("stopping agents")
     creatorAgents.foreach(_.stop())
     mutatorAgents.foreach(_.stop())
     deletorAgents.foreach(_.stop())
-    log.info("stopped agents")
 
     this
   }

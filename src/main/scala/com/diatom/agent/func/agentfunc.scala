@@ -10,6 +10,8 @@ trait TAgentFunc {
     * @return The unique name.
     */
   def name: String = this.toString
+
+  // TODO give apply method, should be usable as function
 }
 
 /**

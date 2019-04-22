@@ -1,7 +1,7 @@
 package com.diatom.population
 
 import com.diatom.agent.FitnessFunc
-import com.diatom.{Scored, TScored}
+import com.diatom.{Population, Scored, TScored}
 import org.scalatest._
 
 class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {

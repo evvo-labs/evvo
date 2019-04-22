@@ -1,10 +1,11 @@
 package com.diatom.agent
 
-import com.diatom._
+import akka.event.slf4j.Logger
+import com.diatom.{Population, _}
 import com.diatom.agent.func.{CreatorFunc, MutatorFunc}
-import com.diatom.population.Population
 import com.diatom.tags.Slow
 import org.scalatest.{BeforeAndAfter, Matchers, WordSpecLike}
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -47,6 +48,8 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   val strategy: TAgentStrategy = _ => 70.millis
 
   val fitnessFunc: TFitnessFunc[S] = FitnessFunc(_.toDouble, "Double")
+
+  implicit val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   before {
     pop = Population[S](Vector(fitnessFunc))

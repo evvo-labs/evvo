@@ -1,7 +1,6 @@
-package com.diatom.population
+package com.diatom
 
-import com.diatom.agent.{FitnessFunc, PopulationInformation, TFitnessFunc, TPopulationInformation}
-import com.diatom.{FitnessFunctionType, ParetoFrontier, Scored, TParetoFrontier, TScored}
+import com.diatom.agent.{PopulationInformation, TFitnessFunc, TPopulationInformation}
 
 import scala.collection.{TraversableOnce, mutable}
 
