@@ -1,7 +1,7 @@
 package com.diatom.population
 
 import com.diatom.agent.FitnessFunc
-import com.diatom.{Scored, TScored}
+import com.diatom.{HashingStrategy, Population, Scored, TScored}
 import org.scalatest._
 
 class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
@@ -46,7 +46,7 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     var pop: Population[Double] = null
     val popSize = 10
     before {
-      pop = Population(fitnesses, Population.Hashing.ON_SOLUTIONS)
+      pop = Population(fitnesses, HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions((1 to popSize).map(_.toDouble))
     }
 
@@ -99,14 +99,14 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
   "A population hashing on solutions" should {
 
     "not allow duplicate solutions" in {
-      val pop = Population(Vector(uniqueScore), Population.Hashing.ON_SOLUTIONS)
+      val pop = Population(Vector(uniqueScore), HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions(Vector(1, 1))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 1
     }
 
     "allow duplicate scores for different solutions" in {
-      val pop = Population(Vector(returnOne), Population.Hashing.ON_SOLUTIONS)
+      val pop = Population(Vector(returnOne), HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions(Vector(1, 2))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 2
@@ -116,14 +116,14 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
   "A population hashing on scores" should {
 
     "not allow duplicate scores" in {
-      val pop = Population(Vector(returnOne), Population.Hashing.ON_SCORES)
+      val pop = Population(Vector(returnOne), HashingStrategy.ON_SCORES)
       pop.addSolutions(Vector(1, 2))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 1
     }
 
     "allow duplicate solutions for different scores" in {
-      val pop = Population(Vector(uniqueScore), Population.Hashing.ON_SCORES)
+      val pop = Population(Vector(uniqueScore), HashingStrategy.ON_SCORES)
       pop.addSolutions(Vector(1, 1))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 2

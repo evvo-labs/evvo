@@ -2,7 +2,8 @@ package com.diatom
 
 import java.util.UUID
 
-import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
+import akka.actor.ActorSystem
+import com.diatom.island.{EvvoIsland, TerminationCriteria}
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -168,7 +169,8 @@ object MatrixCluster {
         (0 until numClasses).map(c => floodFill(c)(sol)).sum
       }
 
-    val island = SingleIslandEvvo.builder[Solution]()
+    implicit val system = ActorSystem("MatrixCluster")
+    val island = EvvoIsland.builder[Solution]()
       .addCreator(createMatrix)
       .addMutator(mutateMatrix)
       .addMutator(mutateMatrix)

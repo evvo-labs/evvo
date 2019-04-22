@@ -1,33 +1,22 @@
 package com.diatom.agent
 
+import com.diatom.TPopulation
 import com.diatom.agent.func.TCreatorFunc
-import com.diatom.population.TPopulation
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration._
 
 
 trait TCreatorAgent[Sol] extends TAgent[Sol]
 
-case class CreatorAgent[Sol](creatorFunc: TCreatorFunc[Sol],
+case class CreatorAgent[Sol](create: TCreatorFunc[Sol],
                              pop: TPopulation[Sol],
-                             strat: TAgentStrategy)
-  extends AAgent[Sol](strat, pop) with TCreatorAgent[Sol]{
+                             strat: TAgentStrategy = CreatorAgentDefaultStrategy())
+  extends AAgent[Sol](strat, pop, create.name) with TCreatorAgent[Sol] {
 
   override def step(): Unit = {
-    val toAdd = creatorFunc.create()
+    val toAdd = create.create()
     pop.addSolutions(toAdd)
-  }
-}
-
-
-object CreatorAgent {
-  def from[Sol](creatorFunc: TCreatorFunc[Sol], pop: TPopulation[Sol]): TCreatorAgent[Sol] = {
-    CreatorAgent.from(creatorFunc, pop, CreatorAgentDefaultStrategy())
-  }
-
-  def from[Sol](creatorFunc: TCreatorFunc[Sol], pop: TPopulation[Sol], strat: TAgentStrategy)
-               : TCreatorAgent[Sol] = {
-    CreatorAgent(creatorFunc, pop, strat)
   }
 }
 

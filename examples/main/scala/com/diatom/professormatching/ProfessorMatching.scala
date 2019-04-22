@@ -3,9 +3,12 @@ package com.diatom.professormatching
 import java.time.LocalTime.parse
 import java.time.{DayOfWeek, LocalTime}
 
+import akka.actor.ActorSystem
+
 import scala.concurrent.duration._
-import com.diatom.island.{SingleIslandEvvo, TerminationCriteria}
+import com.diatom.island.{EvvoIsland, TerminationCriteria}
 import com.diatom._
+import com.diatom.agent.func._
 
 /**
   * Matches professors with courses, assuming:
@@ -14,7 +17,7 @@ import com.diatom._
   */
 object ProfessorMatching {
   // these are superclasses of base types so that you can use the base types to create them,
-  // but they are separate types so they can't be used interchangably
+  // but they are separate types so they can't be used interchangeably
   type ProfID >: Int
   type SectionID >: Int
   type CourseID >: Int
@@ -89,15 +92,16 @@ object ProfessorMatching {
   // =================================== MAIN ===================================================
   def main(args: Array[String]): Unit = {
 
-    val island = SingleIslandEvvo.builder()
+    implicit val system = ActorSystem("ProfessorMatching")
+    val island = EvvoIsland.builder()
       .addFitness(sumProfessorSchedulePreferences, "Sched")
       .addFitness(sumProfessorCoursePreferences, "Course")
       .addFitness(sumProfessorNumPrepsPreferences, "#Prep")
       .addFitness(sumProfessorSectionCountPreferences, "#Section")
-      .addCreator(validScheduleCreator)
-      //      .addMutator(swapTwoCourses)
-      //      .addMutator(balanceCourseload)
-      //      .addDeletor(deleteWorstHalf)
+      .addCreator(CreatorFunc(validScheduleCreator, "creator"))
+      .addMutator(MutatorFunc(swapTwoCourses, "swapTwoCourses"))
+      .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
+      .addDeletor(DeletorFunc(deleteWorstHalf, "deleteWorstHalf"))
       .build()
 
     val pareto = island.run(TerminationCriteria(1.second))
