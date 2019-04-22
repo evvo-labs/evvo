@@ -8,11 +8,29 @@ import scala.concurrent.duration.Duration
   * An evolutionary process with a set of actors that all act upon one set of solutions.
   */
 trait TIsland[Solution] {
-  def run(terminationCriteria: TTerminationCriteria): TParetoFrontier[Solution]
+  /**
+    * Run this island, until the specified termination criteria is met. This call will block
+    * until the termination criteria is completed.
+    *
+    * @return this
+    */
+  def run(terminationCriteria: TTerminationCriteria): TIsland[Solution]
+
+  //TODO add a runAsync(), will be required for a controller
+
+  /**
+    * @return the current pareto frontier of solutions on this island?
+    */
+  def currentParetoFrontier(): TParetoFrontier[Solution]
 }
 
-
+/**
+  * Tells you how long to run an island for.
+  */
 trait TTerminationCriteria {
+  /**
+    * Stop after the specified duration has elapsed.
+    */
   def time: Duration
 }
 

@@ -15,7 +15,7 @@ import com.diatom.agent.func._
   */
 object ProfessorMatching {
   // these are superclasses of base types so that you can use the base types to create them,
-  // but they are separate types so they can't be used interchangably
+  // but they are separate types so they can't be used interchangeably
   type ProfID >: Int
   type SectionID >: Int
   type CourseID >: Int

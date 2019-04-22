@@ -1,7 +1,6 @@
 package com.diatom
 
 import com.diatom.island.{SingleIslandEvvo, TIsland, TerminationCriteria}
-import com.diatom.professormatching.ProfessorMatching.Sol
 import com.diatom.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
 
@@ -91,7 +90,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
   "Single Island Evvo" should {
     // at this point, the second test replaces this one, but we're leaving it in as something
     //    we were proud of once
-    "be able to sort a list of length 5 within 1 second" taggedAs (Performance, Slow) in {
+    "be able to sort a list of length 5 within 1 second" taggedAs(Performance, Slow) in {
       val listLength = 5
       val timeout = 1
       val terminate = TerminationCriteria(timeout.seconds)
@@ -99,19 +98,21 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
       val pareto: Set[Solution] = getEvvo(listLength)
         .run(terminate)
+        .currentParetoFrontier()
         .solutions
         .map(_.solution)
       pareto should contain(1 to listLength toList)
     }
 
-     val timeout = 1
-    f"be able to sort a list of length 10 within $timeout seconds" taggedAs (Performance, Slow) in {
+    val timeout = 1
+    f"be able to sort a list of length 10 within $timeout seconds" taggedAs(Performance, Slow) in {
       val listLength = 10
       val terminate = TerminationCriteria(timeout.seconds)
 
 
       val pareto: Set[Solution] = getEvvo(listLength)
         .run(terminate)
+        .currentParetoFrontier()
         .solutions
         .map(_.solution)
       pareto should contain(1 to listLength toList)
