@@ -24,21 +24,35 @@ val paretoFrontierAfter1Second = mgr.currentParetoFrontier()
 This will run three asynchronous agents locally: _creators_ create new solutions, _mutators_ copy and modify existing solutions, and _deletors_ remove solutions from the island. Notice how this whole block of code will work on any problem, as long as each of the functions can process that type of data. After spinning for a second, the blocking call to `run(…)` will return. The current [pareto frontier](https://en.wikipedia.org/wiki/Pareto_efficiency#Use_in_engineering) is then retrieved and bound to `paretoFrontierAfter1Second`. This result will be a diverse set of solutions optimizing for each provided objective. 
 
 -------------------------------------------------------------------------------
+#### Terminology
+TODO: Write terminilogy section
+
+-------------------------------------------------------------------------------
 #### Asynchronous Evolutionary Computing
 TODO: write basic writeup of A-Team architecture
 
 -------------------------------------------------------------------------------
-#### Contributing
-See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+#### Quickstart
+##### Built-in Agents
+##### Built-in Problem Types
+TODO: Implement built-in types
 
 -------------------------------------------------------------------------------
 #### Configuration
 ##### Akka Configuration
+TODO: Allow end users to override Akka configuration
 ##### Evvo Configuration
+TODO: Allow end users to override Evvo configuration
 
 -------------------------------------------------------------------------------
 #### Examples
 
 See examples in [`./examples`](examples).
 
+-------------------------------------------------------------------------------
+#### Downloads
+TODO: Put this on maven and sbt
 
+-------------------------------------------------------------------------------
+#### Contributing
+See [`CONTRIBUTING.md`](CONTRIBUTING.md).
