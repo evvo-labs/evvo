@@ -1,11 +1,11 @@
-package com.diatom.population
+package com.diatom.island.population
 
-import com.diatom.agent.FitnessFunc
-import com.diatom.{HashingStrategy, Population, Scored, TScored}
+
+import com.diatom.island.population
 import org.scalatest._
 
 class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
-  val identityFitness = FitnessFunc[Double](x => x, "Identity")
+  val identityFitness = population.FitnessFunc[Double](x => x, "Identity")
   val fitnesses = Set(identityFitness)
 
 
@@ -46,7 +46,7 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     var pop: Population[Double] = null
     val popSize = 10
     before {
-      pop = Population(fitnesses, HashingStrategy.ON_SOLUTIONS)
+      pop = population.Population(fitnesses, HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions((1 to popSize).map(_.toDouble))
     }
 
@@ -88,8 +88,8 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     }
   }
 
-  val returnOne: FitnessFunc[Double] = FitnessFunc(x => 1, "one")
-  val uniqueScore: FitnessFunc[Double] = FitnessFunc({
+  val returnOne: FitnessFunc[Double] = population.FitnessFunc(x => 1, "one")
+  val uniqueScore: FitnessFunc[Double] = population.FitnessFunc({
     var counter = 0
     _ => {
       counter += 1
@@ -99,14 +99,14 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
   "A population hashing on solutions" should {
 
     "not allow duplicate solutions" in {
-      val pop = Population(Vector(uniqueScore), HashingStrategy.ON_SOLUTIONS)
+      val pop = population.Population(Vector(uniqueScore), HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions(Vector(1, 1))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 1
     }
 
     "allow duplicate scores for different solutions" in {
-      val pop = Population(Vector(returnOne), HashingStrategy.ON_SOLUTIONS)
+      val pop = population.Population(Vector(returnOne), HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions(Vector(1, 2))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 2
@@ -116,14 +116,14 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
   "A population hashing on scores" should {
 
     "not allow duplicate scores" in {
-      val pop = Population(Vector(returnOne), HashingStrategy.ON_SCORES)
+      val pop = population.Population(Vector(returnOne), HashingStrategy.ON_SCORES)
       pop.addSolutions(Vector(1, 2))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 1
     }
 
     "allow duplicate solutions for different scores" in {
-      val pop = Population(Vector(uniqueScore), HashingStrategy.ON_SCORES)
+      val pop = population.Population(Vector(uniqueScore), HashingStrategy.ON_SCORES)
       pop.addSolutions(Vector(1, 1))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 2

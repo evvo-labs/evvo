@@ -2,7 +2,8 @@ package com.diatom.island
 import java.io.File
 
 import akka.actor.ActorSystem
-import com.diatom.{ParetoFrontier, TParetoFrontier, TScored}
+import com.diatom.island.population.{ParetoFrontier, TParetoFrontier, TScored}
+import com.diatom._
 import com.typesafe.config.ConfigFactory
 import sun.security.provider.PolicyParser.ParsingException
 

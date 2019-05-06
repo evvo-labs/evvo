@@ -1,6 +1,6 @@
 package com.diatom.island
 
-import com.diatom.TParetoFrontier
+import com.diatom.island.population.TParetoFrontier
 
 import scala.concurrent.duration.Duration
 

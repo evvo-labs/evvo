@@ -1,6 +1,6 @@
-package com.diatom
+package com.diatom.island.population
 
-import com.diatom.HashingStrategy.HashingStrategy
+import com.diatom.island.population.HashingStrategy.HashingStrategy
 
 /**
   * Represents a solution scored by mutliple fitness functions.

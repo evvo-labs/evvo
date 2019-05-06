@@ -1,8 +1,9 @@
 package com.diatom.agent
 
 import akka.event.slf4j.Logger
-import com.diatom.{Population, _}
-import com.diatom.agent.func.{CreatorFunc, MutatorFunc}
+import com.diatom._
+import com.diatom.agent.{CreatorFunc, MutatorFunc}
+import com.diatom.island.population.{FitnessFunc, Population, Scored, TFitnessFunc, TScored}
 import com.diatom.tags.Slow
 import org.scalatest.{BeforeAndAfter, Matchers, WordSpecLike}
 import org.slf4j.{Logger, LoggerFactory}
@@ -40,7 +41,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
     agentFunctionCalled("delete") = true
     set
   }
-  val deletorFunc = func.DeletorFunc(delete, "delete", 1)
+  val deletorFunc = DeletorFunc(delete, "delete", 1)
   var deletorAgent: TAgent[S] = _
   val deletorInput: Set[TScored[S]] = mutatorInput
 

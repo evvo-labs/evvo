@@ -1,5 +1,6 @@
 package com.diatom
 
+import com.diatom.island.population.{HashingStrategy, Scored}
 import org.scalatest.{Matchers, WordSpec}
 
 class ScoreHashingTest extends WordSpec with Matchers {

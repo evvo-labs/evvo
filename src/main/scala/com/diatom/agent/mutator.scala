@@ -1,7 +1,6 @@
 package com.diatom.agent
 
-import com.diatom.TPopulation
-import com.diatom.agent.func.TMutatorFunc
+import com.diatom.island.population.TPopulation
 
 import scala.concurrent.duration._
 

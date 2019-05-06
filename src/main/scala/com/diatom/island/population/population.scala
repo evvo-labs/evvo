@@ -1,6 +1,7 @@
-package com.diatom
+package com.diatom.island.population
 
-import com.diatom.agent.{PopulationInformation, TFitnessFunc, TPopulationInformation}
+import com.diatom._
+import com.diatom.agent.{PopulationInformation, TPopulationInformation}
 import org.slf4j.LoggerFactory
 
 import scala.collection.{TraversableOnce, mutable}

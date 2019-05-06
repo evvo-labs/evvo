@@ -8,7 +8,7 @@ import akka.actor.ActorSystem
 import scala.concurrent.duration._
 import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
 import com.diatom._
-import com.diatom.agent.func._
+import com.diatom.agent._
 
 /**
   * Matches professors with courses, assuming:

@@ -1,5 +1,6 @@
 package com.diatom
 
+import com.diatom.island.population.{ParetoFrontier, Scored}
 import org.scalatest.{Matchers, WordSpec}
 
 class ParetoFrontierTest extends WordSpec with Matchers {

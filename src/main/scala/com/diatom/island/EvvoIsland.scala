@@ -6,9 +6,8 @@ import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Address, Props}
 import akka.event.LoggingReceive
 import akka.pattern.ask
 import akka.util.Timeout
-import com.diatom.{Population, _}
+import com.diatom._
 import com.diatom.agent._
-import com.diatom.agent.func._
 import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
 import akka.cluster.Cluster
@@ -18,6 +17,7 @@ import scala.concurrent.duration._
 import java.io.File
 
 import akka.actor
+import com.diatom.island.population.{FitnessFunc, Population, TFitnessFunc, TParetoFrontier}
 
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple

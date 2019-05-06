@@ -4,6 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
+import com.diatom.island.population.{ParetoFrontier, TScored}
 
 import scala.collection.mutable
 import scala.concurrent.duration._

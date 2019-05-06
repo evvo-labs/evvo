@@ -1,4 +1,4 @@
-package com.diatom.agent
+package com.diatom.island.population
 
 import com.diatom.FitnessFunctionType
 

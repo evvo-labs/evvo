@@ -1,4 +1,4 @@
-package com.diatom.agent.func
+package com.diatom.agent
 
 import com.diatom.{CreatorFunctionType, DeletorFunctionType, MutatorFunctionType}
 

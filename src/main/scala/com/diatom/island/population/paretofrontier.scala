@@ -1,5 +1,4 @@
-package com.diatom
-
+package com.diatom.island.population
 
 import scala.collection.mutable
 

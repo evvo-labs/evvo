@@ -1,6 +1,6 @@
 package com.diatom.agent
 
-import com.diatom.TPopulation
+import com.diatom.island.population.TPopulation
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
