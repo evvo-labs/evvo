@@ -33,14 +33,14 @@ object ProfessorMatching {
     * @param id                          the professor's id
     * @param sectionScheduleToPreference a mapping of preferences for each schedule
     * @param courseToPreference          a mapping of preferences for each course they want to teach
-    * @param numSectionsToPreference     mapping from number of sections to preference
-    * @param numPrepsToPreference        a mapping of # unique classes to preference for that #
+    * @param maxSections                 maximum number of sections
+    * @param maxPreps                    maximum number of preps
     */
   case class ProfPreferences(id: ProfID,
                              sectionScheduleToPreference: Map[ScheduleID, Int],
                              courseToPreference: Map[CourseID, Int],
-                             numSectionsToPreference: Map[Int, Int],
-                             numPrepsToPreference: Map[Int, Int])
+                             maxSections: Int,
+                             maxPreps: Int)
 
   case class Section(id: SectionID, courseID: CourseID, scheduleID: ScheduleID)
 
@@ -144,14 +144,16 @@ object ProfessorMatching {
   val sumProfessorSectionCountPreferences: FitnessFunctionType[Sol] = sol => {
     -sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
-        soFar + idToProf(profID).numSectionsToPreference(sections.size)
+        soFar + (if (idToProf(profID).maxSections < sections.size) 1 else 0)
     }
   }
 
   val sumProfessorNumPrepsPreferences: FitnessFunctionType[Sol] = sol => {
     -sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
-        soFar + idToProf(profID).numPrepsToPreference(sections.map(idToSection(_).courseID).size)
+        soFar + (
+          if (idToProf(profID).maxPreps < sections.map(idToSection(_).courseID).size)
+            1 else 0)
     }
   }
 

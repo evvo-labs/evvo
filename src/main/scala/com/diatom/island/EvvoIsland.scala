@@ -2,7 +2,7 @@ package com.diatom.island
 
 import java.util.Calendar
 
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Address, Props}
 import akka.event.LoggingReceive
 import akka.pattern.ask
 import akka.util.Timeout
@@ -16,6 +16,8 @@ import akka.cluster.Cluster
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import java.io.File
+
+import akka.actor
 
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple

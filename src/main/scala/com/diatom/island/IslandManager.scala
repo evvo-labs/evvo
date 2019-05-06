@@ -30,6 +30,7 @@ class IslandManager[Sol](val numIslands: Int,
     val islandFrontiers = islands
       .map(_.currentParetoFrontier().solutions)
       .foldLeft(Set[TScored[Sol]]())(_ | _)
+
     ParetoFrontier(islandFrontiers)
   }
 }
