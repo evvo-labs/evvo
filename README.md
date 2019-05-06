@@ -33,6 +33,8 @@ This example assumes that you have a defined `Solution` type, a creator function
 
 **Agent**: _not_ an Akka actor, but an evolutionary process. See _"Asynchronous Evolutionary Computing"_ for further explanation.
 
+**Agent Strategy**: a function that consumes information about the state of the world and tells an agent how often it should be running
+
 **Diversity**: a measure of how similar the solutions in a population are. The exact measure can be customized for each problem, and then computed based on  some metric of solution's distances, or computed based on the scores according to fitness functions, in which case standard measures of distance in Euclidean space can be used.
 
 **Emigration**: an island sending solutions to another island.
@@ -75,4 +77,8 @@ TODO: Put this on maven and sbt
 
 -------------------------------------------------------------------------------
 #### Contributing
-See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Email us, we'll write up an official guide once there's enough interest to justify it.
+
+-------------------------------------------------------------------------------
+#### 
+See [`ARCHITECTURE.md`](doc/ARCHITECTURE.md).
