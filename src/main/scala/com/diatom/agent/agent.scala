@@ -47,6 +47,7 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
           }
           Thread.sleep(waitTime.toMillis)
 
+          // TODO oh god
           if (numInvocations % 33 == 0) {
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)

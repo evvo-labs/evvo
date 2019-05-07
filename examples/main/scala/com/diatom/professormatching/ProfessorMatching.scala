@@ -3,12 +3,11 @@ package com.diatom.professormatching
 import java.time.LocalTime.parse
 import java.time.{DayOfWeek, LocalTime}
 
-import akka.actor.ActorSystem
-
-import scala.concurrent.duration._
-import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
 import com.diatom._
 import com.diatom.agent._
+import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
+
+import scala.concurrent.duration._
 
 /**
   * Matches professors with courses, assuming:
@@ -92,6 +91,8 @@ object ProfessorMatching {
   // =================================== MAIN ===================================================
   def main(args: Array[String]): Unit = {
 
+    // TODO rename fitness to objective function
+    //      and provide class to create objective functions
     val islandBuilder = EvvoIsland.builder()
       .addFitness(sumProfessorSchedulePreferences, "Sched")
       .addFitness(sumProfessorCoursePreferences, "Course")
@@ -100,9 +101,11 @@ object ProfessorMatching {
       .addCreator(CreatorFunc(validScheduleCreator, "creator"))
       .addMutator(MutatorFunc(swapTwoCourses, "swapTwoCourses"))
       .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
-    val manager = new IslandManager[Sol](10, islandBuilder)
 
-    val pareto = manager.run(TerminationCriteria(1.second))
+    // TODO rename termination criteria
+    val manager = new IslandManager[Sol](5, islandBuilder)
+    manager.run(TerminationCriteria(1.second))
+    val pareto = manager.currentParetoFrontier()
     println(pareto)
   }
 
@@ -119,6 +122,9 @@ object ProfessorMatching {
 
   // =================================== FITNESS ===================================================
   val sumProfessorSchedulePreferences: FitnessFunctionType[Sol] = sol => {
+    // TODO this should be the calling convention
+    //    Objective("schedulePref", Maximize, Precision(…),
+    //    and a optional textual description
     -sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         val prof = idToProf(profID)
@@ -199,6 +205,7 @@ object ProfessorMatching {
 
     sols.map(_.solution).map(swap)
   }
+
   val balanceCourseload: MutatorFunctionType[Sol] = sols => {
     def swap(sol: Sol): Sol = {
       val prof1: ProfPreferences = idToProf(randomKey(idToProf))

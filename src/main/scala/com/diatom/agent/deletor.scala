@@ -14,6 +14,7 @@ case class DeletorAgent[Sol](delete: TDeletorFunc[Sol],
 
   override protected def step(): Unit = {
     val in = pop.getSolutions(delete.numInputs)
+    // TODO configure whether to allow running without
     if (in.length == delete.numInputs) {
       val toDelete = delete.delete(in)
       pop.deleteSolutions(toDelete)
