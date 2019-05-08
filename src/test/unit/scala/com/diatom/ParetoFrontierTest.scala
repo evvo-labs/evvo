@@ -40,7 +40,7 @@ class ParetoFrontierTest extends WordSpec with Matchers {
       val lowMaxSolution = Scored[Double](Map(("a", Maximize) -> 1d), 2)
       val highMaxSolution =  Scored[Double](Map(("a", Maximize) -> 3d), 4)
       val maxPop = Vector(lowMaxSolution, highMaxSolution)
-      val maxParetoFrontier = ParetoFrontier(minPop).solutions
+      val maxParetoFrontier = ParetoFrontier(maxPop).solutions
 
       maxParetoFrontier should not contain(lowMaxSolution)
       maxParetoFrontier should contain(highMaxSolution)

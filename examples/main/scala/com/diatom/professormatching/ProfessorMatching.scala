@@ -22,7 +22,7 @@ object ProfessorMatching {
   type SectionID >: Int
   type CourseID >: Int
   type ScheduleID >: String
-  type Sol = Map[ProfID, Set[SectionID]]
+  type PMSolution = Map[ProfID, Set[SectionID]] // short for professor-matching solution
 
   case class Problem(profIDtoPref: Map[ProfID, ProfPreferences],
                      sectionIDtoSection: Map[SectionID, Section],
@@ -104,7 +104,7 @@ object ProfessorMatching {
       .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
 
     // TODO rename termination criteria
-    val manager = new IslandManager[Sol](5, islandBuilder)
+    val manager = new IslandManager[PMSolution](5, islandBuilder)
     manager.run(TerminationCriteria(1.second))
     val pareto = manager.currentParetoFrontier()
     println(pareto)
@@ -122,7 +122,7 @@ object ProfessorMatching {
 
 
   // =================================== FITNESS ===================================================
-  val sumProfessorSchedulePreferences: ObjectiveFunctionType[Sol] = sol => {
+  val sumProfessorSchedulePreferences: ObjectiveFunctionType[PMSolution] = sol => {
     sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         val prof = idToProf(profID)
@@ -134,7 +134,7 @@ object ProfessorMatching {
     }
   }
 
-  val sumProfessorCoursePreferences: ObjectiveFunctionType[Sol] = sol => {
+  val sumProfessorCoursePreferences: ObjectiveFunctionType[PMSolution] = sol => {
     sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         soFar + sections.foldLeft(0)((tot, sectionID) => {
@@ -145,14 +145,14 @@ object ProfessorMatching {
     }
   }
 
-  val sumProfessorSectionCountPreferences: ObjectiveFunctionType[Sol] = sol => {
+  val sumProfessorSectionCountPreferences: ObjectiveFunctionType[PMSolution] = sol => {
     sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         soFar + (if (idToProf(profID).maxSections < sections.size) 1 else 0)
     }
   }
 
-  val sumProfessorNumPrepsPreferences: ObjectiveFunctionType[Sol] = sol => {
+  val sumProfessorNumPrepsPreferences: ObjectiveFunctionType[PMSolution] = sol => {
     sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         soFar + (
@@ -162,7 +162,7 @@ object ProfessorMatching {
   }
 
   // =================================== CREATOR ==================================================
-  val validScheduleCreator: CreatorFunctionType[Sol] = () => {
+  val validScheduleCreator: CreatorFunctionType[PMSolution] = () => {
     Vector.fill(10)(idToProf.keysIterator.zipAll(
       util.Random.shuffle(idToSection.keys.toVector)
         .grouped(idToSection.size / idToProf.size + 1)
@@ -180,8 +180,8 @@ object ProfessorMatching {
   }
 
   // =================================== MUTATOR ===================================================
-  val swapTwoCourses: MutatorFunctionType[Sol] = sols => {
-    def swap(sol: Sol): Sol = {
+  val swapTwoCourses: MutatorFunctionType[PMSolution] = sols => {
+    def swap(sol: PMSolution): PMSolution = {
       val prof1: ProfPreferences = idToProf(randomKey(idToProf))
       val prof2: ProfPreferences = {
         var prof2maybe: ProfPreferences = null
@@ -204,8 +204,8 @@ object ProfessorMatching {
     sols.map(_.solution).map(swap)
   }
 
-  val balanceCourseload: MutatorFunctionType[Sol] = sols => {
-    def swap(sol: Sol): Sol = {
+  val balanceCourseload: MutatorFunctionType[PMSolution] = sols => {
+    def swap(sol: PMSolution): PMSolution = {
       val prof1: ProfPreferences = idToProf(randomKey(idToProf))
       val prof2: ProfPreferences = {
         var prof2maybe: ProfPreferences = null
@@ -240,7 +240,7 @@ object ProfessorMatching {
 
 
   // =================================== DELETOR ===================================================
-  val deleteWorstHalf: DeletorFunctionType[Sol] = s => {
+  val deleteWorstHalf: DeletorFunctionType[PMSolution] = s => {
     if (s.isEmpty) {
       s
     } else {

@@ -1,0 +1,2 @@
+- we ought to have a better way to construct TScoreds, manually creating them is getting repetitive and error prone
+- we should have a more comprehensive benchmarking framework for testing performance regressions

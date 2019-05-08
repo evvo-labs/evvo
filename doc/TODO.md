@@ -15,4 +15,4 @@
 - https://github.com/levkhomich/akka-tracing or similar
 - interactivity - controller that lets you view pareto frontier, run for a fixed amount of time, etc
 - implement way to override configs for evvo and akka
-- that can be based on fitness improvement, diversity metrics 
+- strategies based on fitness improvement, diversity metrics 

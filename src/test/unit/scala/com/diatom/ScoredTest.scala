@@ -28,7 +28,7 @@ class ScoreHashingTest extends WordSpec with Matchers {
       three.hashCode() shouldBe four.hashCode()
     }
 
-    "hash on scores when hashStrategy = ON_SOLUTIONS" in {
+    "hash on solutions when hashStrategy = ON_SOLUTIONS" in {
       val a = Scored(Map(("a", Minimize) -> 3, ("b", Minimize) -> 5), 3,
         HashingStrategy.ON_SOLUTIONS)
       val b = Scored(Map(("a", Minimize) -> 2, ("b", Minimize) -> 5), 3,

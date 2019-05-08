@@ -34,7 +34,7 @@ trait TDeletorFunc[Sol] extends TAgentFunc {
     * Processing a subset of the population, returning some portion of
     * that subset which ought to be deleted.
     *
-    * param solutions: a sampling of the population.
+    * @param solutions: a sampling of the population.
     *
     * @return the set of solutions that should be deleted
     */
