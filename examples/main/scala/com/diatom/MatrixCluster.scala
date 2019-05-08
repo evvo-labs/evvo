@@ -3,6 +3,7 @@ package com.diatom
 import java.util.UUID
 
 import akka.actor.ActorSystem
+import com.diatom.agent.default.{DeleteDominated, DeleteWorstHalfByRandomObjective}
 import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
 import com.diatom.island.population.{ParetoFrontier, TScored}
 
@@ -111,22 +112,6 @@ object MatrixCluster {
       sols.map(s => mutate(s.solution))
     }
 
-
-    def deleteDominated: DeletorFunctionType[Solution] = (s: IndexedSeq[TScored[Solution]]) => {
-       s.filterNot(elem => ParetoFrontier(s).solutions.contains(elem))
-    }
-
-    def deleteWorstHalf: DeletorFunctionType[Solution] = (s: IndexedSeq[TScored[Solution]]) => {
-      if (s.isEmpty) {
-        s
-      } else {
-        val funcs = s.head.score.keys.toVector
-        val func = funcs(util.Random.nextInt(funcs.size))
-
-        s.toVector.sortBy(_.score(func)).take(s.size / 2).toSet
-      }
-    }
-
     def floodFill(cl: Int): ObjectiveFunctionType[Solution] = {
       sol: Solution => {
         val m = sol.matrix
@@ -172,17 +157,17 @@ object MatrixCluster {
 
     implicit val system = ActorSystem("EvvoCluster")
     val islandBuilder = EvvoIsland.builder[Solution]()
-      .addCreator(createMatrix)
-      .addMutator(mutateMatrix)
-      .addMutator(mutateMatrix)
-      .addMutator(mutateMatrix)
-      .addMutator(mutateMatrix)
-      .addDeletor(deleteWorstHalf)
-      .addDeletor(deleteWorstHalf)
-      .addDeletor(deleteWorstHalf)
-      .addDeletor(deleteWorstHalf)
-      .addDeletor(deleteDominated)
-      .addDeletor(deleteDominated)
+      .addCreatorFromFunction(createMatrix)
+      .addMutatorFromFunction(mutateMatrix)
+      .addMutatorFromFunction(mutateMatrix)
+      .addMutatorFromFunction(mutateMatrix)
+      .addMutatorFromFunction(mutateMatrix)
+      .addDeletor(DeleteWorstHalfByRandomObjective[Solution]())
+      .addDeletor(DeleteWorstHalfByRandomObjective[Solution]())
+      .addDeletor(DeleteWorstHalfByRandomObjective[Solution]())
+      .addDeletor(DeleteWorstHalfByRandomObjective[Solution]())
+      .addDeletor(DeleteDominated[Solution]())
+      .addDeletor(DeleteDominated[Solution]())
       .addObjective(numAdjacentEqual)
       .addObjective(allFloods)
     val manager = new IslandManager[Solution](1, islandBuilder)

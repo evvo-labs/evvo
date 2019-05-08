@@ -47,7 +47,9 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
           }
           Thread.sleep(waitTime.toMillis)
 
-          // TODO oh god
+          // TODO oh god, this is arbitrary. Now that populations are running locally and this
+          // won't require a blocking Akka actor call, maybe we can recompute every time, or
+          // every second?
           if (numInvocations % 33 == 0) {
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)

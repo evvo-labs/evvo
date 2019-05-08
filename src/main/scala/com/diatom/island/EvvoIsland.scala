@@ -142,7 +142,7 @@ case class EvvoIslandBuilder[Sol]
   deletors: Set[TDeletorFunc[Sol]] = Set[TDeletorFunc[Sol]](),
   objectives: Set[TObjective[Sol]] = Set[TObjective[Sol]]()
 ) {
-  def addCreator(creatorFunc: CreatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
+  def addCreatorFromFunction(creatorFunc: CreatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(creators = creators + CreatorFunc(creatorFunc, creatorFunc.toString))
   }
 
@@ -150,7 +150,7 @@ case class EvvoIslandBuilder[Sol]
     this.copy(creators = creators + creatorFunc)
   }
 
-  def addMutator(mutatorFunc: MutatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
+  def addMutatorFromFunction(mutatorFunc: MutatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(mutators = mutators + MutatorFunc(mutatorFunc, mutatorFunc.toString))
   }
 
@@ -158,7 +158,7 @@ case class EvvoIslandBuilder[Sol]
     this.copy(mutators = mutators + mutatorFunc)
   }
 
-  def addDeletor(deletorFunc: DeletorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
+  def addDeletorFromFunction(deletorFunc: DeletorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(deletors = deletors + DeletorFunc(deletorFunc, deletorFunc.toString))
   }
 

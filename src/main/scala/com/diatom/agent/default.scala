@@ -1,7 +1,7 @@
 package com.diatom.agent
 
 import com.diatom.DeletorFunctionType
-import com.diatom.island.population.{ParetoFrontier, TScored}
+import com.diatom.island.population.{Maximize, Minimize, ParetoFrontier, TScored}
 import com.diatom.professormatching.ProfessorMatching.PMSolution
 
 /**
@@ -18,10 +18,10 @@ object default {
     * A deletor that deletes the dominated set, in a group of size `groupSize`
     * @param groupSize the number of solutions to pull at a time
     */
-  case class DeleteDominated[Sol](groupSize: Int) extends TDeletorFunc[Sol] {
+  case class DeleteDominated[Sol](groupSize: Int = 32) extends TDeletorFunc[Sol] {
     override def delete: DeletorFunctionType[Sol] = (sols: IndexedSeq[TScored[Sol]]) => {
       val nonDominatedSet = ParetoFrontier(sols).solutions
-      sols diff nonDominatedSet.toVector
+      sols.filterNot(elem => nonDominatedSet.contains(elem))
     }
 
     override def numInputs: Int = groupSize
@@ -32,10 +32,15 @@ object default {
       if (s.isEmpty) {
         s
       } else {
-        val funcs = s.head.score.keys.toVector
-        val func = funcs(util.Random.nextInt(funcs.size))
+        val objectiveList = s.head.score.keys.toVector
+        val objective = objectiveList(util.Random.nextInt(objectiveList.size))
 
-        s.toVector.sortBy(_.score(func)).take(s.size / 2).toSet
+        val ordering = objective match {
+          case (_, Minimize) => Ordering.Double.reverse
+          case (_, Maximize) => Ordering.Double
+        }
+
+        s.toVector.sortBy(_.score(objective))(ordering).take(s.size / 2).toSet
       }
     }
 

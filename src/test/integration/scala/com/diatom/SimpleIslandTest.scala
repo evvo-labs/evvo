@@ -1,6 +1,7 @@
 package com.diatom
 
 import akka.actor.ActorSystem
+import com.diatom.agent.default.DeleteWorstHalfByRandomObjective
 import com.diatom.island.{EvvoIsland, IslandManager, TEvolutionaryProcess, TerminationCriteria}
 import com.diatom.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
@@ -56,22 +57,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
       })
     }
 
-    val deleteFunc: DeletorFunctionType[Solution] = s => {
-      if (s.isEmpty) {
-        s
-      } else {
-        try {
-          val sums = s.map(_.score.values.sum).toVector.sorted
-          val cutoff = sums(sums.size / 2)
-          s.filter(_.score.values.sum > cutoff)
-        } catch {
-          // catching all exceptions is okay, we can mostly ignore errors within this deletor
-          case e: Throwable =>
-            println(s)
-            throw e
-        }
-      }
-    }
+    val deleteFunc: DeletorFunctionType[Solution] = DeleteWorstHalfByRandomObjective[Solution]()
 
     val numInversions: ObjectiveFunctionType[Solution] = (s: Solution) => {
       (for ((elem, index) <- s.zipWithIndex) yield {
@@ -81,16 +67,16 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
     // TODO add convenience constructor for adding multiple duplicate mutators/creators/deletors
     val islandBuilder = EvvoIsland.builder[Solution]()
-      .addCreator(createFunc)
-      .addMutator(mutateFunc)
-      .addMutator(mutateFunc)
-      .addMutator(mutateFunc)
-      .addMutator(mutateFunc)
-      .addDeletor(deleteFunc)
-      .addDeletor(deleteFunc)
-      .addDeletor(deleteFunc)
-      .addDeletor(deleteFunc)
-      .addDeletor(deleteFunc)
+      .addCreatorFromFunction(createFunc)
+      .addMutatorFromFunction(mutateFunc)
+      .addMutatorFromFunction(mutateFunc)
+      .addMutatorFromFunction(mutateFunc)
+      .addMutatorFromFunction(mutateFunc)
+      .addDeletorFromFunction(deleteFunc)
+      .addDeletorFromFunction(deleteFunc)
+      .addDeletorFromFunction(deleteFunc)
+      .addDeletorFromFunction(deleteFunc)
+      .addDeletorFromFunction(deleteFunc)
       .addObjective(numInversions)
     new IslandManager[Solution](5, islandBuilder)
   }
