@@ -5,7 +5,7 @@ import com.diatom.island.population
 import org.scalatest._
 
 class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
-  val identityFitness = population.FitnessFunc[Double](x => x, "Identity")
+  val identityFitness = population.Objective[Double](x => x, "Identity", Minimize)
   val fitnesses = Set(identityFitness)
 
 
@@ -18,7 +18,7 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     }
 
     "not do anything when deleted from" in {
-      emptyPop.deleteSolutions(Seq(Scored(Map("a" -> 1.0), 1.0)))
+      emptyPop.deleteSolutions(Seq(Scored(Map(("a", Minimize) -> 1.0), 1.0)))
 
       val sols = emptyPop.getSolutions(1)
       sols.length shouldBe 0
@@ -88,14 +88,14 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     }
   }
 
-  val returnOne: FitnessFunc[Double] = population.FitnessFunc(x => 1, "one")
-  val uniqueScore: FitnessFunc[Double] = population.FitnessFunc({
+  val returnOne: Objective[Double] = population.Objective(x => 1, "one", Maximize)
+  val uniqueScore: Objective[Double] = population.Objective({
     var counter = 0
     _ => {
       counter += 1
       counter
     }
-  }, "one")
+  }, "one", Maximize)
   "A population hashing on solutions" should {
 
     "not allow duplicate solutions" in {

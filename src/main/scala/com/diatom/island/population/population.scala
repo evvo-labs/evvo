@@ -1,6 +1,5 @@
 package com.diatom.island.population
 
-import com.diatom._
 import com.diatom.agent.{PopulationInformation, TPopulationInformation}
 import org.slf4j.LoggerFactory
 
@@ -53,7 +52,7 @@ trait TPopulation[Sol] {
   *
   * @tparam Sol the type of the solutions in the population
   */
-case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[Sol]],
+case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TObjective[Sol]],
                            hashing: HashingStrategy.Value = HashingStrategy.ON_SCORES)
   extends TPopulation[Sol] {
 
@@ -72,7 +71,7 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TFitnessFunc[So
 
   private def score(solution: Sol): TScored[Sol] = {
     val scores = fitnessFunctions.map(func => {
-      (func.toString, func.score(solution))
+      (func.toString, func.optimizationDirection) -> func.score(solution)
     }).toMap
     Scored(scores, solution, hashing)
   }

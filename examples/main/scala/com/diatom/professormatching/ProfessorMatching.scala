@@ -5,6 +5,7 @@ import java.time.{DayOfWeek, LocalTime}
 
 import com.diatom._
 import com.diatom.agent._
+import com.diatom.island.population.{Maximize, Objective}
 import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
 
 import scala.concurrent.duration._
@@ -94,10 +95,10 @@ object ProfessorMatching {
     // TODO rename fitness to objective function
     //      and provide class to create objective functions
     val islandBuilder = EvvoIsland.builder()
-      .addFitness(sumProfessorSchedulePreferences, "Sched")
-      .addFitness(sumProfessorCoursePreferences, "Course")
-      .addFitness(sumProfessorNumPrepsPreferences, "#Prep")
-      .addFitness(sumProfessorSectionCountPreferences, "#Section")
+      .addObjective(Objective(sumProfessorSchedulePreferences, "Sched", Maximize))
+      .addObjective(Objective(sumProfessorCoursePreferences, "Course", Maximize))
+      .addObjective(Objective(sumProfessorNumPrepsPreferences, "#Prep", Maximize))
+      .addObjective(Objective(sumProfessorSectionCountPreferences, "#Section", Maximize))
       .addCreator(CreatorFunc(validScheduleCreator, "creator"))
       .addMutator(MutatorFunc(swapTwoCourses, "swapTwoCourses"))
       .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
@@ -121,11 +122,8 @@ object ProfessorMatching {
 
 
   // =================================== FITNESS ===================================================
-  val sumProfessorSchedulePreferences: FitnessFunctionType[Sol] = sol => {
-    // TODO this should be the calling convention
-    //    Objective("schedulePref", Maximize, Precision(…),
-    //    and a optional textual description
-    -sol.foldLeft(0) {
+  val sumProfessorSchedulePreferences: ObjectiveFunctionType[Sol] = sol => {
+    sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         val prof = idToProf(profID)
         soFar + sections.foldLeft(0)((tot, sectionID) => {
@@ -136,8 +134,8 @@ object ProfessorMatching {
     }
   }
 
-  val sumProfessorCoursePreferences: FitnessFunctionType[Sol] = sol => {
-    -sol.foldLeft(0) {
+  val sumProfessorCoursePreferences: ObjectiveFunctionType[Sol] = sol => {
+    sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         soFar + sections.foldLeft(0)((tot, sectionID) => {
           tot + idToProf(profID)
@@ -147,15 +145,15 @@ object ProfessorMatching {
     }
   }
 
-  val sumProfessorSectionCountPreferences: FitnessFunctionType[Sol] = sol => {
-    -sol.foldLeft(0) {
+  val sumProfessorSectionCountPreferences: ObjectiveFunctionType[Sol] = sol => {
+    sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         soFar + (if (idToProf(profID).maxSections < sections.size) 1 else 0)
     }
   }
 
-  val sumProfessorNumPrepsPreferences: FitnessFunctionType[Sol] = sol => {
-    -sol.foldLeft(0) {
+  val sumProfessorNumPrepsPreferences: ObjectiveFunctionType[Sol] = sol => {
+    sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         soFar + (
           if (idToProf(profID).maxPreps < sections.map(idToSection(_).courseID).size)

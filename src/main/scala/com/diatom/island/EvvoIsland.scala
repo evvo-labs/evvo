@@ -17,7 +17,7 @@ import scala.concurrent.duration._
 import java.io.File
 
 import akka.actor
-import com.diatom.island.population.{FitnessFunc, Population, TFitnessFunc, TParetoFrontier}
+import com.diatom.island.population.{Maximize, Minimize, Objective, Population, TObjective, TParetoFrontier}
 
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple
@@ -29,7 +29,7 @@ class EvvoIsland[Sol]
   creators: Vector[TCreatorFunc[Sol]],
   mutators: Vector[TMutatorFunc[Sol]],
   deletors: Vector[TDeletorFunc[Sol]],
-  fitnesses: Vector[TFitnessFunc[Sol]]
+  fitnesses: Vector[TObjective[Sol]]
 ) (implicit val system: ActorSystem)
   extends Actor with TEvolutionaryProcess[Sol] with ActorLogging {
   val cluster = Cluster(context.system)
@@ -90,7 +90,7 @@ object EvvoIsland {
   def from[Sol](creators: TraversableOnce[TCreatorFunc[Sol]],
                 mutators: TraversableOnce[TMutatorFunc[Sol]],
                 deletors: TraversableOnce[TDeletorFunc[Sol]],
-                fitnesses: TraversableOnce[TFitnessFunc[Sol]])
+                fitnesses: TraversableOnce[TObjective[Sol]])
                (implicit system: ActorSystem)
   : TEvolutionaryProcess[Sol] = {
     // TODO validate that there is at least one of each creator/mutator/deletors/fitness
@@ -133,14 +133,14 @@ object EvvoIsland {
   * @param creators  the functions to be used for creating new solutions.
   * @param mutators  the functions to be used for creating new solutions from current solutions.
   * @param deletors  the functions to be used for deciding which solutions to delete.
-  * @param fitnesses the objective functions to maximize.
+  * @param objectives the objective functions to maximize.
   */
 case class EvvoIslandBuilder[Sol]
 (
   creators: Set[TCreatorFunc[Sol]] = Set[TCreatorFunc[Sol]](),
   mutators: Set[TMutatorFunc[Sol]] = Set[TMutatorFunc[Sol]](),
   deletors: Set[TDeletorFunc[Sol]] = Set[TDeletorFunc[Sol]](),
-  fitnesses: Set[TFitnessFunc[Sol]] = Set[TFitnessFunc[Sol]]()
+  objectives: Set[TObjective[Sol]] = Set[TObjective[Sol]]()
 ) {
   def addCreator(creatorFunc: CreatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(creators = creators + CreatorFunc(creatorFunc, creatorFunc.toString))
@@ -166,14 +166,24 @@ case class EvvoIslandBuilder[Sol]
     this.copy(deletors = deletors + deletorFunc)
   }
 
-  def addFitness(fitnessFunc: FitnessFunctionType[Sol], name: String = null)
+  // TODO this calling API is dangerous because it assumes minimization. it should be removed,
+  //      but this will require refactoring across examples
+  def addObjective(objective: ObjectiveFunctionType[Sol], name: String = null)
   : EvvoIslandBuilder[Sol] = {
-    val realName = if (name == null) fitnessFunc.toString() else name
-    this.copy(fitnesses = fitnesses + FitnessFunc(fitnessFunc, realName))
+    val realName = if (name == null) objective.toString() else name
+    this.copy(objectives = objectives + Objective(objective, realName, Minimize))
   }
 
+  def addObjective(objective: Objective[Sol])
+  : EvvoIslandBuilder[Sol] = {
+    this.copy(objectives = objectives + objective)
+  }
+
+
+
+  // TODO this shouldn't even be exposed to the world, we should hide it in IslandManager
   def build()(implicit system: ActorSystem): TEvolutionaryProcess[Sol] = {
-    EvvoIsland.from[Sol](creators, mutators, deletors, fitnesses)
+    EvvoIsland.from[Sol](creators, mutators, deletors, objectives)
   }
 
 }

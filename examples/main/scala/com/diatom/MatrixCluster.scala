@@ -29,7 +29,7 @@ object MatrixCluster {
     val height = width
     val numClasses = 4
 
-    def numAdjacentEqual: FitnessFunctionType[Solution] = (solution: Solution) => {
+    def numAdjacentEqual: ObjectiveFunctionType[Solution] = (solution: Solution) => {
       def get(x: Int, y: Int) = {
         Option(solution.matrix
           .applyOrElse(x, (x: Int) => Vector[Int]())
@@ -57,7 +57,7 @@ object MatrixCluster {
       }).flatten.sum
     }
 
-    def num2StepNeighborsEqual: FitnessFunctionType[Solution] = (solution: Solution) => {
+    def num2StepNeighborsEqual: ObjectiveFunctionType[Solution] = (solution: Solution) => {
       def get(x: Int, y: Int) = {
         Option(solution.matrix
           .applyOrElse(x, (x: Int) => Vector[Int]())
@@ -127,7 +127,7 @@ object MatrixCluster {
       }
     }
 
-    def floodFill(cl: Int): FitnessFunctionType[Solution] = {
+    def floodFill(cl: Int): ObjectiveFunctionType[Solution] = {
       sol: Solution => {
         val m = sol.matrix
 
@@ -165,7 +165,7 @@ object MatrixCluster {
       }
     }
 
-    def allFloods: FitnessFunctionType[Solution] =
+    def allFloods: ObjectiveFunctionType[Solution] =
       sol => {
         (0 until numClasses).map(c => floodFill(c)(sol)).sum
       }
@@ -183,8 +183,8 @@ object MatrixCluster {
       .addDeletor(deleteWorstHalf)
       .addDeletor(deleteDominated)
       .addDeletor(deleteDominated)
-      .addFitness(numAdjacentEqual)
-      .addFitness(allFloods)
+      .addObjective(numAdjacentEqual)
+      .addObjective(allFloods)
     val manager = new IslandManager[Solution](1, islandBuilder)
 
     val pareto = manager.run(TerminationCriteria(1.minute))

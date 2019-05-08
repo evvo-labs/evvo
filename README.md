@@ -12,8 +12,8 @@ val islandBuilder = EvvoIsland.builder[Solution]()
   .addCreator(createFunc)
   .addMutator(mutateFunc)
   .addDeletor(deleteFunc)
-  .addFitness(fitnessFunc1)
-  .addFitness(fitnessFunc2)
+  .addObjective(objective1)
+  .addObjective(objective2)
 
 // create five "islands", run each one for for 1 second
 val islandManager = new IslandManager[Solution](5, islandBuilder)

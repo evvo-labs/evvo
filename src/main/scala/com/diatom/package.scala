@@ -7,6 +7,5 @@ package object diatom {
   type MutatorFunctionType[Sol] = IndexedSeq[TScored[Sol]] => TraversableOnce[Sol]
   type DeletorFunctionType[Sol] = IndexedSeq[TScored[Sol]] => TraversableOnce[TScored[Sol]]
 
-  // TODO should be an arbitrary numeric, not a double
-  type FitnessFunctionType[Sol] = Sol => Double
+  type ObjectiveFunctionType[Sol] = Sol => Double
 }

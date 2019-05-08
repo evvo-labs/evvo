@@ -65,14 +65,15 @@ class SimpleIslandTest extends WordSpec with Matchers {
           val cutoff = sums(sums.size / 2)
           s.filter(_.score.values.sum > cutoff)
         } catch {
-          case e =>
+          // catching all exceptions is okay, we can mostly ignore errors within this deletor
+          case e: Throwable =>
             println(s)
             throw e
         }
       }
     }
 
-    val numInversions: FitnessFunctionType[Solution] = (s: Solution) => {
+    val numInversions: ObjectiveFunctionType[Solution] = (s: Solution) => {
       (for ((elem, index) <- s.zipWithIndex) yield {
         s.drop(index).count(_ < elem)
       }).sum
@@ -90,7 +91,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
       .addDeletor(deleteFunc)
       .addDeletor(deleteFunc)
       .addDeletor(deleteFunc)
-      .addFitness(numInversions)
+      .addObjective(numInversions)
     new IslandManager[Solution](5, islandBuilder)
   }
 

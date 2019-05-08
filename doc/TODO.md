@@ -5,6 +5,7 @@
 - better, configurable logging
 - create and provide default agents
 - implement smarter strategies, more default strategies, and a better calling API 
+- figure out why the examples don't terminate, and fix that
 
 
 ### Longterm 
