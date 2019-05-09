@@ -1,10 +1,8 @@
 package com.diatom.agent
 
+import akka.event.LoggingAdapter
 import com.diatom.island.population.TPopulation
-import org.slf4j.LoggerFactory
-
 import scala.concurrent.duration._
-import scala.util.Try
 
 /**
   * The parent trait for all types of evolutionary agents.
@@ -17,15 +15,12 @@ trait TAgent[Sol] {
   def numInvocations: Int
 }
 
-// TODO all of the children classes have to pass a strategy and population,
-//      which are also available in their top-level under different names, unless they override?
-//      should look into abstract classes and case classes, and figure out what to do
-abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
-                           protected val population: TPopulation[Sol],
-                           protected val name: String)
+abstract class AAgent[Sol](private val strategy: TAgentStrategy,
+                           private val population: TPopulation[Sol],
+                           private val name: String)
+                          (private implicit val logger: LoggingAdapter)
   extends TAgent[Sol] {
 
-  protected val log = LoggerFactory.getLogger(this.getClass)
   var numInvocations: Int = 0
 
   // consider factoring this out into a separate component and using
@@ -64,19 +59,19 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
 
   override def start(): Unit = {
     if (!thread.isAlive) {
-      log.info(s"starting agent ${name}")
+      logger.info(s"starting agent ${name}")
       thread.start()
     } else {
-      log.warn(s"trying to start already start agent")
+      logger.warning(s"trying to start already start agent")
     }
   }
 
   override def stop(): Unit = {
     if (thread.isAlive) {
-      log.info(s"${this}: stopping after ${numInvocations} invocations")
+      logger.info(s"${this}: stopping after ${numInvocations} invocations")
       thread.interrupt()
     } else {
-      log.warn(s"trying to stop already stopped agent")
+      logger.warning(s"trying to stop already stopped agent")
     }
   }
 

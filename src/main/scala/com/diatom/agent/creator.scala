@@ -1,21 +1,21 @@
 package com.diatom.agent
 
+import akka.event.LoggingAdapter
 import com.diatom.island.population.TPopulation
-import org.slf4j.{Logger, LoggerFactory}
-
 import scala.concurrent.duration._
 
 
 trait TCreatorAgent[Sol] extends TAgent[Sol]
 
 case class CreatorAgent[Sol](create: TCreatorFunc[Sol],
-                             pop: TPopulation[Sol],
-                             strat: TAgentStrategy = CreatorAgentDefaultStrategy())
-  extends AAgent[Sol](strat, pop, create.name) with TCreatorAgent[Sol] {
+                             population: TPopulation[Sol],
+                             strategy: TAgentStrategy = CreatorAgentDefaultStrategy())
+                            (implicit val logger: LoggingAdapter)
+  extends AAgent[Sol](strategy, population, create.name)(logger) with TCreatorAgent[Sol] {
 
   override def step(): Unit = {
     val toAdd = create.create()
-    pop.addSolutions(toAdd)
+    population.addSolutions(toAdd)
   }
 }
 

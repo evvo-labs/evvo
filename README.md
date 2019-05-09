@@ -9,13 +9,13 @@ import com.diatom.island._
 import scala.concurrent.duration._ // for `1.second`
 
 val islandBuilder = EvvoIsland.builder[Solution]()
-  .addCreator(createFunc)
-  .addMutator(mutateFunc)
-  .addDeletor(deleteFunc)
+  .addCreator(creator)
+  .addMutator(mutator)
+  .addDeletor(deletor)
   .addObjective(objective1)
   .addObjective(objective2)
 
-// create five "islands", run each one for for 1 second
+// create five "islands", run each one for 1 second, in parallel
 val islandManager = new IslandManager[Solution](5, islandBuilder)
   .run(TerminationCriteria(1.second))
 

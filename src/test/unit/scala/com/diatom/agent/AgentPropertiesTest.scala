@@ -1,5 +1,6 @@
 package com.diatom.agent
 
+import akka.event.LoggingAdapter
 import com.diatom._
 import com.diatom.island.population.{Minimize, Objective, Population, Scored, TObjective, TScored}
 import com.diatom.tags.Slow
@@ -10,6 +11,8 @@ import scala.collection.mutable
 import scala.concurrent.duration._
 
 class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter {
+
+  implicit val log: LoggingAdapter = NullLogger
 
   // TODO reimplement this using http://doc.scalatest.org/3.0.1/#org.scalatest.PropSpec@testMatrix
 

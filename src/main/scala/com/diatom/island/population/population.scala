@@ -1,7 +1,7 @@
 package com.diatom.island.population
 
+import akka.event.LoggingAdapter
 import com.diatom.agent.{PopulationInformation, TPopulationInformation}
-import org.slf4j.LoggerFactory
 
 import scala.collection.{TraversableOnce, mutable}
 
@@ -54,10 +54,8 @@ trait TPopulation[Sol] {
   */
 case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TObjective[Sol]],
                            hashing: HashingStrategy.Value = HashingStrategy.ON_SCORES)
+                          (implicit val logger: LoggingAdapter)
   extends TPopulation[Sol] {
-
-  private val log = LoggerFactory.getLogger(this.getClass)
-
   private val fitnessFunctions = fitnessFunctionsIter.toSet
   private var population = mutable.Set[TScored[Sol]]()
   private var populationVector = Vector[TScored[Sol]]()
@@ -108,7 +106,7 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TObjective[Sol]
 
   override def getInformation(): TPopulationInformation = {
     val out = PopulationInformation(population.size)
-    log.debug(s"getInformation returning ${out}")
+    logger.debug(s"getInformation returning ${out}")
     out
   }
 }

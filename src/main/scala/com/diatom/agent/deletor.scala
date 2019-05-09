@@ -1,25 +1,26 @@
 package com.diatom.agent
 
+import akka.event.LoggingAdapter
 import com.diatom.island.population.TPopulation
-import org.slf4j.{Logger, LoggerFactory}
-
 import scala.concurrent.duration._
 
 trait TDeletorAgent[Sol] extends TAgent[Sol]
 
 case class DeletorAgent[Sol](delete: TDeletorFunc[Sol],
-                             pop: TPopulation[Sol],
-                             strat: TAgentStrategy = DeletorAgentDefaultStrategy())
-  extends AAgent[Sol](strat, pop, delete.name) with TDeletorAgent[Sol] {
+                             population: TPopulation[Sol],
+                             strategy: TAgentStrategy = DeletorAgentDefaultStrategy())
+                            (implicit val logger: LoggingAdapter)
+  extends AAgent[Sol](strategy, population, delete.name)(logger) with TDeletorAgent[Sol] {
 
   override protected def step(): Unit = {
-    val in = pop.getSolutions(delete.numInputs)
+    val in = population.getSolutions(delete.numInputs)
     // TODO configure whether to allow running without
     if (in.length == delete.numInputs) {
       val toDelete = delete.delete(in)
-      pop.deleteSolutions(toDelete)
+      population.deleteSolutions(toDelete)
     } else {
-      log.warn(s"not enough solutions in population: got ${in.length}, wanted ${delete.numInputs}")
+      logger.warning(s"not enough solutions in population: " +
+        s"got ${in.length}, wanted ${delete.numInputs}")
     }
   }
 }

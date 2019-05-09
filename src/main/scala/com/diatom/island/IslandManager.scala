@@ -4,9 +4,7 @@ import java.io.File
 
 import akka.actor.ActorSystem
 import com.diatom.island.population.{ParetoFrontier, TParetoFrontier, TScored}
-import com.diatom._
 import com.typesafe.config.ConfigFactory
-import sun.security.provider.PolicyParser.ParsingException
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration

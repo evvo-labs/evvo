@@ -1,10 +1,14 @@
 package com.diatom.island.population
 
 
+import akka.event.LoggingAdapter
+import com.diatom.NullLogger
 import com.diatom.island.population
 import org.scalatest._
 
 class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
+  implicit val log: LoggingAdapter = NullLogger
+
   val identityFitness = population.Objective[Double](x => x, "Identity", Minimize)
   val fitnesses = Set(identityFitness)
 

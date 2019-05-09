@@ -3,7 +3,7 @@ package com.diatom.island
 import java.util.Calendar
 
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Address, Props}
-import akka.event.LoggingReceive
+import akka.event.{LoggingAdapter, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.diatom._
@@ -15,10 +15,8 @@ import akka.cluster.Cluster
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import java.io.File
+
 import scala.concurrent.ExecutionContext.Implicits.global
-
-
-import akka.actor
 import com.diatom.island.population.{Maximize, Minimize, Objective, Population, TObjective, TParetoFrontier}
 
 /**
@@ -34,10 +32,9 @@ class EvvoIsland[Sol]
   fitnesses: Vector[TObjective[Sol]]
 ) (implicit val system: ActorSystem)
   extends Actor with TEvolutionaryProcess[Sol] with ActorLogging {
-  val cluster = Cluster(context.system)
 
-  // FIXME use akka ActorLogging logger in everywhere
-  implicit val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val cluster = Cluster(context.system)
+  implicit val logger: LoggingAdapter = log
 
   private val pop = Population(fitnesses)
   private val creatorAgents = creators.map(c => CreatorAgent(c, pop))
