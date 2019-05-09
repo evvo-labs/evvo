@@ -17,7 +17,7 @@ trait TAgent[Sol] {
 
 abstract class AAgent[Sol](private val strategy: TAgentStrategy,
                            private val population: TPopulation[Sol],
-                           private val name: String)
+                           protected val name: String)
                           (private implicit val logger: LoggingAdapter)
   extends TAgent[Sol] {
 
@@ -75,8 +75,11 @@ abstract class AAgent[Sol](private val strategy: TAgentStrategy,
     }
   }
 
+
   /**
     * Performs one operation on the population.
     */
   protected def step(): Unit
+
+  override def toString: String = f"Agent[$name, $numInvocations]"
 }

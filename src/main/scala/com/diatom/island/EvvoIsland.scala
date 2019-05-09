@@ -50,7 +50,8 @@ class EvvoIsland[Sol]
   })
 
 
-  override def runAsync(terminationCriteria: TTerminationCriteria): Future[TEvolutionaryProcess[Sol]] = {
+  override def runAsync(terminationCriteria: TTerminationCriteria)
+  : Future[TEvolutionaryProcess[Sol]] = {
     Future {
       log.info(s"Island running with terminationCriteria=${terminationCriteria}")
 

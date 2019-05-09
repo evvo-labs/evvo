@@ -17,6 +17,8 @@ case class CreatorAgent[Sol](create: TCreatorFunc[Sol],
     val toAdd = create.create()
     population.addSolutions(toAdd)
   }
+
+  override def toString: String = s"Agent[$name, $numInvocations]"
 }
 
 case class CreatorAgentDefaultStrategy() extends TAgentStrategy {

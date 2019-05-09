@@ -14,12 +14,18 @@ case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol],
 
 
   def step(): Unit = {
-    //TODO validate size of input set
     val in = population.getSolutions(mutate.numInputs)
-    val out = mutate.mutate(in)
-    population.addSolutions(out)
-
+    if (mutate.shouldRunOnPartialInput || in.length == mutate.numInputs) {
+      val mutatedSolutions = mutate(in)
+      population.addSolutions(mutatedSolutions)
+    } else {
+      logger.info(s"${this}: not enough solutions in population: " +
+        s"got ${in.length}, wanted ${mutate.numInputs}")
+    }
   }
+
+  override def toString: String =  s"MutatorAgent[$name, $numInvocations]"
+
 }
 
 case class MutatorAgentDefaultStrategy() extends TAgentStrategy {

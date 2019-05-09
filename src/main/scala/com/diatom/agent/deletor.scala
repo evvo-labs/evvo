@@ -15,14 +15,16 @@ case class DeletorAgent[Sol](delete: TDeletorFunc[Sol],
   override protected def step(): Unit = {
     val in = population.getSolutions(delete.numInputs)
     // TODO configure whether to allow running without
-    if (in.length == delete.numInputs) {
-      val toDelete = delete.delete(in)
+    if (delete.shouldRunWithPartialInput || in.length == delete.numInputs) {
+      val toDelete = delete(in)
       population.deleteSolutions(toDelete)
     } else {
-      logger.warning(s"not enough solutions in population: " +
+      logger.info(s"${this}: not enough solutions in population: " +
         s"got ${in.length}, wanted ${delete.numInputs}")
     }
   }
+
+  override def toString: String = s"Agent[$name, $numInvocations]"
 }
 
 case class DeletorAgentDefaultStrategy() extends TAgentStrategy {
