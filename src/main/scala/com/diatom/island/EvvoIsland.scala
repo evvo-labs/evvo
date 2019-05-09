@@ -12,9 +12,11 @@ import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
 import akka.cluster.Cluster
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import java.io.File
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 import akka.actor
 import com.diatom.island.population.{Maximize, Minimize, Objective, Population, TObjective, TParetoFrontier}
@@ -46,35 +48,42 @@ class EvvoIsland[Sol]
   import com.diatom.island.EvvoIsland._
 
   override def receive: Receive = LoggingReceive({
-    case Run(t) => sender ! this.run(t)
+    case Run(t) => sender ! this.runBlocking(t)
     case GetParetoFrontier => sender ! this.currentParetoFrontier()
   })
 
-  def run(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Sol] = {
-    log.info(s"Island running with terminationCriteria=${terminationCriteria}")
 
-    // TODO can we put all of these in some combined pool? don't like having to manage each
-    creatorAgents.foreach(_.start())
-    mutatorAgents.foreach(_.start())
-    deletorAgents.foreach(_.start())
+  override def runAsync(terminationCriteria: TTerminationCriteria): Future[TEvolutionaryProcess[Sol]] = {
+    Future {
+      log.info(s"Island running with terminationCriteria=${terminationCriteria}")
 
-    // TODO this is not ideal. fix wait time/add features to termination criteria
-    val startTime = Calendar.getInstance().toInstant.toEpochMilli
+      // TODO can we put all of these in some combined pool? don't like having to manage each
+      creatorAgents.foreach(_.start())
+      mutatorAgents.foreach(_.start())
+      deletorAgents.foreach(_.start())
 
-    while (startTime + terminationCriteria.time.toMillis >
-      Calendar.getInstance().toInstant.toEpochMilli) {
-      Thread.sleep(500)
-      val pareto = pop.getParetoFrontier()
-      log.info(f"pareto = ${pareto}")
+      // TODO this is not ideal. fix wait time/add features to termination criteria
+      val startTime = Calendar.getInstance().toInstant.toEpochMilli
+
+      while (startTime + terminationCriteria.time.toMillis >
+        Calendar.getInstance().toInstant.toEpochMilli) {
+        Thread.sleep(500)
+        val pareto = pop.getParetoFrontier()
+        log.info(f"pareto = ${pareto}")
+      }
+
+      log.info(f"startTime=${startTime}, now=${Calendar.getInstance().toInstant.toEpochMilli}")
+
+      creatorAgents.foreach(_.stop())
+      mutatorAgents.foreach(_.stop())
+      deletorAgents.foreach(_.stop())
+
+      this
     }
+  }
 
-    log.info(f"startTime=${startTime}, now=${Calendar.getInstance().toInstant.toEpochMilli}")
-
-    creatorAgents.foreach(_.stop())
-    mutatorAgents.foreach(_.stop())
-    deletorAgents.foreach(_.stop())
-
-    this
+  def runBlocking(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Sol] = {
+    Await.result(this.runAsync(terminationCriteria), Duration.Inf)
   }
 
   override def currentParetoFrontier(): TParetoFrontier[Sol] = pop.getParetoFrontier()
@@ -114,10 +123,14 @@ object EvvoIsland {
   case class Wrapper[Sol](ref: ActorRef) extends TEvolutionaryProcess[Sol] {
     implicit val timeout: Timeout = Timeout(5.days)
 
-    override def run(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Sol] = {
-      // Block forever, `run` is meant to be a blocking call.
-      Await.result(ref ? Run(terminationCriteria), Duration.Inf)
+    override def runBlocking(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Sol] = {
+      Await.result(this.runAsync(terminationCriteria), Duration.Inf)
       this
+    }
+
+    override def runAsync(terminationCriteria: TTerminationCriteria): Future[TEvolutionaryProcess[Sol]] = {
+      (ref ? Run(terminationCriteria))
+        .map(_.asInstanceOf[TEvolutionaryProcess[Sol]])
     }
 
     override def currentParetoFrontier(): TParetoFrontier[Sol] = {

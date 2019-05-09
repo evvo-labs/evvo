@@ -91,7 +91,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
 
       val pareto: Set[Solution] = getEvvo(listLength)
-        .run(terminate)
+        .runBlocking(terminate)
         .currentParetoFrontier()
         .solutions
         .map(_.solution)
@@ -105,7 +105,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
 
       val pareto: Set[Solution] = getEvvo(listLength)
-        .run(terminate)
+        .runBlocking(terminate)
         .currentParetoFrontier()
         .solutions
         .map(_.solution)
@@ -120,7 +120,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
 
       val pareto: Set[Solution] = getEvvo(listLength)
-        .run(terminate)
+        .runBlocking(terminate)
         .currentParetoFrontier()
         .solutions
         .map(_.solution)

@@ -105,7 +105,7 @@ object ProfessorMatching {
 
     // TODO rename termination criteria
     val manager = new IslandManager[PMSolution](5, islandBuilder)
-    manager.run(TerminationCriteria(1.second))
+    manager.runBlocking(TerminationCriteria(1.second))
     val pareto = manager.currentParetoFrontier()
     println(pareto)
   }

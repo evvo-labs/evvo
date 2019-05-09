@@ -57,7 +57,7 @@ abstract class AAgent[Sol](protected val strategy: TAgentStrategy,
           }
         }
       } catch {
-        case e: InterruptedException => () // ignore Interrupted exception, this is expected
+        case e: InterruptedException => return
       }
     }
   }

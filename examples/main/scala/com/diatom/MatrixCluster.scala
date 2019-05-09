@@ -172,7 +172,7 @@ object MatrixCluster {
       .addObjective(allFloods)
     val manager = new IslandManager[Solution](1, islandBuilder)
 
-    val pareto = manager.run(TerminationCriteria(1.minute))
+    val pareto = manager.runBlocking(TerminationCriteria(1.minute))
     println(s"pareto = ${pareto}")
 
   }
