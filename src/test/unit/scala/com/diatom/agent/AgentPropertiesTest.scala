@@ -5,7 +5,6 @@ import com.diatom._
 import com.diatom.island.population.{Minimize, Objective, Population, Scored, TObjective, TScored}
 import com.diatom.tags.Slow
 import org.scalatest.{BeforeAndAfter, Matchers, WordSpecLike}
-import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -50,8 +49,6 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   val strategy: TAgentStrategy = _ => 70.millis
 
   val fitnessFunc: TObjective[S] = Objective(_.toDouble, "Double", Minimize)
-
-  implicit val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   before {
     pop = Population[S](Vector(fitnessFunc))

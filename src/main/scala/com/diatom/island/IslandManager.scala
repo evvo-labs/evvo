@@ -16,10 +16,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 class IslandManager[Sol](val numIslands: Int,
                          islandBuilder: EvvoIslandBuilder[Sol],
-                         val actorSystemName: String = "EvvoCluster")
+                         val actorSystemName: String = "EvvoCluster",
+                         val userConfig: String = "src/main/resources/application.conf")
   extends TEvolutionaryProcess[Sol] {
 
-  private val config = ConfigFactory.parseFile(new File("application.conf")).resolve()
+  private val config = ConfigFactory
+    // TODO should be configurable by end users
+    .parseFile(new File(userConfig))
+    .withFallback(ConfigFactory.parseFile(new File("src/main/resources/application.conf")))
+    .resolve()
+
   implicit val system: ActorSystem = ActorSystem(actorSystemName, config)
 
   /**

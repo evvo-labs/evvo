@@ -8,13 +8,10 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.diatom._
 import com.diatom.agent._
-import com.typesafe.config.ConfigFactory
-import org.slf4j.{Logger, LoggerFactory}
 import akka.cluster.Cluster
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import java.io.File
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.diatom.island.population.{Maximize, Minimize, Objective, Population, TObjective, TParetoFrontier}

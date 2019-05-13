@@ -1,9 +1,10 @@
 ### Required for v0 launch:
-- better, configurable logging
-- implement smarter strategies, more default strategies, and a better calling API 
 - network parallelism & island exchange
+- implement smarter strategies, more default strategies, and a better calling API 
 - more examples
 - better docs
+- get on maven and sbt
+- make example project using Evvo as dependency through maven
 
 
 ### Longterm 
