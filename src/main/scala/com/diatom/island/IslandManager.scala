@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 class IslandManager[Sol](val numIslands: Int,
                          islandBuilder: EvvoIslandBuilder[Sol],
-                         val actorSystemName: String = "EvvoCluster",
+                         val actorSystemName: String = "EvvoNode",
                          val userConfig: String = "src/main/resources/application.conf")
   extends TEvolutionaryProcess[Sol] {
 

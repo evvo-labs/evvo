@@ -2,19 +2,21 @@ package com.diatom.island
 
 import java.util.Calendar
 
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Address, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Address, Props, RootActorPath, Terminated}
 import akka.event.{LoggingAdapter, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.diatom._
 import com.diatom.agent._
 import akka.cluster.Cluster
+import akka.cluster.ClusterEvent.MemberUp
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.diatom.island.population.{Maximize, Minimize, Objective, Population, TObjective, TParetoFrontier}
+
+import scala.collection.mutable
 
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple
@@ -27,7 +29,7 @@ class EvvoIsland[Sol]
   mutators: Vector[TMutatorFunc[Sol]],
   deletors: Vector[TDeletorFunc[Sol]],
   fitnesses: Vector[TObjective[Sol]]
-) (implicit val system: ActorSystem)
+)(implicit val system: ActorSystem)
   extends Actor with TEvolutionaryProcess[Sol] with ActorLogging {
 
   private val cluster = Cluster(context.system)
@@ -41,10 +43,37 @@ class EvvoIsland[Sol]
   // for messages
   import com.diatom.island.EvvoIsland._
 
+  private val islands = mutable.ArrayBuffer.empty[ActorRef]
+
+  override def preStart(): Unit = {
+    cluster.subscribe(self, classOf[MemberUp])
+  }
+
+  override def postStop(): Unit = {
+    cluster.unsubscribe(self)
+  }
+
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.runBlocking(t)
     case GetParetoFrontier => sender ! this.currentParetoFrontier()
+    case MemberUp(member) =>
+      logger.info(s"Received memberup with ${member.address}")
+      val actorSelection = context.actorSelection(RootActorPath(member.address) / "user" / "*")
+      actorSelection ! IslandRegistration
+    case IslandRegistration =>
+      this.islands += sender
+      logger.debug(this.islands.toString)
+      context.watch(sender)
+
+      println(f"this.islands = ${this.islands}")
+
+    case Terminated(island) =>
+      islands -= island
   })
+
+  case class Scream(aaa: String)
+
+  case object IslandRegistration
 
 
   override def runAsync(terminationCriteria: TTerminationCriteria)
@@ -134,13 +163,15 @@ object EvvoIsland {
   }
 
   case class Run(terminationCriteria: TTerminationCriteria)
+
   case object GetParetoFrontier
+
 }
 
 /**
-  * @param creators  the functions to be used for creating new solutions.
-  * @param mutators  the functions to be used for creating new solutions from current solutions.
-  * @param deletors  the functions to be used for deciding which solutions to delete.
+  * @param creators   the functions to be used for creating new solutions.
+  * @param mutators   the functions to be used for creating new solutions from current solutions.
+  * @param deletors   the functions to be used for deciding which solutions to delete.
   * @param objectives the objective functions to maximize.
   */
 case class EvvoIslandBuilder[Sol]
@@ -186,7 +217,6 @@ case class EvvoIslandBuilder[Sol]
   : EvvoIslandBuilder[Sol] = {
     this.copy(objectives = objectives + objective)
   }
-
 
 
   // TODO this shouldn't even be exposed to the world, we should hide it in IslandManager
