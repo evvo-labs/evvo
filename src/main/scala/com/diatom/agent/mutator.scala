@@ -1,35 +1,35 @@
 package com.diatom.agent
 
-import com.diatom.TPopulation
-import com.diatom.agent.func.TMutatorFunc
-
+import akka.event.LoggingAdapter
+import com.diatom.island.population.TPopulation
 import scala.concurrent.duration._
 
 trait TMutatorAgent[Sol] extends TAgent[Sol]
 
 case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol],
-                             pop: TPopulation[Sol],
-                             strat: TAgentStrategy = MutatorAgentDefaultStrategy())
-  extends AAgent[Sol](strat, pop, mutate.name) with TMutatorAgent[Sol] {
+                             population: TPopulation[Sol],
+                             strategy: TAgentStrategy = MutatorAgentDefaultStrategy())
+                            (implicit val logger: LoggingAdapter)
+  extends AAgent[Sol](strategy, population, mutate.name)(logger) with TMutatorAgent[Sol] {
 
-
-  def step(): Unit = {
-    //TODO validate size of input set
-    val in = pop.getSolutions(mutate.numInputs)
-    val out = mutate.mutate(in)
-    pop.addSolutions(out)
-
+  override protected def step(): Unit = {
+    val in = population.getSolutions(mutate.numInputs)
+    if (mutate.shouldRunOnPartialInput || in.length == mutate.numInputs) {
+      val mutatedSolutions = mutate(in)
+      population.addSolutions(mutatedSolutions)
+    } else {
+      logger.info(s"${this}: not enough solutions in population: " +
+        s"got ${in.length}, wanted ${mutate.numInputs}")
+    }
   }
+
+  override def toString: String =  s"MutatorAgent[$name, $numInvocations]"
+
 }
 
 case class MutatorAgentDefaultStrategy() extends TAgentStrategy {
-  // if there are too many solutions, give the deletor chance to work
   // TODO this is bad. fix it.
   override def waitTime(populationInformation: TPopulationInformation): Duration = {
-    if (populationInformation.numSolutions > 1000) {
-      100.millis
-    } else {
       0.millis
-    }
   }
 }

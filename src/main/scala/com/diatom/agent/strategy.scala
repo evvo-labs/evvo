@@ -8,6 +8,7 @@ import scala.concurrent.duration._
   * agent's task.
   */
 trait TAgentStrategy {
+  // TODO returning a duration is arbitrary, find a better calling API/return type
   def waitTime(populationInformation: TPopulationInformation): Duration
 }
 

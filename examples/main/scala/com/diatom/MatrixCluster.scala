@@ -3,7 +3,9 @@ package com.diatom
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import com.diatom.island.{EvvoIsland, TerminationCriteria}
+import com.diatom.agent.default.{DeleteDominated, DeleteWorstHalfByRandomObjective}
+import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
+import com.diatom.island.population.{ParetoFrontier, TScored}
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -28,7 +30,7 @@ object MatrixCluster {
     val height = width
     val numClasses = 4
 
-    def numAdjacentEqual: FitnessFunctionType[Solution] = (solution: Solution) => {
+    def numAdjacentEqual: ObjectiveFunctionType[Solution] = (solution: Solution) => {
       def get(x: Int, y: Int) = {
         Option(solution.matrix
           .applyOrElse(x, (x: Int) => Vector[Int]())
@@ -56,7 +58,7 @@ object MatrixCluster {
       }).flatten.sum
     }
 
-    def num2StepNeighborsEqual: FitnessFunctionType[Solution] = (solution: Solution) => {
+    def num2StepNeighborsEqual: ObjectiveFunctionType[Solution] = (solution: Solution) => {
       def get(x: Int, y: Int) = {
         Option(solution.matrix
           .applyOrElse(x, (x: Int) => Vector[Int]())
@@ -110,23 +112,7 @@ object MatrixCluster {
       sols.map(s => mutate(s.solution))
     }
 
-
-    def deleteDominated: DeletorFunctionType[Solution] = (s: IndexedSeq[TScored[Solution]]) => {
-       s.filterNot(elem => ParetoFrontier(s).solutions.contains(elem))
-    }
-
-    def deleteWorstHalf: DeletorFunctionType[Solution] = (s: IndexedSeq[TScored[Solution]]) => {
-      if (s.isEmpty) {
-        s
-      } else {
-        val funcs = s.head.score.keys.toVector
-        val func = funcs(util.Random.nextInt(funcs.size))
-
-        s.toVector.sortBy(_.score(func)).take(s.size / 2).toSet
-      }
-    }
-
-    def floodFill(cl: Int): FitnessFunctionType[Solution] = {
+    def floodFill(cl: Int): ObjectiveFunctionType[Solution] = {
       sol: Solution => {
         val m = sol.matrix
 
@@ -164,29 +150,29 @@ object MatrixCluster {
       }
     }
 
-    def allFloods: FitnessFunctionType[Solution] =
+    def allFloods: ObjectiveFunctionType[Solution] =
       sol => {
         (0 until numClasses).map(c => floodFill(c)(sol)).sum
       }
 
-    implicit val system = ActorSystem("MatrixCluster")
-    val island = EvvoIsland.builder[Solution]()
-      .addCreator(createMatrix)
-      .addMutator(mutateMatrix)
-      .addMutator(mutateMatrix)
-      .addMutator(mutateMatrix)
-      .addMutator(mutateMatrix)
-      .addDeletor(deleteWorstHalf)
-      .addDeletor(deleteWorstHalf)
-      .addDeletor(deleteWorstHalf)
-      .addDeletor(deleteWorstHalf)
-      .addDeletor(deleteDominated)
-      .addDeletor(deleteDominated)
-      .addFitness(numAdjacentEqual)
-      .addFitness(allFloods)
-      .build()
+    implicit val system = ActorSystem("EvvoCluster")
+    val islandBuilder = EvvoIsland.builder[Solution]()
+      .addCreatorFromFunction(createMatrix)
+      .addMutatorFromFunction(mutateMatrix)
+      .addMutatorFromFunction(mutateMatrix)
+      .addMutatorFromFunction(mutateMatrix)
+      .addMutatorFromFunction(mutateMatrix)
+      .addDeletor(DeleteWorstHalfByRandomObjective[Solution]())
+      .addDeletor(DeleteWorstHalfByRandomObjective[Solution]())
+      .addDeletor(DeleteWorstHalfByRandomObjective[Solution]())
+      .addDeletor(DeleteWorstHalfByRandomObjective[Solution]())
+      .addDeletor(DeleteDominated[Solution]())
+      .addDeletor(DeleteDominated[Solution]())
+      .addObjective(numAdjacentEqual)
+      .addObjective(allFloods)
+    val manager = new IslandManager[Solution](1, islandBuilder)
 
-    val pareto = island.run(TerminationCriteria(10.minutes))
+    val pareto = manager.runBlocking(TerminationCriteria(1.minute))
     println(s"pareto = ${pareto}")
 
   }

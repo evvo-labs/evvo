@@ -1,6 +1,6 @@
-package com.diatom
+package com.diatom.island.population
 
-import com.diatom.HashingStrategy.HashingStrategy
+import com.diatom.island.population.HashingStrategy.HashingStrategy
 
 /**
   * Represents a solution scored by mutliple fitness functions.
@@ -9,8 +9,7 @@ trait TScored[Sol] {
   /**
     * Maps the name of fitness functions to the score of the solution with respect to them.
     */
-  def score: Map[String, Double]
-
+  def score: Map[(String, OptimizationDirection), Double]
 
   def solution: Sol
 
@@ -36,7 +35,7 @@ object HashingStrategy extends Enumeration {
   val ON_SOLUTIONS, ON_SCORES = Value
 }
 
-case class Scored[Sol](score: Map[String, Double],
+case class Scored[Sol](score: Map[(String, OptimizationDirection), Double],
                        solution: Sol,
                        hashStrategy: HashingStrategy = HashingStrategy.ON_SCORES)
   extends TScored[Sol]

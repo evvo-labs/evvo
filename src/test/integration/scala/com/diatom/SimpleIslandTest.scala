@@ -1,6 +1,8 @@
 package com.diatom
 
 import akka.actor.ActorSystem
+import com.diatom.agent.TDeletorFunc
+import com.diatom.agent.default.DeleteWorstHalfByRandomObjective
 import com.diatom.island.{EvvoIsland, IslandManager, TEvolutionaryProcess, TerminationCriteria}
 import com.diatom.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
@@ -56,23 +58,9 @@ class SimpleIslandTest extends WordSpec with Matchers {
       })
     }
 
-    val deleteFunc: DeletorFunctionType[Solution] = s => {
-      if (s.isEmpty) {
-        s
-      } else {
-        try {
-          val sums = s.map(_.score.values.sum).toVector.sorted
-          val cutoff = sums(sums.size / 2)
-          s.filter(_.score.values.sum > cutoff)
-        } catch {
-          case e =>
-            println(s)
-            throw e
-        }
-      }
-    }
+    val deleteFunc: TDeletorFunc[Solution] = DeleteWorstHalfByRandomObjective[Solution]()
 
-    val numInversions: FitnessFunctionType[Solution] = (s: Solution) => {
+    val numInversions: ObjectiveFunctionType[Solution] = (s: Solution) => {
       (for ((elem, index) <- s.zipWithIndex) yield {
         s.drop(index).count(_ < elem)
       }).sum
@@ -80,17 +68,17 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
     // TODO add convenience constructor for adding multiple duplicate mutators/creators/deletors
     val islandBuilder = EvvoIsland.builder[Solution]()
-      .addCreator(createFunc)
-      .addMutator(mutateFunc)
-      .addMutator(mutateFunc)
-      .addMutator(mutateFunc)
-      .addMutator(mutateFunc)
+      .addCreatorFromFunction(createFunc)
+      .addMutatorFromFunction(mutateFunc)
+      .addMutatorFromFunction(mutateFunc)
+      .addMutatorFromFunction(mutateFunc)
+      .addMutatorFromFunction(mutateFunc)
       .addDeletor(deleteFunc)
       .addDeletor(deleteFunc)
       .addDeletor(deleteFunc)
       .addDeletor(deleteFunc)
       .addDeletor(deleteFunc)
-      .addFitness(numInversions)
+      .addObjective(numInversions)
     new IslandManager[Solution](5, islandBuilder)
   }
 
@@ -104,7 +92,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
 
       val pareto: Set[Solution] = getEvvo(listLength)
-        .run(terminate)
+        .runBlocking(terminate)
         .currentParetoFrontier()
         .solutions
         .map(_.solution)
@@ -118,7 +106,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
 
       val pareto: Set[Solution] = getEvvo(listLength)
-        .run(terminate)
+        .runBlocking(terminate)
         .currentParetoFrontier()
         .solutions
         .map(_.solution)
@@ -133,7 +121,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
 
 
       val pareto: Set[Solution] = getEvvo(listLength)
-        .run(terminate)
+        .runBlocking(terminate)
         .currentParetoFrontier()
         .solutions
         .map(_.solution)

@@ -14,26 +14,22 @@ case class ParsedProblem(professors: Vector[ParsedProfPreferences], sections: Ve
 
 }
 
+// TODO how to link to another class in ScalaDoc?
 /**
-  *
-  * @param id                          the professor's id
-  * @param sectionScheduleToPreference a mapping of preferences for each schedule
-  * @param courseToPreference          a mapping of preferences for each course they want to teach
-  * @param numSectionsToPreference     mapping from number of sections to preference
-  * @param numPrepsToPreference        a mapping of # unique classes to preference for that #
+  * See ProfPreferences.
   */
 case class ParsedProfPreferences(id: Int,
                                  sectionScheduleToPreference: Map[String, Int],
                                  courseToPreference: Map[Int, Int],
-                                 numSectionsToPreference: Map[Int, Int],
-                                 numPrepsToPreference: Map[Int, Int]) {
+                                 maxSections: Int,
+                                 maxPreps: Int) {
 
   def toProfPreference: ProfPreferences = ProfPreferences(
     id,
     sectionScheduleToPreference.asInstanceOf[Map[ScheduleID, Int]],
     courseToPreference.asInstanceOf[Map[CourseID, Int]],
-    numSectionsToPreference,
-    numPrepsToPreference)
+    maxSections,
+    maxPreps)
 }
 
 case class ParsedSection(id: Int, courseID: Int, scheduleID: String) {

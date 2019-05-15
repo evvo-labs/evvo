@@ -3,12 +3,12 @@ package com.diatom.professormatching
 import java.time.LocalTime.parse
 import java.time.{DayOfWeek, LocalTime}
 
-import akka.actor.ActorSystem
+import com.diatom._
+import com.diatom.agent._
+import com.diatom.island.population.{Maximize, Objective}
+import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
 
 import scala.concurrent.duration._
-import com.diatom.island.{EvvoIsland, TerminationCriteria}
-import com.diatom._
-import com.diatom.agent.func._
 
 /**
   * Matches professors with courses, assuming:
@@ -22,7 +22,7 @@ object ProfessorMatching {
   type SectionID >: Int
   type CourseID >: Int
   type ScheduleID >: String
-  type Sol = Map[ProfID, Set[SectionID]]
+  type PMSolution = Map[ProfID, Set[SectionID]] // short for professor-matching solution
 
   case class Problem(profIDtoPref: Map[ProfID, ProfPreferences],
                      sectionIDtoSection: Map[SectionID, Section],
@@ -33,14 +33,14 @@ object ProfessorMatching {
     * @param id                          the professor's id
     * @param sectionScheduleToPreference a mapping of preferences for each schedule
     * @param courseToPreference          a mapping of preferences for each course they want to teach
-    * @param numSectionsToPreference     mapping from number of sections to preference
-    * @param numPrepsToPreference        a mapping of # unique classes to preference for that #
+    * @param maxSections                 maximum number of sections
+    * @param maxPreps                    maximum number of preps
     */
   case class ProfPreferences(id: ProfID,
                              sectionScheduleToPreference: Map[ScheduleID, Int],
                              courseToPreference: Map[CourseID, Int],
-                             numSectionsToPreference: Map[Int, Int],
-                             numPrepsToPreference: Map[Int, Int])
+                             maxSections: Int,
+                             maxPreps: Int)
 
   case class Section(id: SectionID, courseID: CourseID, scheduleID: ScheduleID)
 
@@ -92,19 +92,21 @@ object ProfessorMatching {
   // =================================== MAIN ===================================================
   def main(args: Array[String]): Unit = {
 
-    implicit val system = ActorSystem("ProfessorMatching")
-    val island = EvvoIsland.builder()
-      .addFitness(sumProfessorSchedulePreferences, "Sched")
-      .addFitness(sumProfessorCoursePreferences, "Course")
-      .addFitness(sumProfessorNumPrepsPreferences, "#Prep")
-      .addFitness(sumProfessorSectionCountPreferences, "#Section")
+    // TODO rename fitness to objective function
+    //      and provide class to create objective functions
+    val islandBuilder = EvvoIsland.builder()
+      .addObjective(Objective(sumProfessorSchedulePreferences, "Sched", Maximize))
+      .addObjective(Objective(sumProfessorCoursePreferences, "Course", Maximize))
+      .addObjective(Objective(sumProfessorNumPrepsPreferences, "#Prep", Maximize))
+      .addObjective(Objective(sumProfessorSectionCountPreferences, "#Section", Maximize))
       .addCreator(CreatorFunc(validScheduleCreator, "creator"))
       .addMutator(MutatorFunc(swapTwoCourses, "swapTwoCourses"))
       .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
-      .addDeletor(DeletorFunc(deleteWorstHalf, "deleteWorstHalf"))
-      .build()
 
-    val pareto = island.run(TerminationCriteria(1.second))
+    // TODO rename termination criteria
+    val manager = new IslandManager[PMSolution](5, islandBuilder)
+    manager.runBlocking(TerminationCriteria(1.second))
+    val pareto = manager.currentParetoFrontier()
     println(pareto)
   }
 
@@ -120,8 +122,8 @@ object ProfessorMatching {
 
 
   // =================================== FITNESS ===================================================
-  val sumProfessorSchedulePreferences: FitnessFunctionType[Sol] = sol => {
-    -sol.foldLeft(0) {
+  val sumProfessorSchedulePreferences: ObjectiveFunctionType[PMSolution] = sol => {
+    sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         val prof = idToProf(profID)
         soFar + sections.foldLeft(0)((tot, sectionID) => {
@@ -132,8 +134,8 @@ object ProfessorMatching {
     }
   }
 
-  val sumProfessorCoursePreferences: FitnessFunctionType[Sol] = sol => {
-    -sol.foldLeft(0) {
+  val sumProfessorCoursePreferences: ObjectiveFunctionType[PMSolution] = sol => {
+    sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         soFar + sections.foldLeft(0)((tot, sectionID) => {
           tot + idToProf(profID)
@@ -143,22 +145,24 @@ object ProfessorMatching {
     }
   }
 
-  val sumProfessorSectionCountPreferences: FitnessFunctionType[Sol] = sol => {
-    -sol.foldLeft(0) {
+  val sumProfessorSectionCountPreferences: ObjectiveFunctionType[PMSolution] = sol => {
+    sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
-        soFar + idToProf(profID).numSectionsToPreference(sections.size)
+        soFar + (if (idToProf(profID).maxSections < sections.size) 1 else 0)
     }
   }
 
-  val sumProfessorNumPrepsPreferences: FitnessFunctionType[Sol] = sol => {
-    -sol.foldLeft(0) {
+  val sumProfessorNumPrepsPreferences: ObjectiveFunctionType[PMSolution] = sol => {
+    sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
-        soFar + idToProf(profID).numPrepsToPreference(sections.map(idToSection(_).courseID).size)
+        soFar + (
+          if (idToProf(profID).maxPreps < sections.map(idToSection(_).courseID).size)
+            1 else 0)
     }
   }
 
   // =================================== CREATOR ==================================================
-  val validScheduleCreator: CreatorFunctionType[Sol] = () => {
+  val validScheduleCreator: CreatorFunctionType[PMSolution] = () => {
     Vector.fill(10)(idToProf.keysIterator.zipAll(
       util.Random.shuffle(idToSection.keys.toVector)
         .grouped(idToSection.size / idToProf.size + 1)
@@ -176,8 +180,8 @@ object ProfessorMatching {
   }
 
   // =================================== MUTATOR ===================================================
-  val swapTwoCourses: MutatorFunctionType[Sol] = sols => {
-    def swap(sol: Sol): Sol = {
+  val swapTwoCourses: MutatorFunctionType[PMSolution] = sols => {
+    def swap(sol: PMSolution): PMSolution = {
       val prof1: ProfPreferences = idToProf(randomKey(idToProf))
       val prof2: ProfPreferences = {
         var prof2maybe: ProfPreferences = null
@@ -199,8 +203,9 @@ object ProfessorMatching {
 
     sols.map(_.solution).map(swap)
   }
-  val balanceCourseload: MutatorFunctionType[Sol] = sols => {
-    def swap(sol: Sol): Sol = {
+
+  val balanceCourseload: MutatorFunctionType[PMSolution] = sols => {
+    def swap(sol: PMSolution): PMSolution = {
       val prof1: ProfPreferences = idToProf(randomKey(idToProf))
       val prof2: ProfPreferences = {
         var prof2maybe: ProfPreferences = null
@@ -235,7 +240,7 @@ object ProfessorMatching {
 
 
   // =================================== DELETOR ===================================================
-  val deleteWorstHalf: DeletorFunctionType[Sol] = s => {
+  val deleteWorstHalf: DeletorFunctionType[PMSolution] = s => {
     if (s.isEmpty) {
       s
     } else {

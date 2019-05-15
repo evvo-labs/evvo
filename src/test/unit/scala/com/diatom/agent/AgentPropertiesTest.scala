@@ -1,16 +1,17 @@
 package com.diatom.agent
 
-import akka.event.slf4j.Logger
-import com.diatom.{Population, _}
-import com.diatom.agent.func.{CreatorFunc, MutatorFunc}
+import akka.event.LoggingAdapter
+import com.diatom._
+import com.diatom.island.population.{Minimize, Objective, Population, Scored, TObjective, TScored}
 import com.diatom.tags.Slow
 import org.scalatest.{BeforeAndAfter, Matchers, WordSpecLike}
-import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 import scala.concurrent.duration._
 
 class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter {
+
+  implicit val log: LoggingAdapter = NullLogger
 
   // TODO reimplement this using http://doc.scalatest.org/3.0.1/#org.scalatest.PropSpec@testMatrix
 
@@ -34,22 +35,20 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   }
   val mutatorFunc = MutatorFunc(mutate, "mutate")
   var mutatorAgent: TAgent[S] = _
-  val mutatorInput: Set[TScored[S]] = Set[TScored[S]](Scored(Map("Score1" -> 3), 2))
+  val mutatorInput: Set[TScored[S]] = Set[TScored[S]](Scored(Map(("Score1", Minimize) -> 3), 2))
 
   val delete: DeletorFunctionType[S] = set => {
     agentFunctionCalled("delete") = true
     set
   }
-  val deletorFunc = func.DeletorFunc(delete, "delete", 1)
+  val deletorFunc = DeletorFunc(delete, "delete", 1)
   var deletorAgent: TAgent[S] = _
   val deletorInput: Set[TScored[S]] = mutatorInput
 
   var agents: Vector[TAgent[S]] = _
   val strategy: TAgentStrategy = _ => 70.millis
 
-  val fitnessFunc: TFitnessFunc[S] = FitnessFunc(_.toDouble, "Double")
-
-  implicit val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  val fitnessFunc: TObjective[S] = Objective(_.toDouble, "Double", Minimize)
 
   before {
     pop = Population[S](Vector(fitnessFunc))

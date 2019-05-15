@@ -1,0 +1,22 @@
+<!-- TODO allow users to provide their own logback configurations -->
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <encoder>
+            <pattern>%X{akkaTimestamp} %-5level[%thread] %logger{0} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <File>./logs/akka.log</File>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%-5level] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+</configuration>

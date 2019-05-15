@@ -1,7 +1,8 @@
 package com.diatom.island
 
-import com.diatom.TParetoFrontier
+import com.diatom.island.population.TParetoFrontier
 
+import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
 /**
@@ -14,9 +15,9 @@ trait TEvolutionaryProcess[Solution] {
     *
     * @return this
     */
-  def run(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Solution]
+  def runBlocking(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Solution]
 
-  //TODO add a runAsync(), will be required for a controller
+  def runAsync(terminationCriteria: TTerminationCriteria): Future[TEvolutionaryProcess[Solution]]
 
   /**
     * @return the current pareto frontier of solutions on this island?
