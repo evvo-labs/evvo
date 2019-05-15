@@ -1,6 +1,7 @@
 package com.diatom
 
 import akka.actor.ActorSystem
+import com.diatom.agent.TDeletorFunc
 import com.diatom.agent.default.DeleteWorstHalfByRandomObjective
 import com.diatom.island.{EvvoIsland, IslandManager, TEvolutionaryProcess, TerminationCriteria}
 import com.diatom.tags.{Performance, Slow}
@@ -57,7 +58,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
       })
     }
 
-    val deleteFunc: DeletorFunctionType[Solution] = DeleteWorstHalfByRandomObjective[Solution]()
+    val deleteFunc: TDeletorFunc[Solution] = DeleteWorstHalfByRandomObjective[Solution]()
 
     val numInversions: ObjectiveFunctionType[Solution] = (s: Solution) => {
       (for ((elem, index) <- s.zipWithIndex) yield {
@@ -72,11 +73,11 @@ class SimpleIslandTest extends WordSpec with Matchers {
       .addMutatorFromFunction(mutateFunc)
       .addMutatorFromFunction(mutateFunc)
       .addMutatorFromFunction(mutateFunc)
-      .addDeletorFromFunction(deleteFunc)
-      .addDeletorFromFunction(deleteFunc)
-      .addDeletorFromFunction(deleteFunc)
-      .addDeletorFromFunction(deleteFunc)
-      .addDeletorFromFunction(deleteFunc)
+      .addDeletor(deleteFunc)
+      .addDeletor(deleteFunc)
+      .addDeletor(deleteFunc)
+      .addDeletor(deleteFunc)
+      .addDeletor(deleteFunc)
       .addObjective(numInversions)
     new IslandManager[Solution](5, islandBuilder)
   }
