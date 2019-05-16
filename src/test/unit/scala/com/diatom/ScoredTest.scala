@@ -50,7 +50,7 @@ class ScoreHashingTest extends WordSpec with Matchers {
     }
 
     "default to hashing on scores" in {
-      Scored(Map(), null).hashStrategy shouldBe
+      Scored[Double](Map(), 3).hashStrategy shouldBe
         HashingStrategy.ON_SCORES
     }
   }

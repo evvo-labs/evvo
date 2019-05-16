@@ -175,12 +175,18 @@
                 <configuration>
                     <verbose>false</verbose>
                     <failOnViolation>true</failOnViolation>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <failOnWarning>false</failOnWarning>
-                    <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
-                    <testSourceDirectory>${project.basedir}/src/test/unit/scala</testSourceDirectory>
-                    <testSourceDirectory>${project.basedir}/src/test/integration/scala</testSourceDirectory>
-                    <configLocation>${project.basedir}/project/scalastyle_config.xml</configLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <configLocation>${project.basedir}/project/scalastyle_config.xml
+                    </configLocation>
+                    <sourceDirectories>
+                        <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
+                        <sourceDirectory>${project.basedir}/examples/main/</sourceDirectory>
+                    </sourceDirectories>
+                    <testSourceDirectories>
+                        <testSourceDirectory>${project.basedir}/src/test</testSourceDirectory>
+                    </testSourceDirectories>
+
                 </configuration>
                 <executions>
                     <execution>

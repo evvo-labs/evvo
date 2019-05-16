@@ -46,9 +46,9 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     }
   }
 
+  var pop: Population[Double] = _
+  val popSize = 10
   "A non-empty population hashing on solutions" should {
-    var pop: Population[Double] = null
-    val popSize = 10
     before {
       pop = population.Population(fitnesses, HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions((1 to popSize).map(_.toDouble))
