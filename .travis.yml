@@ -1,0 +1,5 @@
+language: scala
+scala:
+  - 2.12.6
+
+script: mvn scalastyle:check && mvn test

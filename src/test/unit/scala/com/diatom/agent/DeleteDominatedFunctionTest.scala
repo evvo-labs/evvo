@@ -1,7 +1,7 @@
 package com.diatom.agent
 
 import org.scalatest.{Matchers, WordSpec}
-import com.diatom.agent.default.DeleteDominated
+import com.diatom.agent.defaults.DeleteDominated
 import com.diatom.island.population
 import com.diatom.island.population.{Maximize, Minimize, Scored}
 

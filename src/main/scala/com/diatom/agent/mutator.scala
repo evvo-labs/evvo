@@ -2,6 +2,7 @@ package com.diatom.agent
 
 import akka.event.LoggingAdapter
 import com.diatom.island.population.TPopulation
+
 import scala.concurrent.duration._
 
 trait TMutatorAgent[Sol] extends TAgent[Sol]
@@ -23,13 +24,13 @@ case class MutatorAgent[Sol](mutate: TMutatorFunc[Sol],
     }
   }
 
-  override def toString: String =  s"MutatorAgent[$name, $numInvocations]"
+  override def toString: String = s"MutatorAgent[$name, $numInvocations]"
 
 }
 
 case class MutatorAgentDefaultStrategy() extends TAgentStrategy {
   // TODO this is bad. fix it.
   override def waitTime(populationInformation: TPopulationInformation): Duration = {
-      0.millis
+    0.millis
   }
 }

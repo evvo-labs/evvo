@@ -1,4 +1,5 @@
-# Evvo by Diatom Labs
+# Evvo by Diatom Labs ![travis master status](https://travis-ci.org/evvo-labs/evvo.svg?branch=master) 
+
 
 Evvo is the Scala framework for [multi-objective](https://en.wikipedia.org/wiki/Multi-objective_optimization) [evolutionary computing](https://en.wikipedia.org/wiki/Evolutionary_computation). The primary design goals are providing the best possible interface for developers, network parallelism, first-class support for any type of problem, and extensible configurations with sane defaults.
 

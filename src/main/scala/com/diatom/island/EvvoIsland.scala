@@ -16,6 +16,10 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.diatom.island.population.{Maximize, Minimize, Objective, Population, TObjective, TParetoFrontier}
 
+
+// for messages
+import com.diatom.island.EvvoIsland._
+
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple
   * CPU cores). Because it is an Akka actor, generally people will use SingleIslandEvvo.Wrapped
@@ -38,9 +42,6 @@ class EvvoIsland[Sol]
   private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
   private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
 
-  // for messages
-  import com.diatom.island.EvvoIsland._
-
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.runBlocking(t)
     case GetParetoFrontier => sender ! this.currentParetoFrontier()
@@ -50,7 +51,7 @@ class EvvoIsland[Sol]
   override def runAsync(terminationCriteria: TTerminationCriteria)
   : Future[TEvolutionaryProcess[Sol]] = {
     Future {
-      log.info(s"Island running with terminationCriteria=${terminationCriteria}")
+      log.info(f"Island running with terminationCriteria=${terminationCriteria}")
 
       // TODO can we put all of these in some combined pool? don't like having to manage each
       creatorAgents.foreach(_.start())
@@ -62,7 +63,7 @@ class EvvoIsland[Sol]
 
       while (startTime + terminationCriteria.time.toMillis >
         Calendar.getInstance().toInstant.toEpochMilli) {
-        Thread.sleep(500)
+        Thread.sleep(500) // scalastyle:ignore magic.number
         val pareto = pop.getParetoFrontier()
         log.info(f"pareto = ${pareto}")
       }
@@ -176,9 +177,9 @@ case class EvvoIslandBuilder[Sol]
 
   // TODO this calling API is dangerous because it assumes minimization. it should be removed,
   //      but this will require refactoring across examples
-  def addObjective(objective: ObjectiveFunctionType[Sol], name: String = null)
+  def addObjective(objective: ObjectiveFunctionType[Sol], name: String = "")
   : EvvoIslandBuilder[Sol] = {
-    val realName = if (name == null) objective.toString() else name
+    val realName = if (name == "") objective.toString() else name
     this.copy(objectives = objectives + Objective(objective, realName, Minimize))
   }
 

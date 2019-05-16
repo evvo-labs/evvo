@@ -1,0 +1,15 @@
+<configuration>
+<!--    Nogs du
+ring tests. -->
+<!--    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
+<!--        <target>System.out</target>-->
+<!--        <encoder>-->
+<!--            <pattern>%X{akkaTimestamp} %-5level[%thread] %logger{0} - %msg%n</pattern>-->
+<!--        </encoder>-->
+<!--    </appender>-->
+
+
+<!--    <root level="debug">-->
+<!--        <appender-ref ref="CONSOLE"/>-->
+<!--    </root>-->
+</configuration>
