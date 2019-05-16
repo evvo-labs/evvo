@@ -9,37 +9,12 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/python" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/main/scala" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/unit/scala" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="scala-sdk-2.12.7" level="application" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-cluster_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-remote_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-stream_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: org.reactivestreams:reactive-streams:1.0.2" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe:ssl-config-core_2.12:0.3.7" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-protobuf_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty:3.10.6.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.aeron:aeron-driver:1.15.1" level="project" />
-    <orderEntry type="library" name="Maven: org.agrona:agrona:0.9.31" level="project" />
-    <orderEntry type="library" name="Maven: io.aeron:aeron-client:1.15.1" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-actor_2.12:2.5.22" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: com.typesafe.akka:akka-testkit_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-slf4j_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-cluster_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-remote_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-stream_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: org.reactivestreams:reactive-streams:1.0.2" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe:ssl-config-core_2.12:0.3.7" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-protobuf_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty:3.10.6.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.aeron:aeron-driver:1.15.1" level="project" />
-    <orderEntry type="library" name="Maven: org.agrona:agrona:0.9.31" level="project" />
-    <orderEntry type="library" name="Maven: io.aeron:aeron-client:1.15.1" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-actor_2.12:2.5.22" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: com.typesafe.akka:akka-testkit_2.12:2.5.22" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-slf4j_2.12:2.5.22" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.12.6" level="project" />
     <orderEntry type="library" name="Maven: com.typesafe.akka:akka-cluster_2.12:2.5.22" level="project" />
     <orderEntry type="library" name="Maven: com.typesafe.akka:akka-remote_2.12:2.5.22" level="project" />
