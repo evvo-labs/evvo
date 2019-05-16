@@ -1,7 +1,7 @@
 package com.diatom.integration
 
 import com.diatom.agent.TDeletorFunc
-import com.diatom.agent.default.DeleteWorstHalfByRandomObjective
+import com.diatom.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.diatom.island.{EvvoIsland, IslandManager, TEvolutionaryProcess, TerminationCriteria}
 import com.diatom.tags.{Performance, Slow}
 import com.diatom.{CreatorFunctionType, MutatorFunctionType, ObjectiveFunctionType}
@@ -79,7 +79,8 @@ class SimpleIslandTest extends WordSpec with Matchers {
       .addDeletor(deleteFunc)
       .addDeletor(deleteFunc)
       .addObjective(numInversions)
-    new IslandManager[Solution](5, islandBuilder)
+    val numIslands = 5
+    new IslandManager[Solution](numIslands, islandBuilder)
   }
 
   "Single Island Evvo" should {

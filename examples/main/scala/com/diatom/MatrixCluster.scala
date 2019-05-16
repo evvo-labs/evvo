@@ -3,7 +3,7 @@ package com.diatom
 import java.util.UUID
 
 import akka.actor.ActorSystem
-import com.diatom.agent.default.{DeleteDominated, DeleteWorstHalfByRandomObjective}
+import com.diatom.agent.defaults.{DeleteDominated, DeleteWorstHalfByRandomObjective}
 import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
 import com.diatom.island.population.{ParetoFrontier, TScored}
 
