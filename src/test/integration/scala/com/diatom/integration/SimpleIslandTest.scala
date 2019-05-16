@@ -1,10 +1,10 @@
-package com.diatom
+package com.diatom.integration
 
-import akka.actor.ActorSystem
 import com.diatom.agent.TDeletorFunc
 import com.diatom.agent.default.DeleteWorstHalfByRandomObjective
 import com.diatom.island.{EvvoIsland, IslandManager, TEvolutionaryProcess, TerminationCriteria}
 import com.diatom.tags.{Performance, Slow}
+import com.diatom.{CreatorFunctionType, MutatorFunctionType, ObjectiveFunctionType}
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
@@ -83,22 +83,6 @@ class SimpleIslandTest extends WordSpec with Matchers {
   }
 
   "Single Island Evvo" should {
-    // at this point, the second test replaces this one, but we're leaving it in as something
-    //    we were proud of once
-    "be able to sort a list of length 5 within 1 second" taggedAs(Performance, Slow) in {
-      val listLength = 5
-      val timeout = 1
-      val terminate = TerminationCriteria(timeout.seconds)
-
-
-      val pareto: Set[Solution] = getEvvo(listLength)
-        .runBlocking(terminate)
-        .currentParetoFrontier()
-        .solutions
-        .map(_.solution)
-      pareto should contain(1 to listLength toList)
-    }
-
     val timeout = 300
     f"be able to sort a list of length 10 within $timeout milliseconds" taggedAs(Performance, Slow) in {
       val listLength = 10
