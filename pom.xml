@@ -9,7 +9,6 @@
     <name>${project.artifactId}</name>
     <description>The Scala evolutionary computing framework</description>
     <inceptionYear>2018</inceptionYear>
-    <!--TODO pick a license-->
     <licenses>
         <license>
             <name>My License</name>
