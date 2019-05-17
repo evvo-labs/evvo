@@ -4,7 +4,6 @@
 Evvo is the Scala framework for [multi-objective](https://en.wikipedia.org/wiki/Multi-objective_optimization) [evolutionary computing](https://en.wikipedia.org/wiki/Evolutionary_computation). The primary design goals are providing the best possible interface for developers, network parallelism, first-class support for any type of problem, and extensible configurations with sane defaults.
 
 Here's an example showing how simple it is to set up and solve a basic problem (on one machine) using Evvo:
-
 ```scala
 import com.diatom.island._ 
 import scala.concurrent.duration._ // for `1.second`
@@ -32,22 +31,31 @@ This example assumes that you have a defined `Solution` type, a creator function
 #### Terminology
 **Actor**: an Akka actor.
 
-**Agent**: _not_ an Akka actor, but an evolutionary process. See _"Asynchronous Evolutionary Computing"_ for further explanation.
+**Agent**: _not_ an Akka actor, but a part of an asynchronous evolutionary system. See _"Asynchronous Evolutionary Computing"_ for further explanation.
 
-**Agent Strategy**: a function that consumes information about the state of the world and tells an agent how often it should be running
+**Agent Strategy**: a function that consumes information about the state of the world and tells an agent how often it should be running.
+
+**Creator Agent**: often shortened to "Creator", a Creator Agent calls a function to get a set of solutions, and then adds those solutions to the population. 
+
+**Deletor Agent**: often shortened to "Deletor", a Deletor Agent retrieves some number of solutions from the population, calls a function on that set of solutions, and deletes whichever solutions the function says to delete.
 
 **Diversity**: a measure of how similar the solutions in a population are. The exact measure can be customized for each problem, and then computed based on  some metric of solution's distances, or computed based on the scores according to fitness functions, in which case standard measures of distance in Euclidean space can be used.
 
+**Dominated Solution**: a dominated solution is worse in every regard than another solution, or worse in one regard and equal on others. For example, if there are three objective functions, each of which is to be maximized, then a solution scoring `(3, 9, 4)` would be dominated by one scoring `(5, 11, 4)`, but not one scoring `(5, 11, 3)`.
+
 **Emigration**: an island sending solutions to another island.
 
-**Immigration**: an island receiving new solutions from another island. When this happens, the recipient island may choose to accept none, some, or all of the incoming solutions.
+**Immigration**: an island receiving new solutions from another island
 
 **Island**: the second-largest unit of the evolutionary computing system: a population, shared among multiple actors modifying the population in various ways, and a network component that handles immigration and emigration. 
 
 **Island System** the entire evolutionary computing system: consisting of multiple islands, a manager of those islands, and interactions between the islands.
 
+**Mutator Agent**: often shortened to "Mutator", a Mutator Agent retrieves some number of solutions from the population, calls a function on that set of solutions to produce new solutions based on the input, and adds those new solutions to the population.
+
 **Pareto Frontier**: a set of [non-dominated solutions](https://en.wikipedia.org/wiki/Pareto_efficiency#Pareto_frontier).
 
+**Popluation**: each island has a population, which is simply a set of scored solutions. Agents interact with the population, and the goal of the whole system is to make the pareto frontier of the population as high-quality as possible.
 
 -------------------------------------------------------------------------------
 #### Asynchronous Evolutionary Computing
@@ -56,7 +64,16 @@ As described in [John Rachlin's paper on paper mill optimization](https://www.re
 -------------------------------------------------------------------------------
 #### Quickstart
 ##### Built-in Agents
-Likely, the built-in agents will be primarily deletors - deletors can work off the scores a solution gets on the default  
+While each type of problem needs a separate type of creator and mutator, deletors can be shared between problems.
+We provide default deletor agents in [defaults.scala](src/main/scala/com/diatom/agent/defaults/defaults.scala). One example is the `DeleteDominated` agent. This agent takes a sample from the population, and deletes any solutions in the sample that were dominated by any other solution in the sample. These built-in deletors can be used in one line of code, for example, to add a deletor that will take samples of size 32 and delete the dominated set.
+
+```scala
+EvvoIsland.builder[Solution]()
+  // ... add creators, mutators, objective functions
+  .addDeletor(DeleteDominated(numInputs=32))
+```
+
+
 ##### Built-in Problem Types
 TODO: Implement built-in types (bitstrings, trees, vector of floats, 0-1 knapsack on bitstring, TSP)
 
@@ -69,8 +86,7 @@ TODO: Allow end users to override Evvo configuration
 
 -------------------------------------------------------------------------------
 #### Examples
-
-See examples in [`./examples`](examples).
+See examples in [`./examples`](examples). These examples show how you can read data, create solutions types, and then write creators, mutators, and deletors to find good solutions to optimization problems.
 
 -------------------------------------------------------------------------------
 #### Downloads
@@ -78,7 +94,7 @@ TODO: Put this on maven and sbt
 
 -------------------------------------------------------------------------------
 #### Contributing
-Email us, we'll write up an official guide once there's enough interest to justify it.
+See [`CONTRIBUTING.MD`](CONTRIBUTING.md) for information on how to contribute code to Evvo.
 
 -------------------------------------------------------------------------------
 #### 
