@@ -10,8 +10,10 @@ before_script:
   - git config --global user.email "travis@travis.ci"
   - git config --global user.name "Travis CI"
   - export PATH="$PATH:/home/travis/"
+  - "curl https://oss.sonatype.org/content/repositories/releases/org/scalastyle/scalastyle_2.12/1.0.0/scalastyle_2.12-1.0.0-batch.jar > /home/travis/scalastyle.jar"
   - "echo \"#!/bin/bash\n
-     java -jar path/to/scalastyle_2.12-1.0.0-batch.jar \\\"$@\\\"\" > /home/travis/scalastyle"
+     java -jar /home/travis/scalastyle.jar \\\"$@\\\"\" > /home/travis/scalastyle"
+  - "chmod +x /home/travis/scalastyle"
 
 script:
   # Allow changes to overcommit
