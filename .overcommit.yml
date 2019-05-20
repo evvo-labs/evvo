@@ -1,0 +1,9 @@
+PreCommit:
+  Scalastyle:
+    enabled: true
+    flags: ['-c', 'project/scalastyle-config.xml', 'src/main/scala']
+  XmlSyntax:
+    enabled: true
+
+  YamlSyntax:
+    enabled: true
