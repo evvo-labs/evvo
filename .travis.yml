@@ -9,7 +9,7 @@ install:
 before_script:
   - git config --global user.email "travis@travis.ci"
   - git config --global user.name "Travis CI"
-  - sh travis_setup.sh
+  - sh travis/travis_setup.sh
 
 script:
   # Allow changes to overcommit
