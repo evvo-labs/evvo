@@ -1,4 +1,4 @@
-We use [Overcommit](https://github.com/sds/overcommit) to run checks on every commit. Travis will also run these checks against any code it builds.
+We use [Overcommit](https://github.com/sds/overcommit) to run checks on every commit. Travis will also run these checks against any code it builds. Overcommit, when run locally, will only check files modified in the current commit, while Travis will run the checks on all files. While you don't have to use Overcommit, ensuring that your code will be accepted by Travis will be much easier if you do.
 
 To install Overcommit, you will need Ruby >=2.4. To check your version, run 
 ```
