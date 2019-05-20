@@ -23,6 +23,14 @@ trait TEvolutionaryProcess[Solution] {
     * @return the current pareto frontier of solutions on this island?
     */
   def currentParetoFrontier(): TParetoFrontier[Solution]
+
+  /**
+    * Provides a set of solutions to be added to the population of an EvolutionaryProcess.
+    *
+    * @param solutions the solutions to add
+    */
+  def emigrate(solutions: Seq[Solution])
+
 }
 
 /**

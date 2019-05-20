@@ -21,7 +21,7 @@
         </encoder>
     </appender>
 
-    <root level="info">
+    <root level="debug">
         <appender-ref ref="ROLLING"/>
         <appender-ref ref="CONSOLE"/>
     </root>

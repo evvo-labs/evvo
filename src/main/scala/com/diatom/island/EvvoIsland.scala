@@ -11,6 +11,7 @@ import com.diatom.agent._
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.MemberUp
 
+import com.diatom.island.EvvoIsland._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,10 +32,9 @@ class EvvoIsland[Sol]
   mutators: Vector[TMutatorFunc[Sol]],
   deletors: Vector[TDeletorFunc[Sol]],
   fitnesses: Vector[TObjective[Sol]]
-)(implicit val system: ActorSystem)
+)
   extends Actor with TEvolutionaryProcess[Sol] with ActorLogging {
 
-  private val cluster = Cluster(context.system)
   implicit val logger: LoggingAdapter = log
 
   private val pop = Population(fitnesses)
@@ -45,30 +45,13 @@ class EvvoIsland[Sol]
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.runBlocking(t)
     case GetParetoFrontier => sender ! this.currentParetoFrontier()
-    case MemberUp(member) =>
-      logger.info(s"Received memberup with ${member.address}")
-      val actorSelection = context.actorSelection(RootActorPath(member.address) / "user" / "*")
-      actorSelection ! IslandRegistration
-    case IslandRegistration =>
-      this.islands += sender
-      logger.debug(this.islands.toString)
-      context.watch(sender)
-
-      println(f"this.islands = ${this.islands}")
-
-    case Terminated(island) =>
-      islands -= island
+    case Emigrate(solutions: Seq[Sol]) => this.emigrate(solutions)
   })
-
-  case class Scream(aaa: String)
-
-  case object IslandRegistration
-
 
   override def runAsync(terminationCriteria: TTerminationCriteria)
   : Future[TEvolutionaryProcess[Sol]] = {
     Future {
-      log.info(f"Island running with terminationCriteria=${terminationCriteria}")
+      log.info(s"Island running with terminationCriteria=${terminationCriteria}")
 
       // TODO can we put all of these in some combined pool? don't like having to manage each
       creatorAgents.foreach(_.start())
@@ -80,7 +63,7 @@ class EvvoIsland[Sol]
 
       while (startTime + terminationCriteria.time.toMillis >
         Calendar.getInstance().toInstant.toEpochMilli) {
-        Thread.sleep(500) // scalastyle:ignore magic.number
+        Thread.sleep(500)
         val pareto = pop.getParetoFrontier()
         log.info(f"pareto = ${pareto}")
       }
@@ -100,6 +83,10 @@ class EvvoIsland[Sol]
   }
 
   override def currentParetoFrontier(): TParetoFrontier[Sol] = pop.getParetoFrontier()
+
+  override def emigrate(solutions: Seq[Sol]): Unit = {
+    pop.addSolutions(solutions)
+  }
 }
 
 object EvvoIsland {
@@ -149,12 +136,17 @@ object EvvoIsland {
     override def currentParetoFrontier(): TParetoFrontier[Sol] = {
       Await.result(ref ? GetParetoFrontier, Duration.Inf).asInstanceOf[TParetoFrontier[Sol]]
     }
+
+    override def emigrate(solutions: Seq[Sol]): Unit = {
+     ref ! Emigrate(solutions)
+    }
   }
 
   case class Run(terminationCriteria: TTerminationCriteria)
 
   case object GetParetoFrontier
 
+  case class Emigrate[Sol](solutions: Seq[Sol])
 }
 
 /**
@@ -207,10 +199,17 @@ case class EvvoIslandBuilder[Sol]
     this.copy(objectives = objectives + objective)
   }
 
+  def props()(implicit system: ActorSystem): Props = {
+    Props(new EvvoIsland[Sol](
+      creators.toVector,
+      mutators.toVector,
+      deletors.toVector,
+      objectives.toVector))
+  }
+
 
   // TODO this shouldn't even be exposed to the world, we should hide it in IslandManager
   def build()(implicit system: ActorSystem): TEvolutionaryProcess[Sol] = {
     EvvoIsland.from[Sol](creators, mutators, deletors, objectives)
   }
-
 }

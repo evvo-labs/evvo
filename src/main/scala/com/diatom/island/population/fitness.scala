@@ -41,5 +41,5 @@ case class Objective[Sol](private val objective: ObjectiveFunctionType[Sol],
 }
 
 sealed trait OptimizationDirection
-object Minimize extends OptimizationDirection
-object Maximize extends OptimizationDirection
+case object Minimize extends OptimizationDirection
+case object Maximize extends OptimizationDirection

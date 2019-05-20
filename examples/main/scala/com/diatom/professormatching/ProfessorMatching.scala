@@ -1,14 +1,21 @@
 package com.diatom.professormatching
 
+import java.io.File
 import java.time.LocalTime.parse
 import java.time.{DayOfWeek, LocalTime}
 
+import akka.actor.{ActorSystem, Address, AddressFromURIString, Props}
 import com.diatom._
 import com.diatom.agent._
+import com.diatom.island.EvvoIsland.{GetParetoFrontier, Run}
 import com.diatom.island.population.{Maximize, Objective}
 import com.diatom.island.{EvvoIsland, IslandManager, TerminationCriteria}
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
+import akka.pattern.ask
+import akka.util.Timeout
+import com.typesafe.config.ConfigFactory
 
 /**
   * Matches professors with courses, assuming:
@@ -103,12 +110,18 @@ object ProfessorMatching {
       .addMutator(MutatorFunc(swapTwoCourses, "swapTwoCourses"))
       .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
 
-    // TODO rename termination criteria
+     val config = ConfigFactory
+      .parseFile(new File("src/main/resources/application.conf"))
+      .resolve()
+
+    implicit val system: ActorSystem = ActorSystem("EvvoNode", config)
+
     val numIslands = 5
-    val manager = new IslandManager[PMSolution](numIslands, islandBuilder)
+    val manager = IslandManager.from[PMSolution](numIslands, islandBuilder)
     manager.runBlocking(TerminationCriteria(1.second))
     val pareto = manager.currentParetoFrontier()
-    println(pareto)
+    println(f"Pareto Frontier:\n${pareto}")
+//    system.terminate()
   }
 
   def readProblem(): Problem = {
