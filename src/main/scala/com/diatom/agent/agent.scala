@@ -2,6 +2,7 @@ package com.diatom.agent
 
 import akka.event.LoggingAdapter
 import com.diatom.island.population.TPopulation
+
 import scala.concurrent.duration._
 
 /**
@@ -48,11 +49,15 @@ abstract class AAgent[Sol](private val strategy: TAgentStrategy,
           if (numInvocations % 33 == 0) {
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)
-            //            log.debug(s"new waitTime: ${waitTime}")
+          }
+          if (numInvocations % 100 == 0) {
+            logger.debug(s"${this} hit ${numInvocations} invocations")
           }
         }
       } catch {
-        case e: InterruptedException => return
+        // if interrupted, silently exit. This thread is interrupted only when AAgent.stop() is
+        // called, so there's nothing more to do.
+        case e: InterruptedException => ()
       }
     }
   }
@@ -62,7 +67,7 @@ abstract class AAgent[Sol](private val strategy: TAgentStrategy,
       logger.info(s"starting agent ${name}")
       thread.start()
     } else {
-      logger.warning(s"trying to start already start agent")
+      logger.warning(s"trying to start already started agent")
     }
   }
 

@@ -41,6 +41,9 @@
       <option name="ignoreAroundFunctionTypeParam" value="true" />
       <option name="ignoreAroundFunctionExprParam" value="true" />
     </inspection_tool>
+    <inspection_tool class="TypeAnnotation" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Tests" level="INFORMATION" enabled="true" />
+    </inspection_tool>
     <inspection_tool class="WeakerAccess" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="SUGGEST_PACKAGE_LOCAL_FOR_MEMBERS" value="true" />
       <option name="SUGGEST_PACKAGE_LOCAL_FOR_TOP_CLASSES" value="true" />

@@ -1,6 +1,6 @@
 package com.diatom.agent
 
-import com.diatom.agent.default.DeleteWorstHalfByRandomObjective
+import com.diatom.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.diatom.island.population.{Maximize, Minimize, Scored}
 import org.scalatest.{Matchers, WordSpec}
 

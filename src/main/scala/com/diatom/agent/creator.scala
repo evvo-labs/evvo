@@ -13,22 +13,21 @@ case class CreatorAgent[Sol](create: TCreatorFunc[Sol],
                             (implicit val logger: LoggingAdapter)
   extends AAgent[Sol](strategy, population, create.name)(logger) with TCreatorAgent[Sol] {
 
-  override def step(): Unit = {
+  override protected def step(): Unit = {
     val toAdd = create.create()
     population.addSolutions(toAdd)
   }
 
-  override def toString: String = s"Agent[$name, $numInvocations]"
+  override def toString: String = s"CreatorAgent[$name]"
 }
 
 case class CreatorAgentDefaultStrategy() extends TAgentStrategy {
   override def waitTime(populationInformation: TPopulationInformation): Duration = {
     val n = populationInformation.numSolutions
-
-    if (n > 1000) {
+    if (n > 300) {
       1000.millis // they have 1000 solutions, they're probably set.
     } else {
-      math.max(1, math.exp(.001 * n)).millis
+      0.millis
     }
   }
 }

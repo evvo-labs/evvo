@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/diatom.iml" filepath="$PROJECT_DIR$/diatom.iml" />
+      <module fileurl="file://$PROJECT_DIR$/evvo.iml" filepath="$PROJECT_DIR$/evvo.iml" />
     </modules>
   </component>
 </project>

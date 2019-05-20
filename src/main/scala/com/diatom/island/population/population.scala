@@ -64,7 +64,7 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TObjective[Sol]
 
   override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
     population ++= solutions.map(score)
-//    log.debug(f"Added ${solutions.size} solutions, new population size ${population.size}")
+    logger.debug(f"Added ${solutions.size} solutions, new population size ${population.size}")
   }
 
   private def score(solution: Sol): TScored[Sol] = {
@@ -77,19 +77,6 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TObjective[Sol]
 
   override def getSolutions(n: Int): Vector[TScored[Sol]] = {
     // TODO: This can't be the final impl, inefficient space and time
-//    if (population.size <= n) {
-//      population.toVector // no need to randomize, all elements will be included anyway
-//    } else {
-//
-//      var out = Array.ofDim[TScored[Sol]](n)
-//      for (i <- out.indices) {
-//        if (!populationVector.isDefinedAt(getSolutionIndex)) {
-//          populationVector = util.Random.shuffle(population.toVector)
-//          getSolutionIndex = 0
-//        }
-//        out(i) = populationVector(getSolutionIndex)
-//        getSolutionIndex += 1
-//      }
       util.Random.shuffle(population.toVector).take(n)
   }
 
@@ -99,8 +86,6 @@ case class Population[Sol](fitnessFunctionsIter: TraversableOnce[TObjective[Sol]
   }
 
   override def getParetoFrontier(): TParetoFrontier[Sol] = {
-    // TODO test this for performance, and optimize - this is likely to become a bottleneck
-    // https://static.aminer.org/pdf/PDF/000/211/201/on_the_computational_complexity_of_finding_the_maxima_of_a.pdf
     ParetoFrontier(this.population.toSet)
   }
 

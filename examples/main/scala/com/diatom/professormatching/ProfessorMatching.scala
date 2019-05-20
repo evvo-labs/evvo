@@ -104,11 +104,9 @@ object ProfessorMatching {
       .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
 
     // TODO rename termination criteria
-    val manager = new IslandManager[PMSolution](5, islandBuilder)
-    manager.runAsync(TerminationCriteria(10.second))
-    val manager2 = new IslandManager[PMSolution](5, islandBuilder,
-      userConfig="src/main/resources/follower.conf")
-    manager2.runBlocking(TerminationCriteria(10.second))
+    val numIslands = 5
+    val manager = new IslandManager[PMSolution](numIslands, islandBuilder)
+    manager.runBlocking(TerminationCriteria(1.second))
     val pareto = manager.currentParetoFrontier()
     println(pareto)
   }
@@ -159,19 +157,20 @@ object ProfessorMatching {
     sol.foldLeft(0) {
       case (soFar, (profID, sections)) =>
         soFar + (
-          if (idToProf(profID).maxPreps < sections.map(idToSection(_).courseID).size)
-            1 else 0)
+          if (idToProf(profID).maxPreps < sections.map(idToSection(_).courseID).size) {
+            1
+          } else {
+            0
+          })
     }
   }
 
   // =================================== CREATOR ==================================================
   val validScheduleCreator: CreatorFunctionType[PMSolution] = () => {
-    Vector.fill(10)(idToProf.keysIterator.zipAll(
+    Vector.fill(10)(idToProf.keysIterator.zip( // scalastyle:ignore magic.number
       util.Random.shuffle(idToSection.keys.toVector)
         .grouped(idToSection.size / idToProf.size + 1)
-        .map(_.toSet),
-      -1,
-      Set[SectionID]()).toMap).toSet
+        .map(_.toSet)).toMap).toSet
   }
 
   def randomKey[A, B](map: Map[A, B]): A = {
@@ -187,11 +186,11 @@ object ProfessorMatching {
     def swap(sol: PMSolution): PMSolution = {
       val prof1: ProfPreferences = idToProf(randomKey(idToProf))
       val prof2: ProfPreferences = {
-        var prof2maybe: ProfPreferences = null
+        var prof2maybe: Option[ProfPreferences] = None
         do {
-          prof2maybe = idToProf(randomKey(idToProf))
-        } while (prof2maybe == prof1)
-        prof2maybe
+          prof2maybe = Some(idToProf(randomKey(idToProf)))
+        } while (prof2maybe.contains(prof1))
+        prof2maybe.get
       }
 
       val courses1 = sol(prof1.id)
@@ -211,11 +210,11 @@ object ProfessorMatching {
     def swap(sol: PMSolution): PMSolution = {
       val prof1: ProfPreferences = idToProf(randomKey(idToProf))
       val prof2: ProfPreferences = {
-        var prof2maybe: ProfPreferences = null
+        var prof2maybe: Option[ProfPreferences] = None
         do {
-          prof2maybe = idToProf(randomKey(idToProf))
-        } while (prof2maybe == prof1)
-        prof2maybe
+          prof2maybe = Some(idToProf(randomKey(idToProf)))
+        } while (prof2maybe.contains(prof1))
+        prof2maybe.get
       }
 
 

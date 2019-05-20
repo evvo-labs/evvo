@@ -24,10 +24,9 @@ trait TCreatorFunc[Sol] extends TAgentFunc with CreatorFunctionType[Sol] {
 
 case class CreatorFunc[Sol](create: CreatorFunctionType[Sol],
                             name: String)
-  extends TCreatorFunc[Sol] with CreatorFunctionType[Sol] {
-}
+  extends TCreatorFunc[Sol] with CreatorFunctionType[Sol]
 
-abstract class InputAcceptingAgentFunc(numInputs: Int = 32,
+abstract class InputAcceptingAgentFunc(numInputs: Int = 32, // scalastyle:ignore magic.number
                                        runWithoutRequestedInputSize: Boolean = true)
 
 /**
@@ -60,7 +59,7 @@ trait TMutatorFunc[Sol] extends TAgentFunc with MutatorFunctionType[Sol] {
 
 case class MutatorFunc[Sol](mutate: MutatorFunctionType[Sol],
                             name: String,
-                            numInputs: Int = 32,
+                            numInputs: Int = 32, // scalastyle:ignore magic.number
                             shouldRunOnPartialInput: Boolean = true)
   extends TMutatorFunc[Sol]
 
@@ -98,6 +97,6 @@ trait TDeletorFunc[Sol] extends TAgentFunc with DeletorFunctionType[Sol] {
 
 case class DeletorFunc[Sol](delete: DeletorFunctionType[Sol],
                             name: String,
-                            numInputs: Int = 32,
+                            numInputs: Int = 32, // scalastyle:ignore magic.number
                             override val shouldRunWithPartialInput: Boolean = true)
   extends TDeletorFunc[Sol]

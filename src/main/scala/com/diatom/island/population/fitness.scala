@@ -32,10 +32,10 @@ trait TObjective[Sol] {
 case class Objective[Sol](private val objective: ObjectiveFunctionType[Sol],
                           name: String,
                           optimizationDirection: OptimizationDirection,
-                          precision: Int = 3)
+                          precision: Int = 3) // scalastyle:ignore magic.number
   extends TObjective[Sol] {
   override def score: ObjectiveFunctionType[Sol] = sol => {
-    val roundingMultiple = math.pow(10, precision)
+    val roundingMultiple = math.pow(10, precision) // scalastyle:ignore magic.number
     math.round(objective(sol) * roundingMultiple) / roundingMultiple
   }
 }

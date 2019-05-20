@@ -1,0 +1,27 @@
+language: scala
+scala:
+  - 2.12.6
+
+install:
+  - gem install overcommit
+  - gem install travis
+
+before_script:
+  - git config --global user.email "travis@travis.ci"
+  - git config --global user.name "Travis CI"
+  - sh travis/travis_setup.sh
+
+script:
+  # Allow changes to overcommit
+  - overcommit --sign
+  - overcommit --sign pre-commit
+  # And then actually run it
+  - overcommit --install
+  - overcommit --run
+  - mvn scalastyle:check
+  - mvn test
+
+
+notifications:
+  slack:
+    secure: UGf3S41EZx1cSstDQqJtDMTGa2d5w4HPzQyVr8Re+5bCdjybBzjdcGCv1xnkmbNqM1KAa1umu9dPxtFu5DIdjao5xspacFD4HJtddTwX/0UIQmdQEfcE+aZn1bZHCH4Cur2UT2PIPtqXtrY2UOICn5WwAsvyJ9mtU8RPDJCiMaApvRe1pA0hF+KKlm8cBJ9kgIRWlRHNu3fcM2IysTHg8ad7Y8sNgme6V9gMrIJ8eDfFWZDyoRVXn2a1YgFbCYgvv99PQky7GkBgb152ZC4axP3e3zRoa3ZuhCWTwD/lGnRtbaPxi0AqAtlxbgNzd4noZBrY4mnPGBA4LNcJMMC/KAK9+9fH66aXm6H55Q10T9EX9mi61JV2y9NNoWrdf4UD4dQl/kIsp07suH1GkNEELEcrVhbkjW7TUj1njvTbMJdkAaPDM9hukeq4KFQQZQ08bDXcJHTHp86vkSffQMVHvkEEWayJ3TSlaSlnaSXpt8aqyIBsPOiP4NbIim4fKb7x1vwQAH1TOpcuH3Mv3jZ9qeeTf8T44W+dvgmZQgUxfZKEYJE+Dki8Py/naQ5r3193wUfVwzV9yRgNCq4uu3ew2XyTIoXDjfxFv5jrf35kYMlBYnzV+uidipXXjPWKJKGBU+auQT0sIHOeLN8nR2ctRz0ALVv/0Xd1Y11T4n751uI=

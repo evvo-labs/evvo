@@ -1,6 +1,8 @@
 .gitconfig
 out/*
 
+Gemfile.lock
+
 # Created by https://www.gitignore.io/api/scala,macos,maven,intellij	
 # Edit at https://www.gitignore.io/?templates=scala,macos,maven,intellij
 
