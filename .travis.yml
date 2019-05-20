@@ -4,6 +4,8 @@ scala:
 
 install:
   - gem install overcommit
+  - gem install travis
+  - brew install scalastyle
 
 before_script:
   - git config --global user.email "travis@travis.ci"
