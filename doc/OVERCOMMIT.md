@@ -22,10 +22,11 @@ $ scalastyle -v
 scalastyle 1.0.0
 ```
 
-Locally install the Overcommit hooks for this repository:
+Locally install the Overcommit hooks (and those hook's dependencies) for this repository:
 
 ```
 overcommit --install
+gem install travis
 ```
 
 Now, when you commit, you will see a message like
