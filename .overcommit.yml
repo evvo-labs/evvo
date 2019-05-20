@@ -1,0 +1,23 @@
+# Changes relative to https://github.com/sds/overcommit/blob/master/config/default.yml
+PreCommit:
+
+  ForbiddenBranches:
+    enabled: true
+    description: Don't commit to master
+    branch_patterns: ['master']
+
+  Scalastyle:
+    enabled: true
+    flags: ['-w', 'true', '-c', './project/scalastyle_config.xml', 'src']
+
+  JsonSyntax:
+    enabled: true
+
+  TravisLint:
+    enabled: true
+
+  XmlSyntax:
+    enabled: true
+
+  YamlSyntax:
+    enabled: true
