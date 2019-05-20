@@ -2,6 +2,8 @@ language: scala
 scala:
   - 2.12.6
 
+install:
+  - gem install overcommit
 
 before_script:
   - git config --global user.email "travis@travis.ci"
@@ -9,9 +11,11 @@ before_script:
 
 script:
   # Allow changes to overcommit
-  - bundle exec overcommit --sign
-  - bundle exec overcommit --sign pre-commit
-  - bundle exec overcommit --run
+  - overcommit --sign
+  - overcommit --sign pre-commit
+  # And then actually run it
+  - overcommit --install
+  - overcommit --run
   - mvn scalastyle:check
   - mvn test
 

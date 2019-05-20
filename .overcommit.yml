@@ -1,7 +1,7 @@
 PreCommit:
   Scalastyle:
     enabled: true
-    flags: ['-c', 'project/scalastyle-config.xml', 'src/main/scala']
+    flags: ['-w', 'true', '-c', './project/scalastyle_config.xml', 'src']
 
   TravisLint:
     enabled: true
