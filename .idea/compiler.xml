@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="evvo" target="1.6" />
+      <module name="evvo" target="8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

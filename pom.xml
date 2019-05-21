@@ -135,7 +135,7 @@
                     <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
                     <junitxml>.</junitxml>
                     <filereports>TestSuiteReport.txt</filereports>
-                    <!--<tagsToExclude>com.diatom.tags.Slow</tagsToExclude>-->
+                    <!--<tagsToExclude>com.evvo.tags.Slow</tagsToExclude>-->
                 </configuration>
                 <executions>
                     <execution>
