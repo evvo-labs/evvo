@@ -1,18 +1,17 @@
-<!--TODO: Use string interpolation for akka versioning everywhere-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.diatom</groupId>
-    <artifactId>diatom</artifactId>
+    <groupId>com.evvo</groupId>
+    <artifactId>evvo</artifactId>
     <version>0.0.0</version>
     <name>${project.artifactId}</name>
     <description>The Scala evolutionary computing framework</description>
     <inceptionYear>2018</inceptionYear>
     <licenses>
         <license>
-            <name>My License</name>
-            <url>http://....</url>
+            <name>Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -20,9 +19,11 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
-        <scala.version>2.12.6</scala.version>
         <scala.compat.version>2.12</scala.compat.version>
+        <scala.version>${scala.compat.version}.6</scala.version>
         <spec2.version>4.2.0</spec2.version>
+        <akka.version>2.5.22</akka.version>
+        <circe.version>0.11.1</circe.version>
     </properties>
 
     <dependencies>
@@ -31,21 +32,35 @@
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
         </dependency>
+
+        <!-- Akka -->
         <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-cluster -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-cluster_2.12</artifactId>
-            <version>2.5.22</version>
+            <artifactId>akka-cluster_${scala.compat.version}</artifactId>
+            <version>${akka.version}</version>
         </dependency>
-
-
-        <!-- Test -->
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-actor -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_${scala.compat.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-testkit -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-testkit_${scala.compat.version}</artifactId>
+            <version>${akka.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-slf4j -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_${scala.compat.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+
+        <!-- Test -->
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.compat.version}</artifactId>
@@ -64,26 +79,7 @@
             <version>${spec2.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-actor -->
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_2.12</artifactId>
-            <version>2.5.22</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-testkit -->
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-testkit_2.12</artifactId>
-            <version>2.5.22</version>
-            <scope>test</scope>
-        </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-slf4j -->
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-slf4j_2.12</artifactId>
-            <version>2.5.22</version>
-        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -92,18 +88,18 @@
 
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-core_2.12</artifactId>
-            <version>0.11.1</version>
+            <artifactId>circe-core_${scala.compat.version}</artifactId>
+            <version>${circe.version}</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-parser_2.12</artifactId>
-            <version>0.11.1</version>
+            <artifactId>circe-parser_${scala.compat.version}</artifactId>
+            <version>${circe.version}</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-generic_2.12</artifactId>
-            <version>0.11.1</version>
+            <artifactId>circe-generic_${scala.compat.version}</artifactId>
+            <version>${circe.version}</version>
         </dependency>
     </dependencies>
 
@@ -112,7 +108,6 @@
         <testSourceDirectory>src/test/unit/scala</testSourceDirectory>
         <plugins>
             <plugin>
-                <!-- see http://davidb.github.com/scala-maven-plugin -->
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
                 <version>3.3.2</version>
@@ -133,15 +128,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.21.0</version>
-                <configuration>
-                    <!-- Tests will be run with scalatest-maven-plugin instead -->
-                    <skipTests>true</skipTests>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.scalatest</groupId>
                 <artifactId>scalatest-maven-plugin</artifactId>
                 <version>2.0.0</version>
@@ -149,7 +135,7 @@
                     <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
                     <junitxml>.</junitxml>
                     <filereports>TestSuiteReport.txt</filereports>
-                    <!--<tagsToExclude>com.diatom.tags.Slow</tagsToExclude>-->
+                    <!--<tagsToExclude>com.evvo.tags.Slow</tagsToExclude>-->
                 </configuration>
                 <executions>
                     <execution>
@@ -175,18 +161,17 @@
                 <configuration>
                     <verbose>false</verbose>
                     <failOnViolation>true</failOnViolation>
-                    <failOnWarning>false</failOnWarning>
+                    <failOnWarning>true</failOnWarning>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <configLocation>${project.basedir}/project/scalastyle_config.xml
                     </configLocation>
                     <sourceDirectories>
-                        <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
-                        <sourceDirectory>${project.basedir}/examples/main/</sourceDirectory>
+                        <sourceDirectory>${project.basedir}/src</sourceDirectory>
+                        <sourceDirectory>${project.basedir}/examples/</sourceDirectory>
                     </sourceDirectories>
                     <testSourceDirectories>
                         <testSourceDirectory>${project.basedir}/src/test</testSourceDirectory>
                     </testSourceDirectories>
-
                 </configuration>
                 <executions>
                     <execution>

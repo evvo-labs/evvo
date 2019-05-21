@@ -1,11 +1,11 @@
-# Evvo by Diatom Labs ![travis master status](https://travis-ci.org/evvo-labs/evvo.svg?branch=master) 
+# Evvo ![travis master status](https://travis-ci.org/evvo-labs/evvo.svg?branch=master) 
 
 
 Evvo is the Scala framework for [multi-objective](https://en.wikipedia.org/wiki/Multi-objective_optimization) [evolutionary computing](https://en.wikipedia.org/wiki/Evolutionary_computation). The primary design goals are providing the best possible interface for developers, network parallelism, first-class support for any type of problem, and extensible configurations with sane defaults.
 
 Here's an example showing how simple it is to set up and solve a basic problem (on one machine) using Evvo:
 ```scala
-import com.diatom.island._ 
+import com.evvo.island._ 
 import scala.concurrent.duration._ // for `1.second`
 
 val islandBuilder = EvvoIsland.builder[Solution]()
@@ -65,7 +65,7 @@ As described in [John Rachlin's paper on paper mill optimization](https://www.re
 #### Quickstart
 ##### Built-in Agents
 While each type of problem needs a separate type of creator and mutator, deletors can be shared between problems.
-We provide default deletor agents in [defaults.scala](src/main/scala/com/diatom/agent/defaults/defaults.scala). One example is the `DeleteDominated` agent. This agent takes a sample from the population, and deletes any solutions in the sample that were dominated by any other solution in the sample. These built-in deletors can be used in one line of code, for example, to add a deletor that will take samples of size 32 and delete the dominated set.
+We provide default deletor agents in [defaults.scala](src/main/scala/com/evvo/agent/defaults/defaults.scala). One example is the `DeleteDominated` agent. This agent takes a sample from the population, and deletes any solutions in the sample that were dominated by any other solution in the sample. These built-in deletors can be used in one line of code, for example, to add a deletor that will take samples of size 32 and delete the dominated set.
 
 ```scala
 EvvoIsland.builder[Solution]()
