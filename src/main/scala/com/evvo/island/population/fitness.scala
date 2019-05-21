@@ -26,7 +26,7 @@ trait TObjective[Sol] {
     */
   def optimizationDirection: OptimizationDirection
 
-  override def toString: String = s"Fitness[${this.name}]"
+  override def toString: String = s"Objective[${this.name}]"
 }
 
 case class Objective[Sol](private val objective: ObjectiveFunctionType[Sol],
