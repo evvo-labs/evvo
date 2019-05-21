@@ -2,7 +2,7 @@ package com.evvo.island
 
 import java.io.File
 
-import akka.actor.{Actor, ActorSystem, Address, AddressFromURIString, Deploy, Props}
+import akka.actor.{Actor, ActorSystem, Address, AddressFromURIString, Deploy, PoisonPill, Props}
 import akka.event.LoggingReceive
 import akka.remote.RemoteScope
 import com.evvo.island.EvvoIsland.{Emigrate, GetParetoFrontier, Run}
@@ -15,7 +15,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import collection.JavaConverters._
 import akka.pattern.ask
 import akka.util.Timeout
-  import scala.concurrent.duration._
+
+import scala.concurrent.duration._
 
 /**
   * Launches and manages multiple EvvoIslands.
@@ -80,31 +81,50 @@ class IslandManager[Sol](val numIslands: Int,
 
 
   override def runAsync(terminationCriteria: TTerminationCriteria)
-  : Future[TEvolutionaryProcess[Sol]] = {
+  : Future[Unit] = {
     Future {
-      this.islands.map(_.runAsync(terminationCriteria)).map(Await.result(_, Duration.Inf))
-      this.finalParetoFrontier = Some(currentParetoFrontier())
+      val runIslands = this.islands.map(_.runAsync(terminationCriteria))
+      println("RunIslands declared")
+      runIslands.foreach(Await.result(_, Duration.Inf))
+      println("RunIslands foreach")
+      this.finalParetoFrontier = Some(this.currentParetoFrontier())
+      println("got pareto frontier")
+      this.islands.foreach(_.poisonPill())
       println(s"this.finalParetoFrontier = ${this.finalParetoFrontier}")
-//      this.system.terminate()
-      this
+      this.system.terminate()
+      println("finishing runBlocking in IslandManager")
     }
   }
 
-  def runBlocking(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Sol] = {
+  def runBlocking(terminationCriteria: TTerminationCriteria): Unit = {
     // TODO replace Duration.Inf
     Await.result(this.runAsync(terminationCriteria), Duration.Inf)
+    println("finishing runBlocking in IslandManager")
   }
 
   override def currentParetoFrontier(): TParetoFrontier[Sol] = {
+    println("IM CPF call")
     finalParetoFrontier match {
-      case Some(paretoFrontier) => paretoFrontier
+      case Some(paretoFrontier) =>
+        println("Some(paretoFrontier) ")
+        paretoFrontier
       case None =>
+        println("None")
+        println(s"islands(0).currentParetoFrontier() = ${islands(0).currentParetoFrontier()}")
+
         val islandFrontiers = islands
           .map(_.currentParetoFrontier().solutions)
           .foldLeft(Set[TScored[Sol]]())(_ | _)
 
+        println("islandFrontiers")
         ParetoFrontier(islandFrontiers)
     }
+  }
+
+  override def poisonPill(): Unit = {
+    println("PoisonPill received")
+    this.islands.foreach(_.poisonPill())
+    self ! PoisonPill
   }
 }
 

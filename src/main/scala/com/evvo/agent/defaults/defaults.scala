@@ -20,7 +20,7 @@ import com.evvo.agent.TDeletorFunc
 case class DeleteDominated[Sol](numInputs: Int = 32) // scalastyle:ignore magic.number
   extends TDeletorFunc[Sol] {
   override val delete: DeletorFunctionType[Sol] = (sols: IndexedSeq[TScored[Sol]]) => {
-    val nonDominatedSet = ParetoFrontier(sols).solutions
+    val nonDominatedSet = ParetoFrontier(sols.toSet).solutions
     sols.filterNot(elem => nonDominatedSet.contains(elem))
   }
   override val name = "DeleteDominated"

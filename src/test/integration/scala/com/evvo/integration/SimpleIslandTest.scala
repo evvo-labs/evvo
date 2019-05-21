@@ -1,5 +1,6 @@
 package com.evvo.integration
 
+import akka.actor.ActorSystem
 import com.evvo.agent.TDeletorFunc
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.island.{EvvoIsland, IslandManager, TEvolutionaryProcess, TerminationCriteria}
@@ -79,8 +80,10 @@ class SimpleIslandTest extends WordSpec with Matchers {
       .addDeletor(deleteFunc)
       .addDeletor(deleteFunc)
       .addObjective(numInversions)
+
+    implicit val system: ActorSystem = ActorSystem("test")
     val numIslands = 5
-    new IslandManager[Solution](numIslands, islandBuilder)
+    IslandManager.from[Solution](numIslands, islandBuilder)
   }
 
   "Single Island Evvo" should {
@@ -89,9 +92,10 @@ class SimpleIslandTest extends WordSpec with Matchers {
       val listLength = 10
       val terminate = TerminationCriteria(timeout.millis)
 
+      val evvo = getEvvo(listLength)
+      evvo.runBlocking(terminate)
 
-      val pareto: Set[Solution] = getEvvo(listLength)
-        .runBlocking(terminate)
+      val pareto: Set[Solution] = evvo
         .currentParetoFrontier()
         .solutions
         .map(_.solution)
@@ -104,9 +108,10 @@ class SimpleIslandTest extends WordSpec with Matchers {
       val listLength = 30
       val terminate = TerminationCriteria(timeout100.seconds)
 
+      val evvo = getEvvo(listLength)
+      evvo.runBlocking(terminate)
 
-      val pareto: Set[Solution] = getEvvo(listLength)
-        .runBlocking(terminate)
+      val pareto: Set[Solution] = evvo
         .currentParetoFrontier()
         .solutions
         .map(_.solution)

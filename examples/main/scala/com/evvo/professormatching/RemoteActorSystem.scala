@@ -1,4 +1,4 @@
-package com.diatom.professormatching
+package com.evvo.professormatching
 
 import java.io.File
 
@@ -13,7 +13,6 @@ object RemoteActorSystem {
       .parseFile(new File("src/main/resources/remote.conf"))
       .withFallback(ConfigFactory.parseFile(new File("src/main/resources/application.conf")))
       .resolve()
-
     implicit val system: ActorSystem = ActorSystem("RemoteEvvoNode", config)
   }
 }

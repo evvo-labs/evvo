@@ -2,7 +2,7 @@ package com.evvo.island
 
 import java.util.Calendar
 
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Address, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Address, PoisonPill, Props}
 import akka.event.{LoggingAdapter, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
@@ -10,8 +10,8 @@ import com.evvo._
 import com.evvo.agent._
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent.MemberUp
+import com.evvo.island.EvvoIsland._
 
-import com.diatom.island.EvvoIsland._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -49,7 +49,7 @@ class EvvoIsland[Sol]
   })
 
   override def runAsync(terminationCriteria: TTerminationCriteria)
-  : Future[TEvolutionaryProcess[Sol]] = {
+  : Future[Unit] = {
     Future {
       log.info(s"Island running with terminationCriteria=${terminationCriteria}")
 
@@ -68,24 +68,32 @@ class EvvoIsland[Sol]
         log.info(f"pareto = ${pareto}")
       }
 
-      log.info(f"startTime=${startTime}, now=${Calendar.getInstance().toInstant.toEpochMilli}")
+      log.info(f"c=${startTime}, now=${Calendar.getInstance().toInstant.toEpochMilli}")
 
       creatorAgents.foreach(_.stop())
       mutatorAgents.foreach(_.stop())
       deletorAgents.foreach(_.stop())
 
-      this
+      println("returning from runAsync in EvvoIsland")
     }
   }
 
-  def runBlocking(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Sol] = {
+  def runBlocking(terminationCriteria: TTerminationCriteria): Unit = {
     Await.result(this.runAsync(terminationCriteria), Duration.Inf)
+    println("finishing runBlocking inEvvoIsland")
   }
 
-  override def currentParetoFrontier(): TParetoFrontier[Sol] = pop.getParetoFrontier()
+  override def currentParetoFrontier(): TParetoFrontier[Sol] = {
+    println("asked for currentParetoFrontier")
+    pop.getParetoFrontier()
+  }
 
   override def emigrate(solutions: Seq[Sol]): Unit = {
     pop.addSolutions(solutions)
+  }
+
+  override def poisonPill(): Unit = {
+    self ! PoisonPill
   }
 }
 
@@ -123,14 +131,12 @@ object EvvoIsland {
   case class Wrapper[Sol](ref: ActorRef) extends TEvolutionaryProcess[Sol] {
     implicit val timeout: Timeout = Timeout(5.days)
 
-    override def runBlocking(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Sol] = {
+    override def runBlocking(terminationCriteria: TTerminationCriteria): Unit = {
       Await.result(this.runAsync(terminationCriteria), Duration.Inf)
-      this
     }
 
-    override def runAsync(terminationCriteria: TTerminationCriteria): Future[TEvolutionaryProcess[Sol]] = {
-      (ref ? Run(terminationCriteria))
-        .map(_.asInstanceOf[TEvolutionaryProcess[Sol]])
+    override def runAsync(terminationCriteria: TTerminationCriteria): Future[Unit] = {
+      (ref ? Run(terminationCriteria)).asInstanceOf[Future[Unit]]
     }
 
     override def currentParetoFrontier(): TParetoFrontier[Sol] = {
@@ -139,6 +145,10 @@ object EvvoIsland {
 
     override def emigrate(solutions: Seq[Sol]): Unit = {
      ref ! Emigrate(solutions)
+    }
+
+    override def poisonPill(): Unit = {
+      ref ! PoisonPill
     }
   }
 

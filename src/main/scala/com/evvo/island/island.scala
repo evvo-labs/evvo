@@ -15,9 +15,9 @@ trait TEvolutionaryProcess[Solution] {
     *
     * @return this
     */
-  def runBlocking(terminationCriteria: TTerminationCriteria): TEvolutionaryProcess[Solution]
+  def runBlocking(terminationCriteria: TTerminationCriteria): Unit
 
-  def runAsync(terminationCriteria: TTerminationCriteria): Future[TEvolutionaryProcess[Solution]]
+  def runAsync(terminationCriteria: TTerminationCriteria): Future[Unit]
 
   /**
     * @return the current pareto frontier of solutions on this island?
@@ -31,6 +31,10 @@ trait TEvolutionaryProcess[Solution] {
     */
   def emigrate(solutions: Seq[Solution])
 
+  /**
+    * Sends a poison pill to the evolutionary process.
+    */
+  def poisonPill(): Unit
 }
 
 /**
