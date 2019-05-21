@@ -2,7 +2,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.evvolabs</groupId>
+    <groupId>com.evvo</groupId>
     <artifactId>evvo</artifactId>
     <version>0.0.0</version>
     <name>${project.artifactId}</name>
@@ -19,8 +19,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
-        <scala.version>2.12.6</scala.version>
         <scala.compat.version>2.12</scala.compat.version>
+        <scala.version>${scala.compat.version}.6</scala.version>
         <spec2.version>4.2.0</spec2.version>
         <akka.version>2.5.22</akka.version>
         <circe.version>0.11.1</circe.version>
@@ -49,15 +49,15 @@
         <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-testkit -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-testkit_2.12</artifactId>
+            <artifactId>akka-testkit_${scala.compat.version}</artifactId>
             <version>${akka.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-slf4j -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-slf4j_2.12</artifactId>
-            <version>2.5.22</version>
+            <artifactId>akka-slf4j_${scala.compat.version}</artifactId>
+            <version>${akka.version}</version>
         </dependency>
 
         <!-- Test -->
@@ -88,17 +88,17 @@
 
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-core_2.12</artifactId>
+            <artifactId>circe-core_${scala.compat.version}</artifactId>
             <version>${circe.version}</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-parser_2.12</artifactId>
+            <artifactId>circe-parser_${scala.compat.version}</artifactId>
             <version>${circe.version}</version>
         </dependency>
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-generic_2.12</artifactId>
+            <artifactId>circe-generic_${scala.compat.version}</artifactId>
             <version>${circe.version}</version>
         </dependency>
     </dependencies>
