@@ -3,7 +3,7 @@ package com.evvo.integration
 import akka.actor.ActorSystem
 import com.evvo.agent.TDeletorFunc
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
-import com.evvo.island.{EvvoIsland, IslandManager, TEvolutionaryProcess, TerminationCriteria}
+import com.evvo.island.{EvvoIslandActor, IslandManager, TEvolutionaryProcess, TerminationCriteria}
 import com.evvo.tags.{Performance, Slow}
 import com.evvo.{CreatorFunctionType, MutatorFunctionType, ObjectiveFunctionType}
 import org.scalatest.{Matchers, WordSpec}
@@ -16,7 +16,7 @@ import scala.concurrent.duration._
   * The behavior under test is that an Island can sort a list given the proper mutator and fitness
   * function, and terminate successfully returning a set of lists.
   */
-class SimpleIslandTest extends WordSpec with Matchers {
+class LocalEvvoTest extends WordSpec with Matchers {
 
   /** High level concept for the test:
     *
@@ -68,7 +68,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
     }
 
     // TODO add convenience constructor for adding multiple duplicate mutators/creators/deletors
-    val islandBuilder = EvvoIsland.builder[Solution]()
+    val islandBuilder = EvvoIslandActor.builder[Solution]()
       .addCreatorFromFunction(createFunc)
       .addMutatorFromFunction(mutateFunc)
       .addMutatorFromFunction(mutateFunc)
@@ -82,11 +82,10 @@ class SimpleIslandTest extends WordSpec with Matchers {
       .addObjective(numInversions)
 
     implicit val system: ActorSystem = ActorSystem("test")
-    val numIslands = 5
-    IslandManager.from[Solution](numIslands, islandBuilder)
+    islandBuilder.buildLocalEvvo()
   }
 
-  "Single Island Evvo" should {
+  "Local Evvo" should {
     val timeout = 300
     f"be able to sort a list of length 10 within $timeout milliseconds" taggedAs(Performance, Slow) in {
       val listLength = 10

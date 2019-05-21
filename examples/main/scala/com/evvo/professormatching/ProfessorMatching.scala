@@ -8,7 +8,7 @@ import akka.actor.ActorSystem
 import com.evvo._
 import com.evvo.agent._
 import com.evvo.island.population.{Maximize, Objective}
-import com.evvo.island.{EvvoIsland, IslandManager, TerminationCriteria}
+import com.evvo.island.{EvvoIslandActor, IslandManager, TerminationCriteria}
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
@@ -97,7 +97,7 @@ object ProfessorMatching {
 
     // TODO rename fitness to objective function
     //      and provide class to create objective functions
-    val islandBuilder = EvvoIsland.builder()
+    val islandBuilder = EvvoIslandActor.builder()
       .addObjective(Objective(sumProfessorSchedulePreferences, "Sched", Maximize))
       .addObjective(Objective(sumProfessorCoursePreferences, "Course", Maximize))
       .addObjective(Objective(sumProfessorNumPrepsPreferences, "#Prep", Maximize))
@@ -114,13 +114,11 @@ object ProfessorMatching {
 
     val numIslands = 5
     val manager = IslandManager.from[PMSolution](numIslands, islandBuilder)
-    println("manager line")
     manager.runBlocking(TerminationCriteria(1.second))
-    println("runBlocking line")
     val pareto = manager.currentParetoFrontier()
-    println("cpf line")
     manager.poisonPill()
     println(f"Pareto Frontier:\n${pareto}")
+    system.terminate()
   }
 
   def readProblem(): Problem = {
