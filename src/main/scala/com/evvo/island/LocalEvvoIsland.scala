@@ -1,13 +1,11 @@
 package com.evvo.island
 
-import java.util.Calendar
-
 import akka.event.LoggingAdapter
-import com.evvo.agent.{CreatorAgent, DeletorAgent, MutatorAgent, TCreatorFunc, TDeletorFunc, TMutatorFunc}
-import com.evvo.island.population.{Population, TObjective, TParetoFrontier}
+import com.evvo.agent.{TCreatorFunc, TDeletorFunc, TMutatorFunc}
+import com.evvo.island.population.{TObjective, TParetoFrontier}
+import org.slf4j.LoggerFactory
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.Duration
+import scala.concurrent.Future
 
 
 /**
@@ -20,9 +18,10 @@ class LocalEvvoIsland[Sol]
   mutators: Vector[TMutatorFunc[Sol]],
   deletors: Vector[TDeletorFunc[Sol]],
   fitnesses: Vector[TObjective[Sol]]
-) extends TEvolutionaryProcess[Sol] {
+)(
   implicit val log: LoggingAdapter = LocalLogger
-  private val island = new EvvoIsland(creators,mutators,deletors,fitnesses)
+) extends TEvolutionaryProcess[Sol] {
+  private val island = new EvvoIsland(creators, mutators, deletors, fitnesses)
 
   override def runBlocking(terminationCriteria: TTerminationCriteria): Unit = {
     island.runBlocking(terminationCriteria)
@@ -47,6 +46,8 @@ class LocalEvvoIsland[Sol]
 
 
 object LocalLogger extends LoggingAdapter {
+  private val logger = LoggerFactory.getLogger("LocalEvvoIsland")
+
   override def isErrorEnabled: Boolean = true
 
   override def isWarningEnabled: Boolean = true
@@ -56,22 +57,22 @@ object LocalLogger extends LoggingAdapter {
   override def isDebugEnabled: Boolean = true
 
   override protected def notifyError(message: String): Unit = {
-    println("[ERROR] " + message)
+    logger.error(message)
   }
 
   override protected def notifyError(cause: Throwable, message: String): Unit = {
-    println("[INFO] " + message + " caused by " + cause.toString)
+    logger.error(message, cause)
   }
 
   override protected def notifyWarning(message: String): Unit = {
-    println("[WARN ] " + message)
+    logger.warn(message)
   }
 
   override protected def notifyInfo(message: String): Unit = {
-    println("[INFO ] " + message)
+    logger.info(message)
   }
 
   override protected def notifyDebug(message: String): Unit = {
-    println("[DEBUG] " + message)
+    logger.debug(message)
   }
 }

@@ -3,9 +3,9 @@ package com.evvo.integration
 import akka.actor.ActorSystem
 import com.evvo.agent.TDeletorFunc
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
-import com.evvo.island.{EvvoIslandActor, IslandManager, TEvolutionaryProcess, TerminationCriteria}
+import com.evvo.island.{EvvoIslandActor, EvvoIslandBuilder, IslandManager, TEvolutionaryProcess, TerminationCriteria}
 import com.evvo.tags.{Performance, Slow}
-import com.evvo.{CreatorFunctionType, MutatorFunctionType, ObjectiveFunctionType}
+import com.evvo.{CreatorFunctionType, MutatorFunctionType, NullLogger, ObjectiveFunctionType}
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
@@ -68,7 +68,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
     }
 
     // TODO add convenience constructor for adding multiple duplicate mutators/creators/deletors
-    val islandBuilder = EvvoIslandActor.builder[Solution]()
+    val islandBuilder = EvvoIslandBuilder[Solution]()
       .addCreatorFromFunction(createFunc)
       .addMutatorFromFunction(mutateFunc)
       .addMutatorFromFunction(mutateFunc)
@@ -81,9 +81,10 @@ class LocalEvvoTest extends WordSpec with Matchers {
       .addDeletor(deleteFunc)
       .addObjective(numInversions)
 
-    implicit val system: ActorSystem = ActorSystem("test")
     islandBuilder.buildLocalEvvo()
   }
+
+  implicit val log = NullLogger
 
   "Local Evvo" should {
     val timeout = 300
