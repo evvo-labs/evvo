@@ -1,10 +1,9 @@
-package com.evvo.professormatching
+package com.evvo.remoting
 
 import java.io.File
 
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
-import com.typesafe.config._
 
 object RemoteActorSystem {
   def main(args: Array[String]): Unit = {
