@@ -103,7 +103,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
       pareto.size shouldBe 1
     }
 
-    val timeout100 = 10
+    val timeout100 = 15
     f"be able to sort a list of length 30 within $timeout100 seconds" taggedAs(Performance, Slow) in {
       val listLength = 30
       val terminate = TerminationCriteria(timeout100.seconds)

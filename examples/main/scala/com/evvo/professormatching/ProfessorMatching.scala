@@ -110,10 +110,11 @@ object ProfessorMatching {
       .parseFile(new File("src/main/resources/application.conf"))
       .resolve()
 
-    implicit val system: ActorSystem = ActorSystem("EvvoNodew", config)
+    implicit val system: ActorSystem = ActorSystem("EvvoNode", config)
 
     val numIslands = 5
-    val manager = IslandManager.from[PMSolution](numIslands, islandBuilder)
+    val manager = IslandManager.from[PMSolution](numIslands, islandBuilder,
+      userConfig = "src/main/resources/remoting_example.conf")
     manager.runBlocking(TerminationCriteria(1.second))
     val pareto = manager.currentParetoFrontier()
     manager.poisonPill()
@@ -252,6 +253,7 @@ object ProfessorMatching {
         sol.updated(profWithMore.id, coursesMore - courseToTransfer)
           .updated(profWithLess.id, coursesLess + courseToTransfer)
       }
+
       sols.map(_.solution).map(swap)
     }
   }
