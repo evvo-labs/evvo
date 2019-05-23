@@ -32,6 +32,7 @@ class IslandManager[Sol](val numIslands: Int,
     .parseFile(new File(userConfig))
     .withFallback(ConfigFactory.parseFile(new File("src/main/resources/application.conf")))
     .resolve()
+  println(config)
 
   private val addresses: Vector[Address] = config.getList("nodes.locations")
     .unwrapped()
@@ -47,7 +48,6 @@ class IslandManager[Sol](val numIslands: Int,
 
   implicit val timeout: Timeout = 1.second
 
-  context.actorSelection("akka.tcp://RemoteEvvoNode@127.0.0.1:3451/user/Island0").resolveOne
 
   // Round robin deploy new islands to the remote addresses
   private val islands = (0 until numIslands).map(i => {
@@ -56,8 +56,6 @@ class IslandManager[Sol](val numIslands: Int,
     system.actorOf(islandBuilder.toProps.withDeploy(Deploy(scope = RemoteScope(address))),
       s"EvvoIsland${i}")
   }).map(EvvoIslandActor.Wrapper[Sol])
-
-  context.actorSelection("akka.tcp://RemoteEvvoNode@127.0.0.1:3451/user/Island0").resolveOne
 
 
   // the index of the current island in `islands` to send emigrations to
@@ -117,6 +115,8 @@ object IslandManager {
                 actorSystemName: String = "EvvoNode",
                 userConfig: String = "src/main/resources/application.conf")
                (implicit system: ActorSystem): TEvolutionaryProcess[Sol] = {
-    EvvoIslandActor.Wrapper(system.actorOf(Props(new IslandManager[Sol](numIslands, islandBuilder))))
+    EvvoIslandActor.Wrapper(
+      system.actorOf(Props(
+        new IslandManager[Sol](numIslands, islandBuilder, userConfig=userConfig))))
   }
 }

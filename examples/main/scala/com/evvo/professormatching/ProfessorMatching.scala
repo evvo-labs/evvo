@@ -110,7 +110,7 @@ object ProfessorMatching {
       .parseFile(new File("src/main/resources/application.conf"))
       .resolve()
 
-    implicit val system: ActorSystem = ActorSystem("EvvoNode", config)
+    implicit val system: ActorSystem = ActorSystem("EvvoNodew", config)
 
     val numIslands = 5
     val manager = IslandManager.from[PMSolution](numIslands, islandBuilder)
