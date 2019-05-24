@@ -27,10 +27,10 @@ class IslandManager[Sol](val numIslands: Int,
                          val userConfig: String = "src/main/resources/application.conf")
   extends TEvolutionaryProcess[Sol] with Actor {
 
-  private val config = ConfigFactory
-    // TODO should be configurable by end users
-    .parseFile(new File(userConfig))
-    .withFallback(ConfigFactory.parseFile(new File("src/main/resources/application.conf")))
+
+  private val configFile = ConfigFactory.parseFile(new File("src/main/resources/application.conf"))
+  private val config = configFile.getConfig("IslandManager")
+    .withFallback(configFile)
     .resolve()
   println(config)
 
