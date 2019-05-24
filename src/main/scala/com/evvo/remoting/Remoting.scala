@@ -37,8 +37,7 @@ object Remoting {
 
     implicit val actorSystem: ActorSystem = ActorSystem("EvvoNode",config)
 
-    val islandManager = IslandManager.from(10, builder,
-      "EvvoNode" )
+    val islandManager = IslandManager.from(10, builder)
 
     islandManager.runBlocking(TerminationCriteria(1.second))
 
