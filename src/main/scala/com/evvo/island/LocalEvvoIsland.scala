@@ -45,6 +45,11 @@ class LocalEvvoIsland[Sol]
 }
 
 
+object LocalEvvoIsland {
+  def builder[Sol](): EvvoIslandBuilder[Sol] = EvvoIslandBuilder[Sol]()
+}
+
+
 object LocalLogger extends LoggingAdapter {
   private val logger = LoggerFactory.getLogger("LocalEvvoIsland")
 

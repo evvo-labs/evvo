@@ -1,16 +1,10 @@
 package com.evvo.island
 
-import java.util.Calendar
-
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Address, PoisonPill, Props}
 import akka.event.{LoggingAdapter, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
-import com.evvo._
 import com.evvo.agent._
-import akka.cluster.Cluster
-import akka.cluster.ClusterEvent.MemberUp
-import com.evvo.island.EvvoIslandActor._
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
@@ -64,8 +58,6 @@ class EvvoIslandActor[Sol]
   override def poisonPill(): Unit = {
     self ! PoisonPill
   }
-
-
 }
 
 object EvvoIslandActor {
@@ -129,71 +121,4 @@ object EvvoIslandActor {
 
   case class Emigrate[Sol](solutions: Seq[Sol])
 
-}
-
-/**
-  * @param creators   the functions to be used for creating new solutions.
-  * @param mutators   the functions to be used for creating new solutions from current solutions.
-  * @param deletors   the functions to be used for deciding which solutions to delete.
-  * @param objectives the objective functions to maximize.
-  */
-case class EvvoIslandBuilder[Sol]
-(
-  creators: Set[TCreatorFunc[Sol]] = Set[TCreatorFunc[Sol]](),
-  mutators: Set[TMutatorFunc[Sol]] = Set[TMutatorFunc[Sol]](),
-  deletors: Set[TDeletorFunc[Sol]] = Set[TDeletorFunc[Sol]](),
-  objectives: Set[TObjective[Sol]] = Set[TObjective[Sol]]()
-) {
-  def addCreatorFromFunction(creatorFunc: CreatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(creators = creators + CreatorFunc(creatorFunc, creatorFunc.toString))
-  }
-
-  def addCreator(creatorFunc: TCreatorFunc[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(creators = creators + creatorFunc)
-  }
-
-  def addMutatorFromFunction(mutatorFunc: MutatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(mutators = mutators + MutatorFunc(mutatorFunc, mutatorFunc.toString))
-  }
-
-  def addMutator(mutatorFunc: TMutatorFunc[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(mutators = mutators + mutatorFunc)
-  }
-
-  def addDeletorFromFunction(deletorFunc: DeletorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(deletors = deletors + DeletorFunc(deletorFunc, deletorFunc.toString))
-  }
-
-  def addDeletor(deletorFunc: TDeletorFunc[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(deletors = deletors + deletorFunc)
-  }
-
-  // TODO this calling API is dangerous because it assumes minimization. it should be removed,
-  //      but this will require refactoring across examples
-  def addObjective(objective: ObjectiveFunctionType[Sol], name: String = "")
-  : EvvoIslandBuilder[Sol] = {
-    val realName = if (name == "") objective.toString() else name
-    this.copy(objectives = objectives + Objective(objective, realName, Minimize))
-  }
-
-  def addObjective(objective: Objective[Sol])
-  : EvvoIslandBuilder[Sol] = {
-    this.copy(objectives = objectives + objective)
-  }
-
-  def toProps()(implicit system: ActorSystem): Props = {
-    Props(new EvvoIslandActor[Sol](
-      creators.toVector,
-      mutators.toVector,
-      deletors.toVector,
-      objectives.toVector))
-  }
-
-  def buildLocalEvvo(): TEvolutionaryProcess[Sol] = {
-    new LocalEvvoIsland[Sol](
-      creators.toVector,
-      mutators.toVector,
-      deletors.toVector,
-      objectives.toVector)
-  }
 }

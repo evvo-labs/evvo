@@ -8,7 +8,7 @@ import akka.actor.ActorSystem
 import com.evvo._
 import com.evvo.agent._
 import com.evvo.island.population.{Maximize, Objective}
-import com.evvo.island.{EvvoIslandActor, IslandManager, TerminationCriteria}
+import com.evvo.island.{EvvoIsland, EvvoIslandActor, IslandManager, TerminationCriteria}
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
@@ -97,7 +97,7 @@ object ProfessorMatching {
 
     // TODO rename fitness to objective function
     //      and provide class to create objective functions
-    val islandBuilder = EvvoIslandActor.builder()
+    val islandBuilder = EvvoIsland.builder()
       .addObjective(Objective(sumProfessorSchedulePreferences, "Sched", Maximize))
       .addObjective(Objective(sumProfessorCoursePreferences, "Course", Maximize))
       .addObjective(Objective(sumProfessorNumPrepsPreferences, "#Prep", Maximize))
