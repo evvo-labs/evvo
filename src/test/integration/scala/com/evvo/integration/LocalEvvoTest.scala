@@ -1,10 +1,11 @@
 package com.evvo.integration
 
+import akka.actor.ActorSystem
 import com.evvo.agent.TDeletorFunc
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
-import com.evvo.island.{EvvoIsland, IslandManager, TEvolutionaryProcess, TerminationCriteria}
+import com.evvo.island.{EvvoIslandActor, EvvoIslandBuilder, IslandManager, TEvolutionaryProcess, TerminationCriteria}
 import com.evvo.tags.{Performance, Slow}
-import com.evvo.{CreatorFunctionType, MutatorFunctionType, ObjectiveFunctionType}
+import com.evvo.{CreatorFunctionType, MutatorFunctionType, NullLogger, ObjectiveFunctionType}
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
@@ -15,7 +16,7 @@ import scala.concurrent.duration._
   * The behavior under test is that an Island can sort a list given the proper mutator and fitness
   * function, and terminate successfully returning a set of lists.
   */
-class SimpleIslandTest extends WordSpec with Matchers {
+class LocalEvvoTest extends WordSpec with Matchers {
 
   /** High level concept for the test:
     *
@@ -67,7 +68,7 @@ class SimpleIslandTest extends WordSpec with Matchers {
     }
 
     // TODO add convenience constructor for adding multiple duplicate mutators/creators/deletors
-    val islandBuilder = EvvoIsland.builder[Solution]()
+    val islandBuilder = EvvoIslandBuilder[Solution]()
       .addCreatorFromFunction(createFunc)
       .addMutatorFromFunction(mutateFunc)
       .addMutatorFromFunction(mutateFunc)
@@ -79,19 +80,22 @@ class SimpleIslandTest extends WordSpec with Matchers {
       .addDeletor(deleteFunc)
       .addDeletor(deleteFunc)
       .addObjective(numInversions)
-    val numIslands = 5
-    new IslandManager[Solution](numIslands, islandBuilder)
+
+    islandBuilder.buildLocalEvvo()
   }
 
-  "Single Island Evvo" should {
+  implicit val log = NullLogger
+
+  "Local Evvo" should {
     val timeout = 300
     f"be able to sort a list of length 10 within $timeout milliseconds" taggedAs(Performance, Slow) in {
       val listLength = 10
       val terminate = TerminationCriteria(timeout.millis)
 
+      val evvo = getEvvo(listLength)
+      evvo.runBlocking(terminate)
 
-      val pareto: Set[Solution] = getEvvo(listLength)
-        .runBlocking(terminate)
+      val pareto: Set[Solution] = evvo
         .currentParetoFrontier()
         .solutions
         .map(_.solution)
@@ -99,14 +103,15 @@ class SimpleIslandTest extends WordSpec with Matchers {
       pareto.size shouldBe 1
     }
 
-    val timeout100 = 10
+    val timeout100 = 15
     f"be able to sort a list of length 30 within $timeout100 seconds" taggedAs(Performance, Slow) in {
       val listLength = 30
       val terminate = TerminationCriteria(timeout100.seconds)
 
+      val evvo = getEvvo(listLength)
+      evvo.runBlocking(terminate)
 
-      val pareto: Set[Solution] = getEvvo(listLength)
-        .runBlocking(terminate)
+      val pareto: Set[Solution] = evvo
         .currentParetoFrontier()
         .solutions
         .map(_.solution)

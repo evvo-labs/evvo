@@ -10,19 +10,40 @@ trait TParetoFrontier[Sol] {
   def solutions: Set[TScored[Sol]]
 }
 
-class ParetoFrontier[Sol](private val inputSolutions: TraversableOnce[TScored[Sol]])
+case class ParetoFrontier[Sol](solutions: Set[TScored[Sol]])
   extends TParetoFrontier[Sol] {
+  if (!ParetoFrontier.isParetoFrontier(solutions)) {
+    throw new IllegalArgumentException(
+      s"""
+         |`solutions` must be valid pareto frontier, was ${solutions}
+         |Likely, you used new `ParetoFrontier(…)` instead of `ParetoFrontier(…)`
+       """.stripMargin)
+  }
+
+
+  override def toString: String = {
+    val contents = solutions.map(_.score.toVector.map {
+      case ((name, dir), score) => name -> score
+    }.toMap).mkString("\n  ")
+    f"ParetoFrontier(\n  ${contents})"
+  }
+}
+
+object ParetoFrontier {
+  def apply[Sol](solutions: Set[TScored[Sol]]): ParetoFrontier[Sol] = {
+    new ParetoFrontier(setToParetoFrontier(solutions))
+  }
 
   // TODO test this for performance, and optimize - this is likely to become a bottleneck
   // https://static.aminer.org/pdf/PDF/000/211/201/on_the_computational_complexity_of_finding_the_maxima_of_a.pdf
+  def setToParetoFrontier[Sol](solutions: Set[TScored[Sol]]): Set[TScored[Sol]] = {
 
-  private val paretoFrontier = {
     // mutable set used here for performance, converted back to immutable afterwards
     val out: mutable.Set[TScored[Sol]] = mutable.Set()
 
-    for (sol <- inputSolutions) {
+    for (sol <- solutions) {
       // if, for all other elements in the population..
-      if (inputSolutions.forall(other => {
+      if (solutions.forall(other => {
         // (this part just ignores the solution that we are looking at)
         sol == other ||
           // there is at least one score that this solution beats other solutions at,
@@ -44,16 +65,9 @@ class ParetoFrontier[Sol](private val inputSolutions: TraversableOnce[TScored[So
     out.toSet
   }
 
-  override def solutions: Set[TScored[Sol]] = paretoFrontier
-
-  override def toString: String = {
-    val contents = paretoFrontier.map(_.score.toVector.map {
-      case ((name, dir), score) => name -> score
-    }.toMap).mkString("\n  ")
-    f"ParetoFrontier(\n  ${contents})"
+  def isParetoFrontier[Sol](solutions: Set[TScored[Sol]]): Boolean = {
+    solutions == ParetoFrontier.setToParetoFrontier(solutions)
   }
-}
 
-object ParetoFrontier {
-  def apply[Sol](solutions: TraversableOnce[TScored[Sol]]): ParetoFrontier[Sol] = new ParetoFrontier(solutions)
+
 }

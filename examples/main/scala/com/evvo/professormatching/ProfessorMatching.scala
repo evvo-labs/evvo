@@ -1,12 +1,15 @@
 package com.evvo.professormatching
 
+import java.io.File
 import java.time.LocalTime.parse
 import java.time.{DayOfWeek, LocalTime}
 
+import akka.actor.ActorSystem
 import com.evvo._
 import com.evvo.agent._
 import com.evvo.island.population.{Maximize, Objective}
-import com.evvo.island.{EvvoIsland, IslandManager, TerminationCriteria}
+import com.evvo.island.{EvvoIsland, EvvoIslandActor, IslandManager, TerminationCriteria}
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
 
@@ -103,12 +106,20 @@ object ProfessorMatching {
       .addMutator(MutatorFunc(swapTwoCourses, "swapTwoCourses"))
       .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
 
-    // TODO rename termination criteria
+    val config = ConfigFactory
+      .parseFile(new File("src/main/resources/application.conf"))
+      .resolve()
+
+    implicit val system: ActorSystem = ActorSystem("EvvoNode", config)
+
     val numIslands = 5
-    val manager = new IslandManager[PMSolution](numIslands, islandBuilder)
+    val manager = IslandManager.from[PMSolution](numIslands, islandBuilder,
+      userConfig = "src/main/resources/remoting_example.conf")
     manager.runBlocking(TerminationCriteria(1.second))
     val pareto = manager.currentParetoFrontier()
-    println(pareto)
+    manager.poisonPill()
+    println(f"Pareto Frontier:\n${pareto}")
+    system.terminate()
   }
 
   def readProblem(): Problem = {
@@ -182,62 +193,69 @@ object ProfessorMatching {
   }
 
   // =================================== MUTATOR ===================================================
-  val swapTwoCourses: MutatorFunctionType[PMSolution] = sols => {
-    def swap(sol: PMSolution): PMSolution = {
-      val prof1: ProfPreferences = idToProf(randomKey(idToProf))
-      val prof2: ProfPreferences = {
-        var prof2maybe: Option[ProfPreferences] = None
-        do {
-          prof2maybe = Some(idToProf(randomKey(idToProf)))
-        } while (prof2maybe.contains(prof1))
-        prof2maybe.get
+  val swapTwoCourses: MutatorFunctionType[PMSolution] = {
+    sols => {
+      val lidToProf = idToProf
+
+      def swap(sol: PMSolution): PMSolution = {
+        val prof1: ProfPreferences = lidToProf(randomKey(lidToProf))
+        val prof2: ProfPreferences = {
+          var prof2maybe: Option[ProfPreferences] = None
+          do {
+            prof2maybe = Some(lidToProf(randomKey(lidToProf)))
+          } while (prof2maybe.contains(prof1))
+          prof2maybe.get
+        }
+
+        val courses1 = sol(prof1.id)
+        val courses2 = sol(prof2.id)
+
+        val course1 = randomElement(courses1)
+        val course2 = randomElement(courses2)
+
+        sol.updated(prof1.id, courses1 - course1 + course2)
+          .updated(prof2.id, courses2 - course2 + course1)
       }
 
-      val courses1 = sol(prof1.id)
-      val courses2 = sol(prof2.id)
-
-      val course1 = randomElement(courses1)
-      val course2 = randomElement(courses2)
-
-      sol.updated(prof1.id, courses1 - course1 + course2)
-        .updated(prof2.id, courses2 - course2 + course1)
+      sols.map(_.solution).map(swap)
     }
-
-    sols.map(_.solution).map(swap)
   }
 
-  val balanceCourseload: MutatorFunctionType[PMSolution] = sols => {
-    def swap(sol: PMSolution): PMSolution = {
-      val prof1: ProfPreferences = idToProf(randomKey(idToProf))
-      val prof2: ProfPreferences = {
-        var prof2maybe: Option[ProfPreferences] = None
-        do {
-          prof2maybe = Some(idToProf(randomKey(idToProf)))
-        } while (prof2maybe.contains(prof1))
-        prof2maybe.get
+  val balanceCourseload: MutatorFunctionType[PMSolution] = {
+    val lidToProf = idToProf
+    sols => {
+      def swap(sol: PMSolution): PMSolution = {
+        val prof1: ProfPreferences = lidToProf(randomKey(lidToProf))
+        val prof2: ProfPreferences = {
+          var prof2maybe: Option[ProfPreferences] = None
+          do {
+            prof2maybe = Some(lidToProf(randomKey(lidToProf)))
+          } while (prof2maybe.contains(prof1))
+          prof2maybe.get
+        }
+
+
+        val courses1 = sol(prof1.id)
+        val courses2 = sol(prof2.id)
+
+        if (courses1.size == courses2.size) {
+          return sol
+        }
+
+        val (profWithMore, coursesMore, profWithLess, coursesLess) = if (courses1.size < courses2.size) {
+          (prof2, courses2, prof1, courses1)
+        } else {
+          (prof1, courses1, prof2, courses2)
+        }
+
+        val courseToTransfer = randomElement(coursesMore)
+
+        sol.updated(profWithMore.id, coursesMore - courseToTransfer)
+          .updated(profWithLess.id, coursesLess + courseToTransfer)
       }
 
-
-      val courses1 = sol(prof1.id)
-      val courses2 = sol(prof2.id)
-
-      if (courses1.size == courses2.size) {
-        return sol
-      }
-
-      val (profWithMore, coursesMore, profWithLess, coursesLess) = if (courses1.size < courses2.size) {
-        (prof2, courses2, prof1, courses1)
-      } else {
-        (prof1, courses1, prof2, courses2)
-      }
-
-      val courseToTransfer = randomElement(coursesMore)
-
-      sol.updated(profWithMore.id, coursesMore - courseToTransfer)
-        .updated(profWithLess.id, coursesLess + courseToTransfer)
+      sols.map(_.solution).map(swap)
     }
-
-    sols.map(_.solution).map(swap)
   }
 
 
