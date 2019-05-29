@@ -15,6 +15,6 @@ ADD src/main/resources/application.conf ${WORKDIR}/src/main/resources/applicatio
 RUN chmod +x "/opt/docker/bin/evvo/service.jar"
 RUN chmod +x "/opt/docker/bin/evvo/run_service.sh"
 
-EXPOSE 1600
+EXPOSE 3449
 
-ENTRYPOINT ["/opt/docker/bin/evvo/run_service.sh"]
+ENTRYPOINT ["/opt/docker/bin/evvo/run_service.sh > ./ras.log"]
