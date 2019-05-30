@@ -17,4 +17,4 @@ RUN chmod +x "/opt/docker/bin/evvo/run_service.sh"
 
 EXPOSE 3449
 
-ENTRYPOINT ["/opt/docker/bin/evvo/run_service.sh > ./ras.log"]
+ENTRYPOINT ["/opt/docker/bin/evvo/run_service.sh"]

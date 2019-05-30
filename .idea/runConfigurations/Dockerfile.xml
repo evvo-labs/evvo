@@ -19,7 +19,7 @@
           <list>
             <DockerEnvVarImpl>
               <option name="name" value="CLUSTER_PORT" />
-              <option name="value" value="1600" />
+              <option name="value" value="3449" />
             </DockerEnvVarImpl>
             <DockerEnvVarImpl>
               <option name="name" value="CLUSTER_IP" />
@@ -31,8 +31,8 @@
         <option name="portBindings">
           <list>
             <DockerPortBindingImpl>
-              <option name="containerPort" value="1600" />
-              <option name="hostPort" value="1600" />
+              <option name="containerPort" value="3449" />
+              <option name="hostPort" value="3449" />
             </DockerPortBindingImpl>
           </list>
         </option>

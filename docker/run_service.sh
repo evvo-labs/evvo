@@ -6,4 +6,4 @@ echo "BIND IP: $BIND_IP"
 export CLUSTER_IP=$(curl -s http://whatismyip.akamai.com/)
 echo "CLUSTER IP: $CLUSTER_IP"
 
-java -jar $JAR_FILE_PATH $@
+java -jar $JAR_FILE_PATH $@ > ras.log
