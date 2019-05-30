@@ -10,7 +10,6 @@ object RemoteActorSystem {
 
     val configFile = ConfigFactory.parseFile(new File("src/main/resources/application.conf"))
     val config = configFile
-      .getConfig("RemoteActorSystem")
       .withFallback(configFile)
       .resolve()
 
