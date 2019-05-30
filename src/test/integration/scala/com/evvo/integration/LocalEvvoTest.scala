@@ -1,9 +1,8 @@
 package com.evvo.integration
 
-import akka.actor.ActorSystem
 import com.evvo.agent.TDeletorFunc
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
-import com.evvo.island.{EvvoIslandActor, EvvoIslandBuilder, IslandManager, TEvolutionaryProcess, TerminationCriteria}
+import com.evvo.island.{EvvoIslandBuilder, TEvolutionaryProcess, TerminationCriteria}
 import com.evvo.tags.{Performance, Slow}
 import com.evvo.{CreatorFunctionType, MutatorFunctionType, NullLogger, ObjectiveFunctionType}
 import org.scalatest.{Matchers, WordSpec}

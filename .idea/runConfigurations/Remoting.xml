@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Remoting" type="Application" factoryName="Application">
+    <envs>
+      <env name="CLUSTER_PORT" value="0" />
+      <env name="CLUSTER_IP" value="192.168.1.164" />
+      <env name="BIND_IP" value="192.168.1.164" />
+    </envs>
+    <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
+    <option name="MAIN_CLASS_NAME" value="com.evvo.remoting.Remoting" />
+    <module name="evvo" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.evvo.remoting.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

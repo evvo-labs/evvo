@@ -25,6 +25,7 @@ class IslandManager[Sol](val numIslands: Int,
                          islandBuilder: EvvoIslandBuilder[Sol],
                          val actorSystemName: String = "EvvoNode",
                          val userConfig: String = "src/main/resources/application.conf")
+                        (implicit system: ActorSystem)
   extends TEvolutionaryProcess[Sol] with Actor {
 
 
@@ -39,7 +40,7 @@ class IslandManager[Sol](val numIslands: Int,
     .asScala.toVector
     .map(x => AddressFromURIString(x.toString))
 
-  implicit val system: ActorSystem = ActorSystem(actorSystemName, config)
+//  implicit val system: ActorSystem = ActorSystem(actorSystemName, config)
 
   /**
     * The final pareto frontier after the island shuts down, or None until then.
