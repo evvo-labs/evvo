@@ -3,12 +3,13 @@ package com.evvo.remoting
 import java.io.File
 
 import akka.actor.ActorSystem
-import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.agent.{CreatorFunc, MutatorFunc}
+import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.island.population.{Maximize, Objective}
 import com.evvo.island.{EvvoIslandActor, IslandManager, TerminationCriteria}
 import com.evvo.{CreatorFunctionType, MutatorFunctionType}
 import com.typesafe.config.ConfigFactory
+
 import scala.concurrent.duration._
 
 object Remoting {

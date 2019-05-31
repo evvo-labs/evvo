@@ -1,8 +1,8 @@
 package com.evvo.island
 
 import akka.event.LoggingAdapter
-import com.evvo.agent.{TCreatorFunc, TDeletorFunc, TMutatorFunc}
-import com.evvo.island.population.{TObjective, TParetoFrontier}
+import com.evvo.agent.{CreatorFunction, DeletorFunction, MutatorFunction}
+import com.evvo.island.population.{Objective, ParetoFrontier}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
@@ -14,24 +14,24 @@ import scala.concurrent.Future
   */
 class LocalEvvoIsland[Sol]
 (
-  creators: Vector[TCreatorFunc[Sol]],
-  mutators: Vector[TMutatorFunc[Sol]],
-  deletors: Vector[TDeletorFunc[Sol]],
-  fitnesses: Vector[TObjective[Sol]]
+  creators: Vector[CreatorFunction[Sol]],
+  mutators: Vector[MutatorFunction[Sol]],
+  deletors: Vector[DeletorFunction[Sol]],
+  fitnesses: Vector[Objective[Sol]]
 )(
   implicit val log: LoggingAdapter = LocalLogger
-) extends TEvolutionaryProcess[Sol] {
+) extends EvolutionaryProcess[Sol] {
   private val island = new EvvoIsland(creators, mutators, deletors, fitnesses)
 
-  override def runBlocking(terminationCriteria: TTerminationCriteria): Unit = {
+  override def runBlocking(terminationCriteria: TerminationCriteria): Unit = {
     island.runBlocking(terminationCriteria)
   }
 
-  override def runAsync(terminationCriteria: TTerminationCriteria): Future[Unit] = {
+  override def runAsync(terminationCriteria: TerminationCriteria): Future[Unit] = {
     island.runAsync(terminationCriteria)
   }
 
-  override def currentParetoFrontier(): TParetoFrontier[Sol] = {
+  override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     island.currentParetoFrontier()
   }
 

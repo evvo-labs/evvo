@@ -8,9 +8,10 @@
   */
 package com.evvo.agent.defaults
 
-import com.evvo.island.population.{Maximize, Minimize, ParetoFrontier, TScored}
 import com.evvo.DeletorFunctionType
-import com.evvo.agent.TDeletorFunc
+import com.evvo.agent.DeletorFunction
+import com.evvo.island.population
+import com.evvo.island.population.{Maximize, Minimize, ParetoFrontier, Scored}
 
 /**
   * A deletor that deletes the dominated set, in a group of size `groupSize`
@@ -18,19 +19,19 @@ import com.evvo.agent.TDeletorFunc
   * @param numInputs the number of solutions to pull at a time
   */
 case class DeleteDominated[Sol](numInputs: Int = 32) // scalastyle:ignore magic.number
-  extends TDeletorFunc[Sol] {
-  override val delete: DeletorFunctionType[Sol] = (sols: IndexedSeq[TScored[Sol]]) => {
-    val nonDominatedSet = ParetoFrontier(sols.toSet).solutions
+  extends DeletorFunction[Sol] {
+  override val delete: DeletorFunctionType[Sol] = (sols: IndexedSeq[Scored[Sol]]) => {
+    val nonDominatedSet = population.ParetoFrontier(sols.toSet).solutions
     sols.filterNot(elem => nonDominatedSet.contains(elem))
   }
   override val name = "DeleteDominated"
   override val shouldRunWithPartialInput: Boolean = true
 }
 
-case class DeleteWorstHalfByRandomObjective[Sol](numInputs: Int = 32)  // scalastyle:ignore magic.number
-  extends TDeletorFunc[Sol] {
+case class DeleteWorstHalfByRandomObjective[Sol](numInputs: Int = 32) // scalastyle:ignore magic.number
+  extends DeletorFunction[Sol] {
 
-  override val delete: DeletorFunctionType[Sol] = (s: IndexedSeq[TScored[Sol]]) => {
+  override val delete: DeletorFunctionType[Sol] = (s: IndexedSeq[Scored[Sol]]) => {
     if (s.isEmpty) {
       s
     } else {

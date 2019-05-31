@@ -3,17 +3,16 @@ package com.evvo.island.population
 import com.evvo.island.population.HashingStrategy.HashingStrategy
 
 /**
-  * Represents a solution scored by mutliple fitness functions.
+  * A solution, which has been scored by mutliple fitness functions.
+  *
+  * @param score        Maps the name of fitness functions to the score of the solution with respect to them.
+  * @param solution     The solution that has been scored.
+  * @param hashStrategy How to hash this scored solution - on the score, or on the solution?
+  * @tparam Sol The type of the solution that has been scored.
   */
-trait TScored[Sol] {
-  /**
-    * Maps the name of fitness functions to the score of the solution with respect to them.
-    */
-  def score: Map[(String, OptimizationDirection), Double]
-
-  def solution: Sol
-
-  def hashStrategy: HashingStrategy.Value
+case class Scored[Sol](score: Map[(String, OptimizationDirection), Double],
+                       solution: Sol,
+                       hashStrategy: HashingStrategy = HashingStrategy.ON_SCORES) {
 
   override def hashCode(): Int = hashStrategy match {
     case HashingStrategy.ON_SCORES => this.score.hashCode()
@@ -21,7 +20,7 @@ trait TScored[Sol] {
   }
 
   override def equals(obj: Any): Boolean = obj match {
-    case that: TScored[Sol] =>
+    case that: Scored[Sol] =>
       hashStrategy match {
         case HashingStrategy.ON_SCORES => this.score.equals(that.score)
         case HashingStrategy.ON_SOLUTIONS => this.solution.equals(that.solution)
@@ -30,12 +29,8 @@ trait TScored[Sol] {
   }
 }
 
+
 object HashingStrategy extends Enumeration {
   type HashingStrategy = Value
   val ON_SOLUTIONS, ON_SCORES = Value
 }
-
-case class Scored[Sol](score: Map[(String, OptimizationDirection), Double],
-                       solution: Sol,
-                       hashStrategy: HashingStrategy = HashingStrategy.ON_SCORES)
-  extends TScored[Sol]

@@ -102,9 +102,9 @@ object ProfessorMatching {
       .addObjective(Objective(sumProfessorCoursePreferences, "Course", Maximize))
       .addObjective(Objective(sumProfessorNumPrepsPreferences, "#Prep", Maximize))
       .addObjective(Objective(sumProfessorSectionCountPreferences, "#Section", Maximize))
-      .addCreator(CreatorFunc(validScheduleCreator, "creator"))
-      .addMutator(MutatorFunc(swapTwoCourses, "swapTwoCourses"))
-      .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
+      .addCreator(CreatorFunction(validScheduleCreator, "creator"))
+      .addMutator(MutatorFunction(swapTwoCourses, "swapTwoCourses"))
+      .addMutator(MutatorFunction(balanceCourseload, "balanceCourseload"))
 
     val config = ConfigFactory
       .parseFile(new File("src/main/resources/application.conf"))

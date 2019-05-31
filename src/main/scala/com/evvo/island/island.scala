@@ -1,28 +1,28 @@
 package com.evvo.island
 
-import com.evvo.island.population.TParetoFrontier
+import com.evvo.island.population.ParetoFrontier
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
 /**
-  * An evolutionary process with a set of actors that all act upon one set of solutions.
+  * `EvolutionaryProcess` is a generic interface for evolutionary problem solvers.
   */
-trait TEvolutionaryProcess[Solution] {
+trait EvolutionaryProcess[Solution] {
   /**
     * Run this island, until the specified termination criteria is met. This call will block
     * until the termination criteria is completed.
     *
     * @return this
     */
-  def runBlocking(terminationCriteria: TTerminationCriteria): Unit
+  def runBlocking(terminationCriteria: TerminationCriteria): Unit
 
-  def runAsync(terminationCriteria: TTerminationCriteria): Future[Unit]
+  def runAsync(terminationCriteria: TerminationCriteria): Future[Unit]
 
   /**
     * @return the current pareto frontier of solutions on this island?
     */
-  def currentParetoFrontier(): TParetoFrontier[Solution]
+  def currentParetoFrontier(): ParetoFrontier[Solution]
 
   /**
     * Provides a set of solutions to be added to the population of an EvolutionaryProcess.
@@ -38,13 +38,9 @@ trait TEvolutionaryProcess[Solution] {
 }
 
 /**
-  * Tells you how long to run an island for.
+  * Defines how long an evolutionary process should be run for.
+  *
+  * @param time Specifies a maximum duration to run, for example, `1.second` will stop running
+  *             the evolutionary process after one second.
   */
-trait TTerminationCriteria {
-  /**
-    * Stop after the specified duration has elapsed.
-    */
-  def time: Duration
-}
-
-case class TerminationCriteria(time: Duration) extends TTerminationCriteria
+case class TerminationCriteria(time: Duration)

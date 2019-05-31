@@ -3,15 +3,9 @@ package com.evvo.island.population
 import scala.collection.mutable
 
 /**
-  * Represents a set of solutions that are non-dominated.
+  * A set of solutions, none of which dominate each other.
   */
-trait TParetoFrontier[Sol] {
-  //TODO replace with IndexedSeq and provide alternate hashing here
-  def solutions: Set[TScored[Sol]]
-}
-
-case class ParetoFrontier[Sol](solutions: Set[TScored[Sol]])
-  extends TParetoFrontier[Sol] {
+case class ParetoFrontier[Sol](solutions: Set[Scored[Sol]]) {
   if (!ParetoFrontier.isParetoFrontier(solutions)) {
     throw new IllegalArgumentException(
       s"""
@@ -30,16 +24,16 @@ case class ParetoFrontier[Sol](solutions: Set[TScored[Sol]])
 }
 
 object ParetoFrontier {
-  def apply[Sol](solutions: Set[TScored[Sol]]): ParetoFrontier[Sol] = {
+  def apply[Sol](solutions: Set[Scored[Sol]]): ParetoFrontier[Sol] = {
     new ParetoFrontier(setToParetoFrontier(solutions))
   }
 
   // TODO test this for performance, and optimize - this is likely to become a bottleneck
   // https://static.aminer.org/pdf/PDF/000/211/201/on_the_computational_complexity_of_finding_the_maxima_of_a.pdf
-  def setToParetoFrontier[Sol](solutions: Set[TScored[Sol]]): Set[TScored[Sol]] = {
+  def setToParetoFrontier[Sol](solutions: Set[Scored[Sol]]): Set[Scored[Sol]] = {
 
     // mutable set used here for performance, converted back to immutable afterwards
-    val out: mutable.Set[TScored[Sol]] = mutable.Set()
+    val out: mutable.Set[Scored[Sol]] = mutable.Set()
 
     for (sol <- solutions) {
       // if, for all other elements in the population..
@@ -65,9 +59,7 @@ object ParetoFrontier {
     out.toSet
   }
 
-  def isParetoFrontier[Sol](solutions: Set[TScored[Sol]]): Boolean = {
+  def isParetoFrontier[Sol](solutions: Set[Scored[Sol]]): Boolean = {
     solutions == ParetoFrontier.setToParetoFrontier(solutions)
   }
-
-
 }
