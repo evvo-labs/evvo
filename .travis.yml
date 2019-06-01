@@ -18,8 +18,7 @@ script:
   # And then actually run it
   - overcommit --install
   - overcommit --run
-  - mvn scalastyle:check
-  - mvn test
+  - mvn clean scalastyle:check package
 
 
 notifications:
