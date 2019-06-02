@@ -46,4 +46,4 @@ We know it's not in the open-source spirit, but we use Slack for some communicat
 
 ----------------------------------------------------------------------------------------------------
 #### Next Steps
-Now that you understand how to develop on this project, you may want a better understanding of the project internals so that you can start contributing! For that, [`doc/ARCHITECTRURE.md`](doc/ARCHITECTURE.md) will help you get started. Examples of using the framework can be found in the [examples](examples) directory. If you even read this far, we'd love feedback on how to make this file better – go ahead, file your first issue telling us what could be more clear!
+Now that you understand how to develop on this project, you may want a better understanding of the project internals so that you can start contributing! For that, [`doc/ARCHITECTURE.md`](doc/ARCHITECTURE.md) will help you get started. Examples of using the framework can be found in the [examples](examples) directory. If you even read this far, we'd love feedback on how to make this file better – go ahead, file your first issue telling us what could be more clear!
