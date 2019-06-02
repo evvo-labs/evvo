@@ -1,8 +1,8 @@
 package com.evvo.integration
 
-import com.evvo.agent.TDeletorFunc
+import com.evvo.agent.{DeletorFunc, DeletorFunction}
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
-import com.evvo.island.{EvvoIslandBuilder, EvolutionaryProcess, TerminationCriteria}
+import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import com.evvo.tags.{Performance, Slow}
 import com.evvo.{CreatorFunctionType, MutatorFunctionType, NullLogger, ObjectiveFunctionType}
 import org.scalatest.{Matchers, WordSpec}
@@ -58,7 +58,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
       })
     }
 
-    val deleteFunc: TDeletorFunc[Solution] = DeleteWorstHalfByRandomObjective[Solution]()
+    val deleteFunc: DeletorFunction[Solution] = DeleteWorstHalfByRandomObjective[Solution]()
 
     val numInversions: ObjectiveFunctionType[Solution] = (s: Solution) => {
       (for ((elem, index) <- s.zipWithIndex) yield {
@@ -86,10 +86,10 @@ class LocalEvvoTest extends WordSpec with Matchers {
   implicit val log = NullLogger
 
   "Local Evvo" should {
-    val timeout = 300
+    val timeout = 500
     f"be able to sort a list of length 10 within $timeout milliseconds" taggedAs(Performance, Slow) in {
       val listLength = 10
-      val terminate = TerminationCriteria(timeout.millis)
+      val terminate = StopAfter(timeout.millis)
 
       val evvo = getEvvo(listLength)
       evvo.runBlocking(terminate)
@@ -105,7 +105,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
     val timeout100 = 15
     f"be able to sort a list of length 30 within $timeout100 seconds" taggedAs(Performance, Slow) in {
       val listLength = 30
-      val terminate = TerminationCriteria(timeout100.seconds)
+      val terminate = StopAfter(timeout100.seconds)
 
       val evvo = getEvvo(listLength)
       evvo.runBlocking(terminate)

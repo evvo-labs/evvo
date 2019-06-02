@@ -23,12 +23,12 @@ class LocalEvvoIsland[Sol]
 ) extends EvolutionaryProcess[Sol] {
   private val island = new EvvoIsland(creators, mutators, deletors, fitnesses)
 
-  override def runBlocking(terminationCriteria: TerminationCriteria): Unit = {
-    island.runBlocking(terminationCriteria)
+  override def runBlocking(stopAfter: StopAfter): Unit = {
+    island.runBlocking(stopAfter)
   }
 
-  override def runAsync(terminationCriteria: TerminationCriteria): Future[Unit] = {
-    island.runAsync(terminationCriteria)
+  override def runAsync(stopAfter: StopAfter): Future[Unit] = {
+    island.runAsync(stopAfter)
   }
 
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {

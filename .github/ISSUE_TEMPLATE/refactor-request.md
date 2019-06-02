@@ -2,7 +2,7 @@
 name: Refactor request
 about: Request a refactor of some code, making it easier to maintain
 title: ''
-labels: ''
+labels: refactor
 assignees: ''
 
 ---

@@ -27,10 +27,10 @@ class EvvoIsland[Sol]
   private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
   private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
 
-  override def runAsync(terminationCriteria: TerminationCriteria)
+  override def runAsync(stopAfter: StopAfter)
   : Future[Unit] = {
     Future {
-      log.info(s"Island running with terminationCriteria=${terminationCriteria}")
+      log.info(s"Island running with stopAfter=${stopAfter}")
 
       // TODO can we put all of these in some combined pool? don't like having to manage each
       creatorAgents.foreach(_.start())
@@ -40,7 +40,7 @@ class EvvoIsland[Sol]
       // TODO this is not ideal. fix wait time/add features to termination criteria
       val startTime = Calendar.getInstance().toInstant.toEpochMilli
 
-      while (startTime + terminationCriteria.time.toMillis >
+      while (startTime + stopAfter.time.toMillis >
         Calendar.getInstance().toInstant.toEpochMilli) {
         Thread.sleep(500)
         val pareto = pop.getParetoFrontier()
@@ -53,8 +53,8 @@ class EvvoIsland[Sol]
     }
   }
 
-  def runBlocking(terminationCriteria: TerminationCriteria): Unit = {
-    Await.result(this.runAsync(terminationCriteria), Duration.Inf)
+  def runBlocking(stopAfter: StopAfter): Unit = {
+    Await.result(this.runAsync(stopAfter), Duration.Inf)
   }
 
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {

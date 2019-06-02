@@ -6,9 +6,10 @@ import akka.actor.{Actor, ActorSystem, Address, AddressFromURIString, Deploy, Po
 import akka.event.LoggingReceive
 import akka.remote.RemoteScope
 import akka.util.Timeout
-import com.evvo.island.EvvoIslandActor.{Emigrate, GetParetoFrontier, Run}
 import com.evvo.island.population.{ParetoFrontier, Scored}
 import com.typesafe.config.ConfigFactory
+import com.evvo.island.EvvoIslandActor.{Emigrate, GetParetoFrontier, Run}
+
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -61,7 +62,7 @@ class IslandManager[Sol](val numIslands: Int,
 
 
   override def receive: Receive = LoggingReceive({
-    case Run(terminationCriteria) => sender ! this.runBlocking(terminationCriteria)
+    case Run(stopAfter) => sender ! this.runBlocking(stopAfter)
     case GetParetoFrontier => sender ! this.currentParetoFrontier()
     case Emigrate(solutions: Seq[Sol]) => emigrate(solutions)
   })
@@ -72,10 +73,10 @@ class IslandManager[Sol](val numIslands: Int,
   }
 
 
-  override def runAsync(terminationCriteria: TerminationCriteria)
+  override def runAsync(stopAfter: StopAfter)
   : Future[Unit] = {
     Future {
-      val runIslands = this.islands.map(_.runAsync(terminationCriteria))
+      val runIslands = this.islands.map(_.runAsync(stopAfter))
       runIslands.foreach(Await.result(_, Duration.Inf))
       this.finalParetoFrontier = Some(this.currentParetoFrontier())
       this.islands.foreach(_.poisonPill())
@@ -83,9 +84,9 @@ class IslandManager[Sol](val numIslands: Int,
     }
   }
 
-  def runBlocking(terminationCriteria: TerminationCriteria): Unit = {
+  def runBlocking(stopAfter: StopAfter): Unit = {
     // TODO replace Duration.Inf
-    Await.result(this.runAsync(terminationCriteria), Duration.Inf)
+    Await.result(this.runAsync(stopAfter), Duration.Inf)
   }
 
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {

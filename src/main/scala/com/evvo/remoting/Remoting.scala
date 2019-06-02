@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import com.evvo.agent.{CreatorFunc, MutatorFunc}
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.island.population.{Maximize, Objective}
-import com.evvo.island.{EvvoIslandActor, IslandManager, TerminationCriteria}
+import com.evvo.island.{EvvoIslandActor, IslandManager, StopAfter}
 import com.evvo.{CreatorFunctionType, MutatorFunctionType}
 import com.typesafe.config.ConfigFactory
 
@@ -40,7 +40,7 @@ object Remoting {
 
     val islandManager = IslandManager.from(10, builder)
 
-    islandManager.runBlocking(TerminationCriteria(1.second))
+    islandManager.runBlocking(StopAfter(1.second))
 
     println(islandManager.currentParetoFrontier())
     actorSystem.terminate()

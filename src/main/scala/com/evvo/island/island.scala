@@ -1,9 +1,8 @@
 package com.evvo.island
 
-import com.evvo.island.population.ParetoFrontier
-
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
+import com.evvo.island.population.ParetoFrontier
 
 /**
   * `EvolutionaryProcess` is a generic interface for evolutionary problem solvers.
@@ -15,9 +14,9 @@ trait EvolutionaryProcess[Solution] {
     *
     * @return this
     */
-  def runBlocking(terminationCriteria: TerminationCriteria): Unit
+  def runBlocking(stopAfter: StopAfter): Unit
 
-  def runAsync(terminationCriteria: TerminationCriteria): Future[Unit]
+  def runAsync(stopAfter: StopAfter): Future[Unit]
 
   /**
     * @return the current pareto frontier of solutions on this island?
@@ -43,4 +42,4 @@ trait EvolutionaryProcess[Solution] {
   * @param time Specifies a maximum duration to run, for example, `1.second` will stop running
   *             the evolutionary process after one second.
   */
-case class TerminationCriteria(time: Duration)
+case class StopAfter(time: Duration)

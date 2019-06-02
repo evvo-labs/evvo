@@ -7,6 +7,7 @@ import akka.util.Timeout
 import com.evvo.agent._
 import com.evvo.island.population.{Objective, ParetoFrontier}
 
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
@@ -38,12 +39,12 @@ class EvvoIslandActor[Sol]
   })
 
 
-  override def runBlocking(terminationCriteria: TerminationCriteria): Unit = {
-    island.runBlocking(terminationCriteria)
+  override def runBlocking(stopAfter: StopAfter): Unit = {
+    island.runBlocking(stopAfter)
   }
 
-  override def runAsync(terminationCriteria: TerminationCriteria): Future[Unit] = {
-    island.runAsync(terminationCriteria)
+  override def runAsync(stopAfter: StopAfter): Future[Unit] = {
+    island.runAsync(stopAfter)
   }
 
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {
@@ -93,12 +94,12 @@ object EvvoIslandActor {
   case class Wrapper[Sol](ref: ActorRef) extends EvolutionaryProcess[Sol] {
     implicit val timeout: Timeout = Timeout(5.days)
 
-    override def runBlocking(terminationCriteria: TerminationCriteria): Unit = {
-      Await.result(this.runAsync(terminationCriteria), Duration.Inf)
+    override def runBlocking(stopAfter: StopAfter): Unit = {
+      Await.result(this.runAsync(stopAfter), Duration.Inf)
     }
 
-    override def runAsync(terminationCriteria: TerminationCriteria): Future[Unit] = {
-      (ref ? Run(terminationCriteria)).asInstanceOf[Future[Unit]]
+    override def runAsync(stopAfter: StopAfter): Future[Unit] = {
+      (ref ? Run(stopAfter)).asInstanceOf[Future[Unit]]
     }
 
     override def currentParetoFrontier(): ParetoFrontier[Sol] = {
@@ -114,7 +115,7 @@ object EvvoIslandActor {
     }
   }
 
-  case class Run(terminationCriteria: TerminationCriteria)
+  case class Run(stopAfter: StopAfter)
 
   case object GetParetoFrontier
 
