@@ -64,7 +64,7 @@ class IslandManager[Sol](val numIslands: Int,
 
 
   override def receive: Receive = LoggingReceive({
-    case Run(terminationCriteria) => sender ! this.runBlocking(terminationCriteria)
+    case Run(stopAfter) => sender ! this.runBlocking(stopAfter)
     case GetParetoFrontier => sender ! this.currentParetoFrontier()
     case Emigrate(solutions: Seq[Sol]) => emigrate(solutions)
   })
@@ -75,10 +75,10 @@ class IslandManager[Sol](val numIslands: Int,
   }
 
 
-  override def runAsync(terminationCriteria: TTerminationCriteria)
+  override def runAsync(stopAfter: TStopAfter)
   : Future[Unit] = {
     Future {
-      val runIslands = this.islands.map(_.runAsync(terminationCriteria))
+      val runIslands = this.islands.map(_.runAsync(stopAfter))
       runIslands.foreach(Await.result(_, Duration.Inf))
       this.finalParetoFrontier = Some(this.currentParetoFrontier())
       this.islands.foreach(_.poisonPill())
@@ -86,9 +86,9 @@ class IslandManager[Sol](val numIslands: Int,
     }
   }
 
-  def runBlocking(terminationCriteria: TTerminationCriteria): Unit = {
+  def runBlocking(stopAfter: TStopAfter): Unit = {
     // TODO replace Duration.Inf
-    Await.result(this.runAsync(terminationCriteria), Duration.Inf)
+    Await.result(this.runAsync(stopAfter), Duration.Inf)
   }
 
   override def currentParetoFrontier(): TParetoFrontier[Sol] = {
