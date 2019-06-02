@@ -17,7 +17,7 @@ val islandBuilder = EvvoIsland.builder[Solution]()
 
 // create five "islands", run each one for 1 second, in parallel
 val islandManager = new IslandManager[Solution](5, islandBuilder)
-  .run(TerminationCriteria(1.second))
+  .run(StopAfter(1.second))
 
 // collects the pareto frontier from each island, and returns the non-dominated set from there 
 val paretoFrontierAfter1Second = islandManager.currentParetoFrontier()

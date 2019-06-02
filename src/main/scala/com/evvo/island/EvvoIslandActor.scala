@@ -39,12 +39,12 @@ class EvvoIslandActor[Sol]
   })
 
 
-  override def runBlocking(terminationCriteria: TTerminationCriteria): Unit = {
-    island.runBlocking(terminationCriteria)
+  override def runBlocking(stopAfter: TStopAfter): Unit = {
+    island.runBlocking(stopAfter)
   }
 
-  override def runAsync(terminationCriteria: TTerminationCriteria): Future[Unit] = {
-    island.runAsync(terminationCriteria)
+  override def runAsync(stopAfter: TStopAfter): Future[Unit] = {
+    island.runAsync(stopAfter)
   }
 
   override def currentParetoFrontier(): TParetoFrontier[Sol] = {
@@ -94,12 +94,12 @@ object EvvoIslandActor {
   case class Wrapper[Sol](ref: ActorRef) extends TEvolutionaryProcess[Sol] {
     implicit val timeout: Timeout = Timeout(5.days)
 
-    override def runBlocking(terminationCriteria: TTerminationCriteria): Unit = {
-      Await.result(this.runAsync(terminationCriteria), Duration.Inf)
+    override def runBlocking(stopAfter: TStopAfter): Unit = {
+      Await.result(this.runAsync(stopAfter), Duration.Inf)
     }
 
-    override def runAsync(terminationCriteria: TTerminationCriteria): Future[Unit] = {
-      (ref ? Run(terminationCriteria)).asInstanceOf[Future[Unit]]
+    override def runAsync(stopAfter: TStopAfter): Future[Unit] = {
+      (ref ? Run(stopAfter)).asInstanceOf[Future[Unit]]
     }
 
     override def currentParetoFrontier(): TParetoFrontier[Sol] = {
@@ -115,7 +115,7 @@ object EvvoIslandActor {
     }
   }
 
-  case class Run(terminationCriteria: TTerminationCriteria)
+  case class Run(stopAfter: TStopAfter)
 
   case object GetParetoFrontier
 

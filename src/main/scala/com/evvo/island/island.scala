@@ -15,9 +15,9 @@ trait TEvolutionaryProcess[Solution] {
     *
     * @return this
     */
-  def runBlocking(terminationCriteria: TTerminationCriteria): Unit
+  def runBlocking(stopAfter: TStopAfter): Unit
 
-  def runAsync(terminationCriteria: TTerminationCriteria): Future[Unit]
+  def runAsync(stopAfter: TStopAfter): Future[Unit]
 
   /**
     * @return the current pareto frontier of solutions on this island?
@@ -40,11 +40,11 @@ trait TEvolutionaryProcess[Solution] {
 /**
   * Tells you how long to run an island for.
   */
-trait TTerminationCriteria {
+trait TStopAfter {
   /**
     * Stop after the specified duration has elapsed.
     */
   def time: Duration
 }
 
-case class TerminationCriteria(time: Duration) extends TTerminationCriteria
+case class StopAfter(time: Duration) extends TStopAfter
