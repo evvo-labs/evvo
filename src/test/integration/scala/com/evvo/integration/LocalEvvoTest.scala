@@ -86,7 +86,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
   implicit val log = NullLogger
 
   "Local Evvo" should {
-    val timeout = 300
+    val timeout = 500
     f"be able to sort a list of length 10 within $timeout milliseconds" taggedAs(Performance, Slow) in {
       val listLength = 10
       val terminate = StopAfter(timeout.millis)
