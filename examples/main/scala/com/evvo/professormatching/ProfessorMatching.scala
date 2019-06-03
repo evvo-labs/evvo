@@ -102,15 +102,13 @@ object ProfessorMatching {
       .addObjective(Objective(sumProfessorCoursePreferences, "Course", Maximize))
       .addObjective(Objective(sumProfessorNumPrepsPreferences, "#Prep", Maximize))
       .addObjective(Objective(sumProfessorSectionCountPreferences, "#Section", Maximize))
-      .addCreator(CreatorFunction(validScheduleCreator, "creator"))
-      .addMutator(MutatorFunction(swapTwoCourses, "swapTwoCourses"))
-      .addMutator(MutatorFunction(balanceCourseload, "balanceCourseload"))
+      .addCreator(CreatorFunc(validScheduleCreator, "creator"))
+      .addMutator(MutatorFunc(swapTwoCourses, "swapTwoCourses"))
+      .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
 
     val config = ConfigFactory
       .parseFile(new File("src/main/resources/application.conf"))
       .resolve()
-
-    implicit val system: ActorSystem = ActorSystem("EvvoNode", config)
 
     val numIslands = 5
     val manager = IslandManager.from[PMSolution](numIslands, islandBuilder,
@@ -119,7 +117,6 @@ object ProfessorMatching {
     val pareto = manager.currentParetoFrontier()
     manager.poisonPill()
     println(f"Pareto Frontier:\n${pareto}")
-    system.terminate()
   }
 
   def readProblem(): Problem = {
