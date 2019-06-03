@@ -71,7 +71,7 @@ case class StandardPopulation[Sol](fitnessFunctionsIter: TraversableOnce[Objecti
 
   private def score(solution: Sol): Scored[Sol] = {
     val scores = fitnessFunctions.map(func => {
-      (func.toString, func.optimizationDirection) -> func.score(solution)
+      (func.name, func.optimizationDirection) -> func.score(solution)
     }).toMap
     Scored(scores, solution, hashing)
   }
