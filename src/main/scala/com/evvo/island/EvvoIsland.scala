@@ -153,7 +153,7 @@ case class EvvoIslandBuilder[Sol]
   }
 
   def toProps()(implicit system: ActorSystem): Props = {
-    Props(new EvvoIslandActor[Sol](
+    Props(new RemoteEvvoIsland[Sol](
       creators.toVector,
       mutators.toVector,
       deletors.toVector,
@@ -258,7 +258,7 @@ object LocalLogger extends LoggingAdapter {
   * CPU cores). Because it is an Akka actor, generally people will use SingleIslandEvvo.Wrapped
   * to use it in a type-safe way, instead of throwing messages.
   */
-class EvvoIslandActor[Sol]
+class RemoteEvvoIsland[Sol]
 (
   creators: Vector[CreatorFunction[Sol]],
   mutators: Vector[MutatorFunction[Sol]],
@@ -267,7 +267,7 @@ class EvvoIslandActor[Sol]
 )
   extends Actor with EvolutionaryProcess[Sol] with ActorLogging {
   // for messages
-  import com.evvo.island.EvvoIslandActor._ // scalastyle:ignore import.grouping
+  import com.evvo.island.RemoteEvvoIsland._ // scalastyle:ignore import.grouping
 
   implicit val logger: LoggingAdapter = log
 
@@ -306,7 +306,7 @@ class EvvoIslandActor[Sol]
   }
 }
 
-object EvvoIslandActor {
+object RemoteEvvoIsland {
   /**
     * @param creators  the functions to be used for creating new solutions.
     * @param mutators  the functions to be used for creating new solutions from current solutions.
@@ -321,12 +321,12 @@ object EvvoIslandActor {
   : EvolutionaryProcess[Sol] = {
     // TODO validate that there is at least one of each creator/mutator/deletors/fitness
 
-    val props = Props(new EvvoIslandActor[Sol](
+    val props = Props(new RemoteEvvoIsland[Sol](
       creators.toVector,
       mutators.toVector,
       deletors.toVector,
       fitnesses.toVector))
-    EvvoIslandActor.Wrapper[Sol](system.actorOf(props, s"EvvoIsland_${java.util.UUID.randomUUID()}"))
+    RemoteEvvoIsland.Wrapper[Sol](system.actorOf(props, s"EvvoIsland_${java.util.UUID.randomUUID()}"))
   }
 
   def builder[Sol](): EvvoIslandBuilder[Sol] = EvvoIslandBuilder[Sol]()
