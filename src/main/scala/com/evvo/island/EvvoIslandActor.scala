@@ -35,7 +35,8 @@ class EvvoIslandActor[Sol]
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.runBlocking(t)
     case GetParetoFrontier => sender ! this.currentParetoFrontier()
-    case Emigrate(solutions: Seq[Sol]) => this.emigrate(solutions)
+    case Immigrate(solutions: Seq[Sol]) => this.immigrate(solutions)
+    case RegisterIslands(islands: Seq[EvolutionaryProcess[Sol]]) => this.registerIslands(islands)
   })
 
 
@@ -51,12 +52,16 @@ class EvvoIslandActor[Sol]
     island.currentParetoFrontier()
   }
 
-  override def emigrate(solutions: Seq[Sol]): Unit = {
-    island.emigrate(solutions)
+  override def immigrate(solutions: Seq[Sol]): Unit = {
+    island.immigrate(solutions)
   }
 
   override def poisonPill(): Unit = {
     self ! PoisonPill
+  }
+
+  override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
+    this.island.registerIslands(islands)
   }
 }
 
@@ -106,12 +111,16 @@ object EvvoIslandActor {
       Await.result(ref ? GetParetoFrontier, Duration.Inf).asInstanceOf[ParetoFrontier[Sol]]
     }
 
-    override def emigrate(solutions: Seq[Sol]): Unit = {
-      ref ! Emigrate(solutions)
+    override def immigrate(solutions: Seq[Sol]): Unit = {
+      ref ! Immigrate(solutions)
     }
 
     override def poisonPill(): Unit = {
       ref ! PoisonPill
+    }
+
+    override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
+      ref ! RegisterIslands[Sol](islands)
     }
   }
 
@@ -119,6 +128,8 @@ object EvvoIslandActor {
 
   case object GetParetoFrontier
 
-  case class Emigrate[Sol](solutions: Seq[Sol])
+  case class Immigrate[Sol](solutions: Seq[Sol])
+
+  case class RegisterIslands[Sol](islands: Seq[EvolutionaryProcess[Sol]])
 
 }

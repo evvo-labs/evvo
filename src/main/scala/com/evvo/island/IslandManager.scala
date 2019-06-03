@@ -2,14 +2,11 @@ package com.evvo.island
 
 import java.io.File
 
-import akka.actor.{Actor, ActorSystem, Address, AddressFromURIString, Deploy, PoisonPill, Props}
-import akka.event.LoggingReceive
+import akka.actor.{ActorSystem, Address, AddressFromURIString, Deploy}
 import akka.remote.RemoteScope
 import akka.util.Timeout
 import com.evvo.island.population.{ParetoFrontier, Scored}
 import com.typesafe.config.ConfigFactory
-import com.evvo.island.EvvoIslandActor.{Emigrate, GetParetoFrontier, Run}
-
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -46,25 +43,25 @@ class IslandManager[Sol](val numIslands: Int,
 
   implicit val timeout: Timeout = 1.second
 
-
   // Round robin deploy new islands to the remote addresses
-  private val islands = (0 until numIslands).map(i => {
+  private val islands: IndexedSeq[EvolutionaryProcess[Sol]] = (0 until numIslands).map(i => {
     val remoteChoice = i % addresses.length // pick round robin
     val address = addresses(remoteChoice)
     system.actorOf(islandBuilder.toProps.withDeploy(Deploy(scope = RemoteScope(address))),
       s"EvvoIsland${i}")
   }).map(EvvoIslandActor.Wrapper[Sol])
 
+  // Tell each island about all the other islands (so they can exchange solutions)
+  this.registerIslands(islands)
 
   // the index of the current island in `islands` to send emigrations to
   private var islandEmigrationIndex = 0
 
 
-  def emigrate(solutions: Seq[Sol]): Unit = {
-    this.islands(this.islandEmigrationIndex).emigrate(solutions)
+  def immigrate(solutions: Seq[Sol]): Unit = {
+    this.islands(this.islandEmigrationIndex).immigrate(solutions)
     this.islandEmigrationIndex += 1
   }
-
 
   override def runAsync(stopAfter: StopAfter)
   : Future[Unit] = {
@@ -97,6 +94,10 @@ class IslandManager[Sol](val numIslands: Int,
 
   override def poisonPill(): Unit = {
     this.islands.foreach(_.poisonPill())
+  }
+
+  override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
+    this.islands.foreach(_.registerIslands(islands))
   }
 }
 

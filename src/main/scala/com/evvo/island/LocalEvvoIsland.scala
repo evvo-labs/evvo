@@ -35,12 +35,16 @@ class LocalEvvoIsland[Sol]
     island.currentParetoFrontier()
   }
 
-  override def emigrate(solutions: Seq[Sol]): Unit = {
-    island.emigrate(solutions)
+  override def immigrate(solutions: Seq[Sol]): Unit = {
+    island.immigrate(solutions)
   }
 
   override def poisonPill(): Unit = {
     island.poisonPill()
+  }
+
+  override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
+    island.registerIslands(islands)
   }
 }
 

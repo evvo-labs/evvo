@@ -26,6 +26,8 @@ class EvvoIsland[Sol]
   private val creatorAgents = creators.map(c => CreatorAgent(c, pop))
   private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
   private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
+  private var emigrationTargets: Seq[EvolutionaryProcess[Sol]] = Seq()
+  private var currentEmigrationTargetIndex: Int = 0
 
   override def runAsync(stopAfter: StopAfter)
   : Future[Unit] = {
@@ -44,6 +46,7 @@ class EvvoIsland[Sol]
         Calendar.getInstance().toInstant.toEpochMilli) {
         Thread.sleep(500)
         val pareto = pop.getParetoFrontier()
+        this.emigrate()
         log.info(f"pareto = ${pareto}")
       }
 
@@ -61,7 +64,7 @@ class EvvoIsland[Sol]
     pop.getParetoFrontier()
   }
 
-  override def emigrate(solutions: Seq[Sol]): Unit = {
+  override def immigrate(solutions: Seq[Sol]): Unit = {
     pop.addSolutions(solutions)
   }
 
@@ -69,10 +72,24 @@ class EvvoIsland[Sol]
     stop()
   }
 
+  override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
+    emigrationTargets = emigrationTargets ++ islands
+  }
+
   private def stop(): Unit = {
     creatorAgents.foreach(_.stop())
     mutatorAgents.foreach(_.stop())
     deletorAgents.foreach(_.stop())
+  }
+
+  private def emigrate(): Unit = {
+    if (emigrationTargets.isEmpty) {
+      log.info("Trying to emigrate without any emigration targets")
+    } else {
+      val emigrants = this.pop.getSolutions(4).map(_.solution)
+      this.emigrationTargets(currentEmigrationTargetIndex).immigrate(emigrants)
+      currentEmigrationTargetIndex = (currentEmigrationTargetIndex + 1) % emigrationTargets.length
+    }
   }
 }
 
