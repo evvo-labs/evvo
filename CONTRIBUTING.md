@@ -13,6 +13,7 @@ We are using tagged releases on master to indicate milestones. There is no devel
 #### Branch Names
 * Branches that implement new features should be named `feature/<the-feature-name>`
 * Branches that improve documentation should be named `doc/<what-docs-are-updated>`. Of course, feature branches will include lots of documentation as well - this name is only for branches that exist solely to update documentation.
+* Branches that fix bugs __not__ on a tagged release should be named `fix/<what's-being-fixed>`
 * Branches that fix bugs on a tagged release should be named `hotfix/<what's-being-fixed>`
 * Refactors should be named `refactor/<what's-refactored-and-the-end-result>`
 
