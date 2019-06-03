@@ -8,7 +8,7 @@ import akka.actor.ActorSystem
 import com.evvo._
 import com.evvo.agent._
 import com.evvo.island.population.{Maximize, Objective}
-import com.evvo.island.{EvvoIsland, EvvoIslandActor, IslandManager, StopAfter}
+import com.evvo.island.{EvvoIsland, RemoteEvvoIsland, RemoteIslandManager, StopAfter}
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
@@ -111,7 +111,7 @@ object ProfessorMatching {
       .resolve()
 
     val numIslands = 5
-    val manager = IslandManager.from[PMSolution](numIslands, islandBuilder,
+    val manager = new RemoteIslandManager[PMSolution](numIslands, islandBuilder,
       userConfig = "src/main/resources/remoting_example.conf")
     manager.runBlocking(StopAfter(1.second))
     val pareto = manager.currentParetoFrontier()
