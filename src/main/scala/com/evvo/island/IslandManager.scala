@@ -23,8 +23,7 @@ class IslandManager[Sol](val numIslands: Int,
                          islandBuilder: EvvoIslandBuilder[Sol],
                          val actorSystemName: String = "EvvoNode",
                          val userConfig: String = "src/main/resources/application.conf")
-                        (implicit system: ActorSystem)
-  extends EvolutionaryProcess[Sol] with Actor {
+  extends EvolutionaryProcess[Sol] {
 
 
   private val configFile = ConfigFactory.parseFile(new File("src/main/resources/application.conf"))
@@ -38,7 +37,7 @@ class IslandManager[Sol](val numIslands: Int,
     .asScala.toVector
     .map(x => AddressFromURIString(x.toString))
 
-//  implicit val system: ActorSystem = ActorSystem(actorSystemName, config)
+  implicit val system: ActorSystem = ActorSystem(actorSystemName, config)
 
   /**
     * The final pareto frontier after the island shuts down, or None until then.
@@ -60,12 +59,6 @@ class IslandManager[Sol](val numIslands: Int,
   // the index of the current island in `islands` to send emigrations to
   private var islandEmigrationIndex = 0
 
-
-  override def receive: Receive = LoggingReceive({
-    case Run(stopAfter) => sender ! this.runBlocking(stopAfter)
-    case GetParetoFrontier => sender ! this.currentParetoFrontier()
-    case Emigrate(solutions: Seq[Sol]) => emigrate(solutions)
-  })
 
   def emigrate(solutions: Seq[Sol]): Unit = {
     this.islands(this.islandEmigrationIndex).emigrate(solutions)
@@ -104,7 +97,6 @@ class IslandManager[Sol](val numIslands: Int,
 
   override def poisonPill(): Unit = {
     this.islands.foreach(_.poisonPill())
-    self ! PoisonPill
   }
 }
 
@@ -113,9 +105,7 @@ object IslandManager {
                 islandBuilder: EvvoIslandBuilder[Sol],
                 actorSystemName: String = "EvvoNode",
                 userConfig: String = "src/main/resources/application.conf")
-               (implicit system: ActorSystem): EvolutionaryProcess[Sol] = {
-    EvvoIslandActor.Wrapper(
-      system.actorOf(Props(
-        new IslandManager[Sol](numIslands, islandBuilder, userConfig=userConfig))))
+  : EvolutionaryProcess[Sol] = {
+    new IslandManager[Sol](numIslands, islandBuilder, userConfig = userConfig)
   }
 }
