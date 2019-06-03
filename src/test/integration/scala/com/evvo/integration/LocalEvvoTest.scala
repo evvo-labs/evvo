@@ -27,7 +27,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
     * Start the evolutionary process
     *
     * Wait for the process to terminate, and see if result is sorted.
-    */
+  */
 
   type Solution = List[Int]
 
@@ -86,26 +86,10 @@ class LocalEvvoTest extends WordSpec with Matchers {
   implicit val log = NullLogger
 
   "Local Evvo" should {
-    val timeout = 500
-    f"be able to sort a list of length 10 within $timeout milliseconds" taggedAs(Performance, Slow) in {
+    val timeout = 1
+    f"be able to sort a list of length 10 within $timeout seconds" taggedAs(Performance, Slow) in {
       val listLength = 10
-      val terminate = StopAfter(timeout.millis)
-
-      val evvo = getEvvo(listLength)
-      evvo.runBlocking(terminate)
-
-      val pareto: Set[Solution] = evvo
-        .currentParetoFrontier()
-        .solutions
-        .map(_.solution)
-      pareto should contain(1 to listLength toList)
-      pareto.size shouldBe 1
-    }
-
-    val timeout100 = 15
-    f"be able to sort a list of length 30 within $timeout100 seconds" taggedAs(Performance, Slow) in {
-      val listLength = 30
-      val terminate = StopAfter(timeout100.seconds)
+      val terminate = StopAfter(timeout.seconds)
 
       val evvo = getEvvo(listLength)
       evvo.runBlocking(terminate)
