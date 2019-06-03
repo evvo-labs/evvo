@@ -7,9 +7,9 @@ import scala.concurrent.duration._
   * Given some information, returns how long to wait between each invocation of the
   * agent's task.
   */
-trait TAgentStrategy {
+trait AgentStrategy {
   // TODO returning a duration is arbitrary, find a better calling API/return type
-  def waitTime(populationInformation: TPopulationInformation): Duration
+  def waitTime(populationInformation: PopulationInformation): Duration
 }
 
 /**
@@ -17,8 +17,4 @@ trait TAgentStrategy {
   * between the population and strategies of agents. Provides enough information
   * for agents to base their decisions on.
   */
-trait TPopulationInformation {
-  def numSolutions: Int
-}
-
-case class PopulationInformation(numSolutions: Int) extends TPopulationInformation
+case class PopulationInformation(numSolutions: Int)

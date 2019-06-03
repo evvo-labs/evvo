@@ -1,16 +1,14 @@
 package com.evvo.agent
 
 import akka.event.LoggingAdapter
-import com.evvo.island.population.TPopulation
+import com.evvo.island.population.Population
 import scala.concurrent.duration._
 
-trait TDeletorAgent[Sol] extends TAgent[Sol]
-
-case class DeletorAgent[Sol](delete: TDeletorFunc[Sol],
-                             population: TPopulation[Sol],
-                             strategy: TAgentStrategy = DeletorAgentDefaultStrategy())
+case class DeletorAgent[Sol](delete: DeletorFunction[Sol],
+                             population: Population[Sol],
+                             strategy: AgentStrategy = DeletorAgentDefaultStrategy())
                             (implicit val logger: LoggingAdapter)
-  extends AAgent[Sol](strategy, population, delete.name)(logger) with TDeletorAgent[Sol] {
+  extends AAgent[Sol](strategy, population, delete.name)(logger) {
 
   override protected def step(): Unit = {
     val in = population.getSolutions(delete.numInputs)
@@ -27,8 +25,8 @@ case class DeletorAgent[Sol](delete: TDeletorFunc[Sol],
   override def toString: String = s"DeletorAgent[$name]"
 }
 
-case class DeletorAgentDefaultStrategy() extends TAgentStrategy {
-  override def waitTime(populationInformation: TPopulationInformation): Duration = {
+case class DeletorAgentDefaultStrategy() extends AgentStrategy {
+  override def waitTime(populationInformation: PopulationInformation): Duration = {
     if (populationInformation.numSolutions < 100) {
       30.millis // give creators a chance!
     } else {

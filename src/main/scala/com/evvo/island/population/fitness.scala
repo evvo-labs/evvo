@@ -3,38 +3,18 @@ package com.evvo.island.population
 import com.evvo.ObjectiveFunctionType
 
 /**
-  * A real valued objective.
+  *
+  * @param objective             The underlying function: takes a `Sol` and scores it.
+  * @param name                  the name of this objective
+  * @param optimizationDirection oneof `Minimize` or `Maximize`
+  * @param precision             how many decimal points to round to. For example, if given 1,
+  *                              .015 and .018 will be considered equal.
   */
-trait TObjective[Sol] {
-
-  /**
-    * The score, to be minimized.
-    * param: the solution to score
-    * @return the score, according to this objective
-    */
-  def score:  ObjectiveFunctionType[Sol]
-
-  def name: String
-
-  /**
-    * @return How many significant figures to keep.
-    */
-  def precision: Int
-
-  /**
-    * @return the direction to optimize in - either Minimize or Maximize
-    */
-  def optimizationDirection: OptimizationDirection
-
-  override def toString: String = s"Objective[${this.name}]"
-}
-
 case class Objective[Sol](private val objective: ObjectiveFunctionType[Sol],
                           name: String,
                           optimizationDirection: OptimizationDirection,
-                          precision: Int = 3) // scalastyle:ignore magic.number
-  extends TObjective[Sol] {
-  override def score: ObjectiveFunctionType[Sol] = sol => {
+                          precision: Int = 3) { // scalastyle:ignore magic.number
+  def score: ObjectiveFunctionType[Sol] = sol => {
     val roundingMultiple = math.pow(10, precision) // scalastyle:ignore magic.number
     math.round(objective(sol) * roundingMultiple) / roundingMultiple
   }

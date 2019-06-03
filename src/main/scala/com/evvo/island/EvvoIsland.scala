@@ -4,30 +4,30 @@ import java.util.Calendar
 
 import akka.actor.{ActorSystem, Props}
 import akka.event.LoggingAdapter
+import com.evvo.agent._
+import com.evvo.island.population.{Minimize, Objective, ParetoFrontier, Population, StandardPopulation}
 import com.evvo.{CreatorFunctionType, DeletorFunctionType, MutatorFunctionType, ObjectiveFunctionType}
-import com.evvo.agent.{CreatorAgent, CreatorFunc, DeletorAgent, DeletorFunc, MutatorAgent, MutatorFunc, TCreatorFunc, TDeletorFunc, TMutatorFunc}
-import com.evvo.island.population.{Minimize, Objective, Population, TObjective, TParetoFrontier}
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 
 class EvvoIsland[Sol]
 (
-  creators: Vector[TCreatorFunc[Sol]],
-  mutators: Vector[TMutatorFunc[Sol]],
-  deletors: Vector[TDeletorFunc[Sol]],
-  fitnesses: Vector[TObjective[Sol]])
+  creators: Vector[CreatorFunction[Sol]],
+  mutators: Vector[MutatorFunction[Sol]],
+  deletors: Vector[DeletorFunction[Sol]],
+  fitnesses: Vector[Objective[Sol]])
 (implicit log: LoggingAdapter)
-  extends TEvolutionaryProcess[Sol] {
+  extends EvolutionaryProcess[Sol] {
 
-  private val pop = Population(fitnesses)
+  private val pop: Population[Sol] = StandardPopulation(fitnesses)
   private val creatorAgents = creators.map(c => CreatorAgent(c, pop))
   private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
   private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
 
-  override def runAsync(stopAfter: TStopAfter)
+  override def runAsync(stopAfter: StopAfter)
   : Future[Unit] = {
     Future {
       log.info(s"Island running with stopAfter=${stopAfter}")
@@ -53,11 +53,11 @@ class EvvoIsland[Sol]
     }
   }
 
-  def runBlocking(stopAfter: TStopAfter): Unit = {
+  def runBlocking(stopAfter: StopAfter): Unit = {
     Await.result(this.runAsync(stopAfter), Duration.Inf)
   }
 
-  override def currentParetoFrontier(): TParetoFrontier[Sol] = {
+  override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     pop.getParetoFrontier()
   }
 
@@ -89,16 +89,16 @@ object EvvoIsland {
   */
 case class EvvoIslandBuilder[Sol]
 (
-  creators: Set[TCreatorFunc[Sol]] = Set[TCreatorFunc[Sol]](),
-  mutators: Set[TMutatorFunc[Sol]] = Set[TMutatorFunc[Sol]](),
-  deletors: Set[TDeletorFunc[Sol]] = Set[TDeletorFunc[Sol]](),
-  objectives: Set[TObjective[Sol]] = Set[TObjective[Sol]]()
+  creators: Set[CreatorFunction[Sol]] = Set[CreatorFunction[Sol]](),
+  mutators: Set[MutatorFunction[Sol]] = Set[MutatorFunction[Sol]](),
+  deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
+  objectives: Set[Objective[Sol]] = Set[Objective[Sol]]()
 ) {
   def addCreatorFromFunction(creatorFunc: CreatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(creators = creators + CreatorFunc(creatorFunc, creatorFunc.toString))
   }
 
-  def addCreator(creatorFunc: TCreatorFunc[Sol]): EvvoIslandBuilder[Sol] = {
+  def addCreator(creatorFunc: CreatorFunction[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(creators = creators + creatorFunc)
   }
 
@@ -106,7 +106,7 @@ case class EvvoIslandBuilder[Sol]
     this.copy(mutators = mutators + MutatorFunc(mutatorFunc, mutatorFunc.toString))
   }
 
-  def addMutator(mutatorFunc: TMutatorFunc[Sol]): EvvoIslandBuilder[Sol] = {
+  def addMutator(mutatorFunc: MutatorFunction[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(mutators = mutators + mutatorFunc)
   }
 
@@ -114,7 +114,7 @@ case class EvvoIslandBuilder[Sol]
     this.copy(deletors = deletors + DeletorFunc(deletorFunc, deletorFunc.toString))
   }
 
-  def addDeletor(deletorFunc: TDeletorFunc[Sol]): EvvoIslandBuilder[Sol] = {
+  def addDeletor(deletorFunc: DeletorFunction[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(deletors = deletors + deletorFunc)
   }
 
@@ -139,7 +139,7 @@ case class EvvoIslandBuilder[Sol]
       objectives.toVector))
   }
 
-  def buildLocalEvvo(): TEvolutionaryProcess[Sol] = {
+  def buildLocalEvvo(): EvolutionaryProcess[Sol] = {
     new LocalEvvoIsland[Sol](
       creators.toVector,
       mutators.toVector,

@@ -1,8 +1,8 @@
 package com.evvo.integration
 
-import com.evvo.agent.TDeletorFunc
+import com.evvo.agent.{DeletorFunc, DeletorFunction}
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
-import com.evvo.island.{EvvoIslandBuilder, TEvolutionaryProcess, StopAfter}
+import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import com.evvo.tags.{Performance, Slow}
 import com.evvo.{CreatorFunctionType, MutatorFunctionType, NullLogger, ObjectiveFunctionType}
 import org.scalatest.{Matchers, WordSpec}
@@ -38,7 +38,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
     * @param listLength the length of the lists to sort.
     * @return
     */
-  def getEvvo(listLength: Int): TEvolutionaryProcess[Solution] = {
+  def getEvvo(listLength: Int): EvolutionaryProcess[Solution] = {
     val createFunc: CreatorFunctionType[Solution] = () => {
       Vector((listLength to 1 by -1).toList)
     }
@@ -58,7 +58,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
       })
     }
 
-    val deleteFunc: TDeletorFunc[Solution] = DeleteWorstHalfByRandomObjective[Solution]()
+    val deleteFunc: DeletorFunction[Solution] = DeleteWorstHalfByRandomObjective[Solution]()
 
     val numInversions: ObjectiveFunctionType[Solution] = (s: Solution) => {
       (for ((elem, index) <- s.zipWithIndex) yield {

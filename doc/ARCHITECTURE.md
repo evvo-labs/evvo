@@ -12,7 +12,7 @@ This holds the agents (classes that extend `TAgent`), and supporting classes suc
 Implements islands and clusters of islands. The main point of this package are the classes that extend `TEvolutionaryProcess`. These classes are ready-to-use implementations of evolutionary processes, that only need to have creators, fitness functions, etc. plugged in to start solving problems. Each island has its own population.
 
 #### [`island/population`](src/main/scala/com/evvo/island/population/)
-Holds `TPopulation`, `Population`, and the classes required to support them. The population is a set of scored ('`TScored`') solutions, where uniqueness and equality are (by default) measured by the score and not the solution itself. This is for speed (we can hash a smaller piece of data - the score mapping), and for speed (because we have fewer solutions in the population, and anything with duplicate scores should be just as good as a solution).
+Holds `Population`, `StandardPopulation`, and the classes required to support them. The population is a set of scored ('`Scored`') solutions, where uniqueness and equality are (by default) measured by the score and not the solution itself. This is for speed (we can hash a smaller piece of data - the score mapping), and for speed (because we have fewer solutions in the population, and anything with duplicate scores should be just as good as a solution).
 
 
 -------------------------------------------------------------------------------

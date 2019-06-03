@@ -1,17 +1,15 @@
 package com.evvo.agent
 
 import akka.event.LoggingAdapter
-import com.evvo.island.population.TPopulation
+import com.evvo.island.population.Population
 import scala.concurrent.duration._
 
 
-trait TCreatorAgent[Sol] extends TAgent[Sol]
-
-case class CreatorAgent[Sol](create: TCreatorFunc[Sol],
-                             population: TPopulation[Sol],
-                             strategy: TAgentStrategy = CreatorAgentDefaultStrategy())
+case class CreatorAgent[Sol](create: CreatorFunction[Sol],
+                             population: Population[Sol],
+                             strategy: AgentStrategy = CreatorAgentDefaultStrategy())
                             (implicit val logger: LoggingAdapter)
-  extends AAgent[Sol](strategy, population, create.name)(logger) with TCreatorAgent[Sol] {
+  extends AAgent[Sol](strategy, population, create.name)(logger) {
 
   override protected def step(): Unit = {
     val toAdd = create.create()
@@ -21,8 +19,8 @@ case class CreatorAgent[Sol](create: TCreatorFunc[Sol],
   override def toString: String = s"CreatorAgent[$name]"
 }
 
-case class CreatorAgentDefaultStrategy() extends TAgentStrategy {
-  override def waitTime(populationInformation: TPopulationInformation): Duration = {
+case class CreatorAgentDefaultStrategy() extends AgentStrategy {
+  override def waitTime(populationInformation: PopulationInformation): Duration = {
     val n = populationInformation.numSolutions
     if (n > 300) {
       1000.millis // they have 1000 solutions, they're probably set.

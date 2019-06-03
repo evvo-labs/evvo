@@ -14,6 +14,7 @@ We are using tagged releases on master to indicate milestones. There is no devel
 * Branches that implement new features should be named `feature/<the-feature-name>`
 * Branches that improve documentation should be named `doc/<what-docs-are-updated>`. Of course, feature branches will include lots of documentation as well - this name is only for branches that exist solely to update documentation.
 * Branches that fix bugs on a tagged release should be named `hotfix/<what's-being-fixed>`
+* Refactors should be named `refactor/<what's-refactored-and-the-end-result>`
 
 #### Commit Messages
 Commit messages should start with a brief description of what the commit does - a verb phrase, like "add CONTRIBUTING.md" or "test foo under bar conditions". This verb phrase should indicate what changes will be caused by applying the code to the codebase. Then, if there is more to your commit than what you could say in the header, list everything else in bullets after two newline. For example:

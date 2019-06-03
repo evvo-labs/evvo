@@ -1,102 +1,102 @@
 package com.evvo.agent
 
-import com.evvo.island.population.TScored
+import com.evvo.island.population.Scored
 import com.evvo.{CreatorFunctionType, DeletorFunctionType, MutatorFunctionType}
 
-/**
-  * A function that an agent can apply repeatedly.
-  */
-trait TAgentFunc {
-  /**
-    * @return The name of this function, used entirely for logging purposes.
-    */
+
+trait CreatorFunction[Sol] {
+  /** @return This function's name */
   def name: String
+
+  /** @return The function to call to produce new solutions */
+  def create: CreatorFunctionType[Sol]
+
+  def apply(): TraversableOnce[Sol] = create()
 }
 
 /**
   * A function that creates a new set of solutions.
+  *
+  * @param create the function to call to produce new solutions
+  * @param name   The name of this creator function.
   */
-trait TCreatorFunc[Sol] extends TAgentFunc with CreatorFunctionType[Sol] {
-  val create: CreatorFunctionType[Sol]
-
-  override def apply(): TraversableOnce[Sol] = create()
-}
-
 case class CreatorFunc[Sol](create: CreatorFunctionType[Sol],
-                            name: String)
-  extends TCreatorFunc[Sol] with CreatorFunctionType[Sol]
+                            name: String) extends CreatorFunction[Sol]
 
-abstract class InputAcceptingAgentFunc(numInputs: Int = 32, // scalastyle:ignore magic.number
-                                       runWithoutRequestedInputSize: Boolean = true)
+
+trait MutatorFunction[Sol] {
+  /**
+    * @return This function's name
+    */
+  def name: String
+
+  /**
+    * @return The function to call to produce new solutions
+    */
+  def mutate: MutatorFunctionType[Sol]
+
+  /** @return The number of solutions to request in the contents of each input set */
+  def numInputs: Int
+
+  /**
+    * @return Whether this function should run if the number of solutions
+    *         in the input is less than `numInputs`
+    */
+  def shouldRunWithPartialInput: Boolean
+
+  def apply(solutions: IndexedSeq[Scored[Sol]]): TraversableOnce[Sol] = mutate(solutions)
+}
 
 /**
   * A function that produces a new set of solutions based on a set of solutions.
   *
+  * @param mutate                    Produces a new set of solutions based on a set of solutions.
+  * @param name                      The name of the mutator function
+  * @param numInputs                 The number of solutions to request in the contents of each
+  *                                  input set
+  * @param shouldRunWithPartialInput Whether this function should run if the number of solutions
+  *                                  in the input is less than `numInputs`
   */
-trait TMutatorFunc[Sol] extends TAgentFunc with MutatorFunctionType[Sol] {
-
-  /**
-    * Produces a new set of solutions based on a set of solutions.
-    * param solutions: the solutions to base the new ones off of.
-    *
-    * @return the new set of solutions.
-    */
-  val mutate: MutatorFunctionType[Sol]
-
-  /**
-    * @return the number of solutions to request in the contents of each set
-    */
-  val numInputs: Int
-
-  /**
-    * @return whether this function should run without the requested input size
-    */
-  val shouldRunOnPartialInput: Boolean
-
-
-  override def apply(sample: IndexedSeq[TScored[Sol]]): TraversableOnce[Sol] = mutate(sample)
-}
-
 case class MutatorFunc[Sol](mutate: MutatorFunctionType[Sol],
                             name: String,
                             numInputs: Int = 32, // scalastyle:ignore magic.number
-                            shouldRunOnPartialInput: Boolean = true)
-  extends TMutatorFunc[Sol]
+                            shouldRunWithPartialInput: Boolean = true)
+  extends MutatorFunction[Sol]
+
+
+trait DeletorFunction[Sol] {
+  /** @return This function's name */
+  def name: String
+
+  /** @return The function to call to identify which solutions to delete */
+  def delete: DeletorFunctionType[Sol]
+
+  /** @return The number of solutions to request in the contents of each input set */
+  def numInputs: Int
+
+  /**
+    * @return Whether this function should run if the number of solutions
+    *         in the input is less than `numInputs`
+    */
+  def shouldRunWithPartialInput: Boolean
+
+  def apply(solutions: IndexedSeq[Scored[Sol]]): TraversableOnce[Scored[Sol]] = delete(solutions)
+}
 
 
 /**
   * A function that, given a subset of a population, determines which solutions in that subset
   * ought to be deleted.
+  *
+  * @param delete                    Decides which of a set of solutions to delete.
+  * @param name                      The name of the deletor function
+  * @param numInputs                 The number of solutions to request in the contents of each
+  *                                  input set
+  * @param shouldRunWithPartialInput Whether this function should run if the number of solutions
+  *                                  in the input is less than `numInputs`
   */
-trait TDeletorFunc[Sol] extends TAgentFunc with DeletorFunctionType[Sol] {
-  /**
-    * Processing a subset of the population, returning some portion of
-    * that subset which ought to be deleted.
-    *
-    * `@param solutions: a sampling of the population.`
-    *
-    * @return the set of solutions that should be deleted
-    */
-  val delete: DeletorFunctionType[Sol]
-
-  /**
-    * @return the number of solutions to request in the contents of each set
-    */
-  val numInputs: Int
-
-  /**
-    * @return whether this function should run without the requested input size
-    */
-  val shouldRunWithPartialInput: Boolean
-
-
-  override def apply(sample: IndexedSeq[TScored[Sol]]): TraversableOnce[TScored[Sol]] = {
-    delete(sample)
-  }
-}
-
 case class DeletorFunc[Sol](delete: DeletorFunctionType[Sol],
                             name: String,
                             numInputs: Int = 32, // scalastyle:ignore magic.number
-                            override val shouldRunWithPartialInput: Boolean = true)
-  extends TDeletorFunc[Sol]
+                            shouldRunWithPartialInput: Boolean = true)
+  extends DeletorFunction[Sol]

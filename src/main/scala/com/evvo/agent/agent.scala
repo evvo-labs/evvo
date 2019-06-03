@@ -1,14 +1,14 @@
 package com.evvo.agent
 
 import akka.event.LoggingAdapter
-import com.evvo.island.population.TPopulation
+import com.evvo.island.population.Population
 
 import scala.concurrent.duration._
 
 /**
   * The parent trait for all types of evolutionary agents.
   */
-trait TAgent[Sol] {
+trait Agent[Sol] {
   def start(): Unit
 
   def stop(): Unit
@@ -16,11 +16,11 @@ trait TAgent[Sol] {
   def numInvocations: Int
 }
 
-abstract class AAgent[Sol](private val strategy: TAgentStrategy,
-                           private val population: TPopulation[Sol],
+abstract class AAgent[Sol](private val strategy: AgentStrategy,
+                           private val population: Population[Sol],
                            protected val name: String)
                           (private implicit val logger: LoggingAdapter)
-  extends TAgent[Sol] {
+  extends Agent[Sol] {
 
   var numInvocations: Int = 0
 

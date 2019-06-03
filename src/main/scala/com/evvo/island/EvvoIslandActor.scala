@@ -1,15 +1,15 @@
 package com.evvo.island
 
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Address, PoisonPill, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, PoisonPill, Props}
 import akka.event.{LoggingAdapter, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
 import com.evvo.agent._
+import com.evvo.island.population.{Objective, ParetoFrontier}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
-import com.evvo.island.population.{Maximize, Minimize, Objective, Population, TObjective, TParetoFrontier}
+import scala.concurrent.{Await, Future}
 
 
 // for messages
@@ -22,12 +22,12 @@ import com.evvo.island.EvvoIslandActor._
   */
 class EvvoIslandActor[Sol]
 (
-  creators: Vector[TCreatorFunc[Sol]],
-  mutators: Vector[TMutatorFunc[Sol]],
-  deletors: Vector[TDeletorFunc[Sol]],
-  fitnesses: Vector[TObjective[Sol]]
+  creators: Vector[CreatorFunction[Sol]],
+  mutators: Vector[MutatorFunction[Sol]],
+  deletors: Vector[DeletorFunction[Sol]],
+  fitnesses: Vector[Objective[Sol]]
 )
-  extends Actor with TEvolutionaryProcess[Sol] with ActorLogging {
+  extends Actor with EvolutionaryProcess[Sol] with ActorLogging {
   implicit val logger: LoggingAdapter = log
 
   val island = new EvvoIsland[Sol](creators, mutators, deletors, fitnesses)
@@ -39,15 +39,15 @@ class EvvoIslandActor[Sol]
   })
 
 
-  override def runBlocking(stopAfter: TStopAfter): Unit = {
+  override def runBlocking(stopAfter: StopAfter): Unit = {
     island.runBlocking(stopAfter)
   }
 
-  override def runAsync(stopAfter: TStopAfter): Future[Unit] = {
+  override def runAsync(stopAfter: StopAfter): Future[Unit] = {
     island.runAsync(stopAfter)
   }
 
-  override def currentParetoFrontier(): TParetoFrontier[Sol] = {
+  override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     island.currentParetoFrontier()
   }
 
@@ -67,12 +67,12 @@ object EvvoIslandActor {
     * @param deletors  the functions to be used for deciding which solutions to delete.
     * @param fitnesses the objective functions to maximize.
     */
-  def from[Sol](creators: TraversableOnce[TCreatorFunc[Sol]],
-                mutators: TraversableOnce[TMutatorFunc[Sol]],
-                deletors: TraversableOnce[TDeletorFunc[Sol]],
-                fitnesses: TraversableOnce[TObjective[Sol]])
+  def from[Sol](creators: TraversableOnce[CreatorFunction[Sol]],
+                mutators: TraversableOnce[MutatorFunction[Sol]],
+                deletors: TraversableOnce[DeletorFunction[Sol]],
+                fitnesses: TraversableOnce[Objective[Sol]])
                (implicit system: ActorSystem)
-  : TEvolutionaryProcess[Sol] = {
+  : EvolutionaryProcess[Sol] = {
     // TODO validate that there is at least one of each creator/mutator/deletors/fitness
 
     val props = Props(new EvvoIslandActor[Sol](
@@ -91,19 +91,19 @@ object EvvoIslandActor {
     *
     * @param ref the reference to wrap
     */
-  case class Wrapper[Sol](ref: ActorRef) extends TEvolutionaryProcess[Sol] {
+  case class Wrapper[Sol](ref: ActorRef) extends EvolutionaryProcess[Sol] {
     implicit val timeout: Timeout = Timeout(5.days)
 
-    override def runBlocking(stopAfter: TStopAfter): Unit = {
+    override def runBlocking(stopAfter: StopAfter): Unit = {
       Await.result(this.runAsync(stopAfter), Duration.Inf)
     }
 
-    override def runAsync(stopAfter: TStopAfter): Future[Unit] = {
+    override def runAsync(stopAfter: StopAfter): Future[Unit] = {
       (ref ? Run(stopAfter)).asInstanceOf[Future[Unit]]
     }
 
-    override def currentParetoFrontier(): TParetoFrontier[Sol] = {
-      Await.result(ref ? GetParetoFrontier, Duration.Inf).asInstanceOf[TParetoFrontier[Sol]]
+    override def currentParetoFrontier(): ParetoFrontier[Sol] = {
+      Await.result(ref ? GetParetoFrontier, Duration.Inf).asInstanceOf[ParetoFrontier[Sol]]
     }
 
     override def emigrate(solutions: Seq[Sol]): Unit = {
@@ -115,7 +115,7 @@ object EvvoIslandActor {
     }
   }
 
-  case class Run(stopAfter: TStopAfter)
+  case class Run(stopAfter: StopAfter)
 
   case object GetParetoFrontier
 

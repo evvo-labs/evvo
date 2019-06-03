@@ -1,11 +1,11 @@
 package com
 
-import com.evvo.island.population.TScored
+import com.evvo.island.population.Scored
 
 package object evvo {
   type CreatorFunctionType[Sol] = () => TraversableOnce[Sol]
-  type MutatorFunctionType[Sol] = IndexedSeq[TScored[Sol]] => TraversableOnce[Sol]
-  type DeletorFunctionType[Sol] = IndexedSeq[TScored[Sol]] => TraversableOnce[TScored[Sol]]
+  type MutatorFunctionType[Sol] = IndexedSeq[Scored[Sol]] => TraversableOnce[Sol]
+  type DeletorFunctionType[Sol] = IndexedSeq[Scored[Sol]] => TraversableOnce[Scored[Sol]]
 
   type ObjectiveFunctionType[Sol] = Sol => Double
 }

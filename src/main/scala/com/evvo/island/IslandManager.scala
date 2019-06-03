@@ -5,28 +5,26 @@ import java.io.File
 import akka.actor.{Actor, ActorSystem, Address, AddressFromURIString, Deploy, PoisonPill, Props}
 import akka.event.LoggingReceive
 import akka.remote.RemoteScope
-import com.evvo.island.EvvoIslandActor.{Emigrate, GetParetoFrontier, Run}
-import com.evvo.island.population.{ParetoFrontier, TParetoFrontier, TScored}
-import com.typesafe.config.ConfigFactory
-
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.Duration
-import scala.concurrent.ExecutionContext.Implicits.global
-import collection.JavaConverters._
-import akka.pattern.ask
 import akka.util.Timeout
+import com.evvo.island.population.{ParetoFrontier, Scored}
+import com.typesafe.config.ConfigFactory
+import com.evvo.island.EvvoIslandActor.{Emigrate, GetParetoFrontier, Run}
 
-import scala.concurrent.duration._
+
+import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.{Duration, _}
+import scala.concurrent.{Await, Future}
 
 /**
-  * Launches and manages multiple EvvoIslands.
+  * Launches and manages multiple EvvoIslandActors.
   */
 class IslandManager[Sol](val numIslands: Int,
                          islandBuilder: EvvoIslandBuilder[Sol],
                          val actorSystemName: String = "EvvoNode",
                          val userConfig: String = "src/main/resources/application.conf")
                         (implicit system: ActorSystem)
-  extends TEvolutionaryProcess[Sol] with Actor {
+  extends EvolutionaryProcess[Sol] with Actor {
 
 
   private val configFile = ConfigFactory.parseFile(new File("src/main/resources/application.conf"))
@@ -45,7 +43,7 @@ class IslandManager[Sol](val numIslands: Int,
   /**
     * The final pareto frontier after the island shuts down, or None until then.
     */
-  private var finalParetoFrontier: Option[TParetoFrontier[Sol]] = None
+  private var finalParetoFrontier: Option[ParetoFrontier[Sol]] = None
 
   implicit val timeout: Timeout = 1.second
 
@@ -75,7 +73,7 @@ class IslandManager[Sol](val numIslands: Int,
   }
 
 
-  override def runAsync(stopAfter: TStopAfter)
+  override def runAsync(stopAfter: StopAfter)
   : Future[Unit] = {
     Future {
       val runIslands = this.islands.map(_.runAsync(stopAfter))
@@ -86,19 +84,19 @@ class IslandManager[Sol](val numIslands: Int,
     }
   }
 
-  def runBlocking(stopAfter: TStopAfter): Unit = {
+  def runBlocking(stopAfter: StopAfter): Unit = {
     // TODO replace Duration.Inf
     Await.result(this.runAsync(stopAfter), Duration.Inf)
   }
 
-  override def currentParetoFrontier(): TParetoFrontier[Sol] = {
+  override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     finalParetoFrontier match {
       case Some(paretoFrontier) =>
         paretoFrontier
       case None =>
         val islandFrontiers = islands
           .map(_.currentParetoFrontier().solutions)
-          .foldLeft(Set[TScored[Sol]]())(_ | _)
+          .foldLeft(Set[Scored[Sol]]())(_ | _)
 
         ParetoFrontier(islandFrontiers)
     }
@@ -115,7 +113,7 @@ object IslandManager {
                 islandBuilder: EvvoIslandBuilder[Sol],
                 actorSystemName: String = "EvvoNode",
                 userConfig: String = "src/main/resources/application.conf")
-               (implicit system: ActorSystem): TEvolutionaryProcess[Sol] = {
+               (implicit system: ActorSystem): EvolutionaryProcess[Sol] = {
     EvvoIslandActor.Wrapper(
       system.actorOf(Props(
         new IslandManager[Sol](numIslands, islandBuilder, userConfig=userConfig))))

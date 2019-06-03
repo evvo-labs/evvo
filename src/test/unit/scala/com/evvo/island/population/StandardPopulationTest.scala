@@ -6,7 +6,7 @@ import com.evvo.NullLogger
 import com.evvo.island.population
 import org.scalatest._
 
-class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
+class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter {
   implicit val log: LoggingAdapter = NullLogger
 
   val identityFitness = population.Objective[Double](x => x, "Identity", Minimize)
@@ -14,7 +14,7 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
 
 
   "An empty population" should {
-    val emptyPop = Population(fitnesses)
+    val emptyPop = StandardPopulation(fitnesses)
 
     "not return any solutions" in {
       val sols = emptyPop.getSolutions(1)
@@ -29,7 +29,7 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     }
 
     "become non-empty when added to" in {
-      val pop = Population(fitnesses)
+      val pop = StandardPopulation(fitnesses)
       pop.addSolutions(Set(1.0))
       val sols = pop.getSolutions(1)
       sols.length should not be 0
@@ -46,11 +46,11 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     }
   }
 
-  var pop: Population[Double] = _
+  var pop: StandardPopulation[Double] = _
   val popSize = 10
   "A non-empty population hashing on solutions" should {
     before {
-      pop = population.Population(fitnesses, HashingStrategy.ON_SOLUTIONS)
+      pop = population.StandardPopulation(fitnesses, HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions((1 to popSize).map(_.toDouble))
     }
 
@@ -70,7 +70,7 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
     }
 
     "return random subsections of the population" in {
-      val multipleSolSelections: List[Set[TScored[Double]]] =
+      val multipleSolSelections: List[Set[Scored[Double]]] =
         List.fill(12)(pop.getSolutions(popSize / 2).toSet)
       assert(multipleSolSelections.toSet.size > 1)
     }
@@ -103,14 +103,14 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
   "A population hashing on solutions" should {
 
     "not allow duplicate solutions" in {
-      val pop = population.Population(Vector(uniqueScore), HashingStrategy.ON_SOLUTIONS)
+      val pop = population.StandardPopulation(Vector(uniqueScore), HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions(Vector(1, 1))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 1
     }
 
     "allow duplicate scores for different solutions" in {
-      val pop = population.Population(Vector(returnOne), HashingStrategy.ON_SOLUTIONS)
+      val pop = population.StandardPopulation(Vector(returnOne), HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions(Vector(1, 2))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 2
@@ -120,14 +120,14 @@ class PopulationTest extends WordSpec with Matchers with BeforeAndAfter {
   "A population hashing on scores" should {
 
     "not allow duplicate scores" in {
-      val pop = population.Population(Vector(returnOne), HashingStrategy.ON_SCORES)
+      val pop = population.StandardPopulation(Vector(returnOne), HashingStrategy.ON_SCORES)
       pop.addSolutions(Vector(1, 2))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 1
     }
 
     "allow duplicate solutions for different scores" in {
-      val pop = population.Population(Vector(uniqueScore), HashingStrategy.ON_SCORES)
+      val pop = population.StandardPopulation(Vector(uniqueScore), HashingStrategy.ON_SCORES)
       pop.addSolutions(Vector(1, 1))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 2
