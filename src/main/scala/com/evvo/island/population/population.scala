@@ -84,7 +84,6 @@ case class StandardPopulation[Sol](fitnessFunctionsIter: TraversableOnce[Objecti
 
   override def deleteSolutions(solutions: TraversableOnce[Scored[Sol]]): Unit = {
     population --= solutions
-
   }
 
   override def getParetoFrontier(): ParetoFrontier[Sol] = {
