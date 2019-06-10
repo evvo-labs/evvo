@@ -21,13 +21,9 @@
               <option name="name" value="CLUSTER_PORT" />
               <option name="value" value="3449" />
             </DockerEnvVarImpl>
-            <DockerEnvVarImpl>
-              <option name="name" value="CLUSTER_IP" />
-              <option name="value" value="192.168.1.164" />
-            </DockerEnvVarImpl>
           </list>
         </option>
-        <option name="imageTag" value="" />
+        <option name="imageTag" value="evvo:latest" />
         <option name="portBindings">
           <list>
             <DockerPortBindingImpl>

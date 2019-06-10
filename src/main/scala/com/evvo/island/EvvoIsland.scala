@@ -8,6 +8,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.evvo.agent._
 import com.evvo.island.population._
+import com.evvo.utils.UntypedSerializationPackage
 import com.evvo.{CreatorFunctionType, DeletorFunctionType, MutatorFunctionType, ObjectiveFunctionType}
 import org.slf4j.LoggerFactory
 
@@ -16,19 +17,19 @@ import scala.concurrent.duration.{Duration, _}
 import scala.concurrent.{Await, Future}
 
 
-class EvvoIsland[Sol]
+private class EvvoIsland[Sol]
 (
-  creators: Vector[CreatorFunction[Sol]],
-  mutators: Vector[MutatorFunction[Sol]],
-  deletors: Vector[DeletorFunction[Sol]],
-  fitnesses: Vector[Objective[Sol]])
+  creators: Vector[UntypedSerializationPackage[CreatorFunction[Sol]]],
+  mutators: Vector[UntypedSerializationPackage[MutatorFunction[Sol]]],
+  deletors: Vector[UntypedSerializationPackage[DeletorFunction[Sol]]],
+  fitnesses: Vector[UntypedSerializationPackage[Objective[Sol]]])
 (implicit log: LoggingAdapter)
   extends EvolutionaryProcess[Sol] {
 
-  private val pop: Population[Sol] = StandardPopulation(fitnesses)
-  private val creatorAgents = creators.map(c => CreatorAgent(c, pop))
-  private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
-  private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
+  private val pop: Population[Sol] = StandardPopulation(fitnesses.map(_.content))
+  private val creatorAgents = creators.map(c => CreatorAgent(c.content, pop))
+  private val mutatorAgents = mutators.map(m => MutatorAgent(m.content, pop))
+  private val deletorAgents = deletors.map(d => DeletorAgent(d.content, pop))
 
   private var emigrationTargets: Seq[EvolutionaryProcess[Sol]] = Seq()
   private var currentEmigrationTargetIndex: Int = 0
@@ -181,11 +182,15 @@ class LocalEvvoIsland[Sol]
   creators: Vector[CreatorFunction[Sol]],
   mutators: Vector[MutatorFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
-  fitnesses: Vector[Objective[Sol]]
+  objectives: Vector[Objective[Sol]]
 )(
   implicit val log: LoggingAdapter = LocalLogger
 ) extends EvolutionaryProcess[Sol] {
-  private val island = new EvvoIsland(creators, mutators, deletors, fitnesses)
+  private val island = new EvvoIsland(
+    creators.map(UntypedSerializationPackage(_)),
+    mutators.map(UntypedSerializationPackage(_)),
+    deletors.map(UntypedSerializationPackage(_)),
+    objectives.map(UntypedSerializationPackage(_)))
 
   override def runBlocking(stopAfter: StopAfter): Unit = {
     island.runBlocking(stopAfter)
@@ -263,7 +268,7 @@ class RemoteEvvoIsland[Sol]
   creators: Vector[CreatorFunction[Sol]],
   mutators: Vector[MutatorFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
-  fitnesses: Vector[Objective[Sol]]
+  objectives: Vector[Objective[Sol]]
 )
   extends Actor with EvolutionaryProcess[Sol] with ActorLogging {
   // for messages
@@ -271,7 +276,11 @@ class RemoteEvvoIsland[Sol]
 
   implicit val logger: LoggingAdapter = log
 
-  private val island = new EvvoIsland[Sol](creators, mutators, deletors, fitnesses)
+  private val island = new EvvoIsland(
+    creators.map(UntypedSerializationPackage(_)),
+    mutators.map(UntypedSerializationPackage(_)),
+    deletors.map(UntypedSerializationPackage(_)),
+    objectives.map(UntypedSerializationPackage(_)))
 
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.runBlocking(t)
@@ -307,27 +316,6 @@ class RemoteEvvoIsland[Sol]
 }
 
 object RemoteEvvoIsland {
-  /**
-    * @param creators  the functions to be used for creating new solutions.
-    * @param mutators  the functions to be used for creating new solutions from current solutions.
-    * @param deletors  the functions to be used for deciding which solutions to delete.
-    * @param fitnesses the objective functions to maximize.
-    */
-  def from[Sol](creators: TraversableOnce[CreatorFunction[Sol]],
-                mutators: TraversableOnce[MutatorFunction[Sol]],
-                deletors: TraversableOnce[DeletorFunction[Sol]],
-                fitnesses: TraversableOnce[Objective[Sol]])
-               (implicit system: ActorSystem)
-  : EvolutionaryProcess[Sol] = {
-    // TODO validate that there is at least one of each creator/mutator/deletors/fitness
-
-    val props = Props(new RemoteEvvoIsland[Sol](
-      creators.toVector,
-      mutators.toVector,
-      deletors.toVector,
-      fitnesses.toVector))
-    RemoteEvvoIsland.Wrapper[Sol](system.actorOf(props, s"EvvoIsland_${java.util.UUID.randomUUID()}"))
-  }
 
   def builder[Sol](): EvvoIslandBuilder[Sol] = EvvoIslandBuilder[Sol]()
 
