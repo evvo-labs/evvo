@@ -5,7 +5,6 @@
       <env name="CLUSTER_IP" value="192.168.1.164" />
       <env name="BIND_IP" value="192.168.1.164" />
     </envs>
-    <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
     <option name="MAIN_CLASS_NAME" value="com.evvo.remoting.Remoting" />
     <module name="evvo" />
     <extension name="coverage">

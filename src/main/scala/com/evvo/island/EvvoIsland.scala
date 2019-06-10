@@ -271,7 +271,7 @@ class RemoteEvvoIsland[Sol]
 
   implicit val logger: LoggingAdapter = log
 
-  val island = new EvvoIsland[Sol](creators, mutators, deletors, fitnesses)
+  private val island = new EvvoIsland[Sol](creators, mutators, deletors, fitnesses)
 
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.runBlocking(t)
