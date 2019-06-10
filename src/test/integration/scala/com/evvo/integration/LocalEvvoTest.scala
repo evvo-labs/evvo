@@ -1,10 +1,11 @@
 package com.evvo.integration
 
-import com.evvo.agent.{DeletorFunc, DeletorFunction}
+import com.evvo.agent.{CreatorFunction, DeletorFunction, MutatorFunction}
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import com.evvo.tags.{Performance, Slow}
-import com.evvo.{CreatorFunctionType, MutatorFunctionType, NullLogger, ObjectiveFunctionType}
+import com.evvo.NullLogger
+import com.evvo.island.population.{Minimize, Objective, Scored}
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
@@ -27,9 +28,47 @@ class LocalEvvoTest extends WordSpec with Matchers {
     * Start the evolutionary process
     *
     * Wait for the process to terminate, and see if result is sorted.
-  */
+    */
 
   type Solution = List[Int]
+
+  class Creator(listLength: Int) extends CreatorFunction[Solution] {
+    val name = "Creator"
+
+    override def create(): TraversableOnce[Solution] = {
+      Vector((listLength to 1 by -1).toList)
+    }
+  }
+
+  class Mutator extends MutatorFunction[Solution] {
+    override def name: String = "Mutator"
+
+    private def mutateOneSolution(sol: Solution): Solution = {
+      val i = util.Random.nextInt(sol.length)
+      val j = util.Random.nextInt(sol.length)
+      val tmp = sol(j)
+      sol.updated(j, sol(i)).updated(i, tmp)
+    }
+
+
+    override def mutate(s: IndexedSeq[Scored[Solution]]): TraversableOnce[Solution] = {
+      s.map(scoredSol => {
+        val sol = scoredSol.solution
+        val out = mutateOneSolution(sol)
+        out
+      })
+    }
+  }
+
+  class NumInversions extends Objective[Solution]("Inversions", Minimize) {
+
+    override protected def objective(sol: Solution): Double = {
+      (for ((elem, index) <- sol.zipWithIndex) yield {
+        sol.drop(index).count(_ < elem)
+      }).sum
+    }
+  }
+
 
   /**
     * Creates a test Evvo instance running locally, that will use basic swapping
@@ -39,46 +78,20 @@ class LocalEvvoTest extends WordSpec with Matchers {
     * @return
     */
   def getEvvo(listLength: Int): EvolutionaryProcess[Solution] = {
-    val createFunc: CreatorFunctionType[Solution] = () => {
-      Vector((listLength to 1 by -1).toList)
-    }
-
-    def mutate(sol: Solution): Solution = {
-      val i = util.Random.nextInt(sol.length)
-      val j = util.Random.nextInt(sol.length)
-      val tmp = sol(j)
-      sol.updated(j, sol(i)).updated(i, tmp)
-    }
-
-    val mutateFunc: MutatorFunctionType[Solution] = s => {
-      s.map(scoredSol => {
-        val sol = scoredSol.solution
-        val out = mutate(sol)
-        out
-      })
-    }
-
-    val deleteFunc: DeletorFunction[Solution] = DeleteWorstHalfByRandomObjective[Solution]()
-
-    val numInversions: ObjectiveFunctionType[Solution] = (s: Solution) => {
-      (for ((elem, index) <- s.zipWithIndex) yield {
-        s.drop(index).count(_ < elem)
-      }).sum
-    }
 
     // TODO add convenience constructor for adding multiple duplicate mutators/creators/deletors
     val islandBuilder = EvvoIslandBuilder[Solution]()
-      .addCreatorFromFunction(createFunc)
-      .addMutatorFromFunction(mutateFunc)
-      .addMutatorFromFunction(mutateFunc)
-      .addMutatorFromFunction(mutateFunc)
-      .addMutatorFromFunction(mutateFunc)
-      .addDeletor(deleteFunc)
-      .addDeletor(deleteFunc)
-      .addDeletor(deleteFunc)
-      .addDeletor(deleteFunc)
-      .addDeletor(deleteFunc)
-      .addObjective(numInversions)
+      .addCreator(new Creator(listLength))
+      .addMutator(new Mutator())
+      .addMutator(new Mutator())
+      .addMutator(new Mutator())
+      .addMutator(new Mutator())
+      .addDeletor(DeleteWorstHalfByRandomObjective())
+      .addDeletor(DeleteWorstHalfByRandomObjective())
+      .addDeletor(DeleteWorstHalfByRandomObjective())
+      .addDeletor(DeleteWorstHalfByRandomObjective())
+      .addDeletor(DeleteWorstHalfByRandomObjective())
+      .addObjective(new NumInversions())
 
     islandBuilder.buildLocalEvvo()
   }

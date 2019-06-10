@@ -11,7 +11,7 @@ class DeleteWorstHalfByRandomObjectiveTest extends WordSpec with Matchers {
     val scored3 = Scored(Map(("a", Maximize) -> 3), 14)
     val scored4 = Scored(Map(("a", Maximize) -> 4), 14)
 
-    val deletor = DeleteWorstHalfByRandomObjective[Int]().delete.andThen(_.toVector)
+    val deletor = (DeleteWorstHalfByRandomObjective[Int]().delete _).andThen(_.toVector)
 
     "not error if given empty input" in {
       deletor(Vector())

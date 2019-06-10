@@ -17,7 +17,7 @@ import scala.concurrent.duration.{Duration, _}
 import scala.concurrent.{Await, Future}
 
 
-private class EvvoIsland[Sol]
+class EvvoIsland[Sol]
 (
   creators: Vector[UntypedSerializationPackage[CreatorFunction[Sol]]],
   mutators: Vector[UntypedSerializationPackage[MutatorFunction[Sol]]],
@@ -116,36 +116,20 @@ case class EvvoIslandBuilder[Sol]
   deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
   objectives: Set[Objective[Sol]] = Set[Objective[Sol]]()
 ) {
-  def addCreatorFromFunction(creatorFunc: CreatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(creators = creators + CreatorFunc(creatorFunc, creatorFunc.toString))
-  }
+//  def addCreatorFromFunction(creatorFunc: CreatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
+//    this.copy(creators = creators + CreatorFunc(creatorFunc, creatorFunc.toString))
+//  }
 
   def addCreator(creatorFunc: CreatorFunction[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(creators = creators + creatorFunc)
-  }
-
-  def addMutatorFromFunction(mutatorFunc: MutatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(mutators = mutators + MutatorFunc(mutatorFunc, mutatorFunc.toString))
   }
 
   def addMutator(mutatorFunc: MutatorFunction[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(mutators = mutators + mutatorFunc)
   }
 
-  def addDeletorFromFunction(deletorFunc: DeletorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(deletors = deletors + DeletorFunc(deletorFunc, deletorFunc.toString))
-  }
-
   def addDeletor(deletorFunc: DeletorFunction[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(deletors = deletors + deletorFunc)
-  }
-
-  // TODO this calling API is dangerous because it assumes minimization. it should be removed,
-  //      but this will require refactoring across examples
-  def addObjective(objective: ObjectiveFunctionType[Sol], name: String = "")
-  : EvvoIslandBuilder[Sol] = {
-    val realName = if (name == "") objective.toString() else name
-    this.copy(objectives = objectives + Objective(objective, realName, Minimize))
   }
 
   def addObjective(objective: Objective[Sol])

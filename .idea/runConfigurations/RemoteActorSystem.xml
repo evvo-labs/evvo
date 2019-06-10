@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="RemoteActorSystem" type="Application" factoryName="Application">
     <envs>
-      <env name="CLUSTER_IP" value="127.0.0.1" />
+      <env name="CLUSTER_IP" value="192.168.1.164" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="com.evvo.remoting.RemoteActorSystem" />
     <module name="evvo" />

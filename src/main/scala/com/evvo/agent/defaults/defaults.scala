@@ -18,9 +18,9 @@ import com.evvo.island.population.{Maximize, Minimize, ParetoFrontier, Scored}
   *
   * @param numInputs the number of solutions to pull at a time
   */
-case class DeleteDominated[Sol](numInputs: Int = 32) // scalastyle:ignore magic.number
+case class DeleteDominated[Sol](override val numInputs: Int = 32) // scalastyle:ignore magic.number
   extends DeletorFunction[Sol] {
-  override val delete: DeletorFunctionType[Sol] = (sols: IndexedSeq[Scored[Sol]]) => {
+  override def delete(sols: IndexedSeq[Scored[Sol]]): IndexedSeq[Scored[Sol]] = {
     val nonDominatedSet = population.ParetoFrontier(sols.toSet).solutions
     sols.filterNot(elem => nonDominatedSet.contains(elem))
   }
@@ -28,10 +28,10 @@ case class DeleteDominated[Sol](numInputs: Int = 32) // scalastyle:ignore magic.
   override val shouldRunWithPartialInput: Boolean = true
 }
 
-case class DeleteWorstHalfByRandomObjective[Sol](numInputs: Int = 32) // scalastyle:ignore magic.number
+case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 32) // scalastyle:ignore magic.number
   extends DeletorFunction[Sol] {
 
-  override val delete: DeletorFunctionType[Sol] = (s: IndexedSeq[Scored[Sol]]) => {
+  override def delete(s: IndexedSeq[Scored[Sol]]): IndexedSeq[Scored[Sol]] = {
     if (s.isEmpty) {
       s
     } else {
@@ -43,7 +43,7 @@ case class DeleteWorstHalfByRandomObjective[Sol](numInputs: Int = 32) // scalast
         case (_, Maximize) => Ordering.Double
       }
 
-      s.toVector.sortBy(_.score(objective))(ordering).take(s.size / 2).toSet
+      s.toVector.sortBy(_.score(objective))(ordering).take(s.size / 2)
     }
   }
   override val name = "DeleteWorstHalfByRandomObjective"

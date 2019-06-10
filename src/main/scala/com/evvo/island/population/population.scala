@@ -57,11 +57,11 @@ trait Population[Sol] {
   *
   * @tparam Sol the type of the solutions in the population
   */
-case class StandardPopulation[Sol](fitnessFunctionsIter: TraversableOnce[Objective[Sol]],
+case class StandardPopulation[Sol](objectivesIter: TraversableOnce[Objective[Sol]],
                                    hashing: HashingStrategy.Value = HashingStrategy.ON_SCORES)
                                   (implicit val logger: LoggingAdapter)
   extends Population[Sol] {
-  private val fitnessFunctions = fitnessFunctionsIter.toSet
+  private val objectives = objectivesIter.toSet
   private var population = mutable.Set[Scored[Sol]]()
 
   override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
@@ -70,7 +70,7 @@ case class StandardPopulation[Sol](fitnessFunctionsIter: TraversableOnce[Objecti
   }
 
   private def score(solution: Sol): Scored[Sol] = {
-    val scores = fitnessFunctions.map(func => {
+    val scores = objectives.map(func => {
       (func.name, func.optimizationDirection) -> func.score(solution)
     }).toMap
     Scored(scores, solution, hashing)
