@@ -2,7 +2,7 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
         <encoder>
-            <pattern>%X{akkaTimestamp} %-5level[%thread] %logger{0} - %msg%n</pattern>
+            <pattern>%X{akkaTimestamp} %-5level [%thread] %logger{0} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -16,7 +16,7 @@
             <totalSizeCap>20GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%X{akkaTimestamp} %-5level[%thread] %logger{0} - %msg%n</pattern>
+            <pattern>%X{akkaTimestamp} %-5level [%thread] %logger{0} - %msg%n</pattern>
         </encoder>
     </appender>
 

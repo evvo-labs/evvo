@@ -8,9 +8,8 @@ import com.typesafe.config.ConfigFactory
 object RemoteActorSystem {
   def main(args: Array[String]): Unit = {
 
-    val configFile = ConfigFactory.parseFile(new File("src/main/resources/application.conf"))
-    val config = configFile
-      .withFallback(configFile)
+    val config = ConfigFactory
+      .parseFile(new File("src/main/resources/application.conf"))
       .resolve()
 
     implicit val system: ActorSystem = ActorSystem("RemoteEvvoNode", config)
