@@ -1,11 +1,11 @@
 package com.evvo.integration
 
-import com.evvo.agent.{CreatorFunction, DeletorFunction, MutatorFunction}
+import com.evvo.NullLogger
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
+import com.evvo.agent.{CreatorFunction, MutatorFunction}
+import com.evvo.island.population.{Minimize, Objective, Scored}
 import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import com.evvo.tags.{Performance, Slow}
-import com.evvo.NullLogger
-import com.evvo.island.population.{Minimize, Objective, Scored}
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
@@ -32,24 +32,20 @@ class LocalEvvoTest extends WordSpec with Matchers {
 
   type Solution = List[Int]
 
-  class Creator(listLength: Int) extends CreatorFunction[Solution] {
-    val name = "Creator"
+  class Creator(listLength: Int) extends CreatorFunction[Solution]("Creator") {
 
     override def create(): TraversableOnce[Solution] = {
       Vector((listLength to 1 by -1).toList)
     }
   }
 
-  class Mutator extends MutatorFunction[Solution] {
-    override def name: String = "Mutator"
-
+  class Mutator extends MutatorFunction[Solution]("Mutator") {
     private def mutateOneSolution(sol: Solution): Solution = {
       val i = util.Random.nextInt(sol.length)
       val j = util.Random.nextInt(sol.length)
       val tmp = sol(j)
       sol.updated(j, sol(i)).updated(i, tmp)
     }
-
 
     override def mutate(s: IndexedSeq[Scored[Solution]]): TraversableOnce[Solution] = {
       s.map(scoredSol => {
@@ -61,7 +57,6 @@ class LocalEvvoTest extends WordSpec with Matchers {
   }
 
   class NumInversions extends Objective[Solution]("Inversions", Minimize) {
-
     override protected def objective(sol: Solution): Double = {
       (for ((elem, index) <- sol.zipWithIndex) yield {
         sol.drop(index).count(_ < elem)

@@ -1,6 +1,5 @@
 package com.evvo
 
-import akka.actor.FSM.->
 import com.evvo.island.population.{
   HashingStrategy, Minimize, Scored}
 import org.scalatest.{Matchers, WordSpec}
