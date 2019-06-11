@@ -112,7 +112,7 @@ object ProfessorMatching {
 
   def readProblem(): Problem = {
     DataReader.readFromJsonFile(
-      "examples/main/scala/com/evvo/professormatching/preferences_mock.json")
+      "src/main/scala/com/evvo/professormatching/preferences_mock.json")
   }
 
   private val problem: Problem = readProblem()
