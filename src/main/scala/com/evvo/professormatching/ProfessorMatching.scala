@@ -93,17 +93,20 @@ object ProfessorMatching {
   // =================================== MAIN ===================================================
   def main(args: Array[String]): Unit = {
     val islandBuilder = EvvoIsland.builder()
+      .addObjective(new CoursePreferences())
+      .addObjective(new SectionCountPreferences())
+      .addObjective(new NumPrepsPreferences())
       .addObjective(new ScheduleObjective())
       .addCreator(new RandomScheduleCreator())
       .addMutator(new SwapTwoCourses())
+      .addMutator(new BalanceCourseload())
 
     val config = ConfigFactory
       .parseFile(new File("src/main/resources/application.conf"))
       .resolve()
 
     val numIslands = 5
-    val manager = new RemoteIslandManager[PMSolution](numIslands, islandBuilder,
-      userConfig = "src/main/resources/remoting_example.conf")
+    val manager = new RemoteIslandManager[PMSolution](numIslands, islandBuilder)
     manager.runBlocking(StopAfter(1.second))
     val pareto = manager.currentParetoFrontier()
     manager.poisonPill()
