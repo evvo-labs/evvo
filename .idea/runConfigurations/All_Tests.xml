@@ -37,8 +37,6 @@
     <buffered bufClass="com.evvo.integration.LocalIslandManagerTest" />
     <buffered bufClass="com.evvo.island.population.StandardPopulationTest" />
     <buffered bufClass="com.evvo.island.population.StandardPopulationTest" />
-    <buffered bufClass="com.evvo.utils.UntypedSerializationPackageTest" />
-    <buffered bufClass="com.evvo.utils.UntypedSerializationPackageTest" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

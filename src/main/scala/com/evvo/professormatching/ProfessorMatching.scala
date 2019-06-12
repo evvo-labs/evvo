@@ -5,8 +5,8 @@ import java.time.LocalTime.parse
 import java.time.{DayOfWeek, LocalTime}
 
 import com.evvo.agent._
+import com.evvo.island._
 import com.evvo.island.population.{Maximize, Objective, Scored}
-import com.evvo.island.{EvvoIsland, RemoteIslandManager, StopAfter}
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
@@ -98,8 +98,10 @@ object ProfessorMatching {
       .addObjective(new NumPrepsPreferences())
       .addObjective(new ScheduleObjective())
       .addCreator(new RandomScheduleCreator(idToProf, idToSection))
-      .addMutator(new SwapTwoCourses())
-      .addMutator(new BalanceCourseload())
+//      .addCreator(new Creator2(idToProf, idToSection))
+//      .addCreator(new Creator3(idToProf, idToSection))
+//      .addMutator(new SwapTwoCourses())
+//      .addMutator(new BalanceCourseload())
 
     val config = ConfigFactory
       .parseFile(new File("src/main/resources/application.conf"))
@@ -184,6 +186,22 @@ object ProfessorMatching {
         util.Random.shuffle(idToSection.keys.toVector)
           .grouped((idToSection.size / idToProf.size) + 1)
           .map(_.toSet)).toMap)
+    }
+  }
+
+//  class Creator2(idToProf: Map[ProfID, ProfPreferences],
+//                 idToSection: Map[SectionID, Section])
+//    extends CreatorFunction[PMSolution]("Creator2") {
+//    override def create(): TraversableOnce[PMSolution] = {
+//      Vector.fill(1)(null)
+//    }
+//  }
+
+  class Creator3(idToProf: Map[ProfID, ProfPreferences],
+                 idToSection: Map[SectionID, Section])
+    extends CreatorFunction[PMSolution]("Creator3") {
+    override def create(): TraversableOnce[PMSolution] = {
+      Vector(idToProf.keys.map(_ -> Set[SectionID]()).toMap)
     }
   }
 

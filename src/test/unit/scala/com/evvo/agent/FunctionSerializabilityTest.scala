@@ -4,7 +4,6 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, 
 
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.island.population.Scored
-import com.evvo.utils.UntypedSerializationPackage
 import org.scalatest.{Matchers, WordSpec}
 
 /**

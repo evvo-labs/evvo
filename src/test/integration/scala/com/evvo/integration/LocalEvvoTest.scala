@@ -3,6 +3,7 @@ package com.evvo.integration
 import com.evvo.NullLogger
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.agent.{CreatorFunction, MutatorFunction}
+import com.evvo.integration.LocalEvvoTestFixtures.{Creator, Mutator, NumInversions, Solution}
 import com.evvo.island.population.{Minimize, Objective, Scored}
 import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import com.evvo.tags.{Performance, Slow}
@@ -17,53 +18,6 @@ import scala.concurrent.duration._
   * function, and terminate successfully returning a set of lists.
   */
 class LocalEvvoTest extends WordSpec with Matchers {
-
-  /** High level concept for the test:
-    *
-    * Create an island
-    * - Supply mutators, deletors, creators
-    * - Supply a termination condition
-    * - Supply a starting population
-    *
-    * Start the evolutionary process
-    *
-    * Wait for the process to terminate, and see if result is sorted.
-    */
-
-  type Solution = List[Int]
-
-  class Creator(listLength: Int) extends CreatorFunction[Solution]("Creator") {
-
-    override def create(): TraversableOnce[Solution] = {
-      Vector((listLength to 1 by -1).toList)
-    }
-  }
-
-  class Mutator extends MutatorFunction[Solution]("Mutator") {
-    private def mutateOneSolution(sol: Solution): Solution = {
-      val i = util.Random.nextInt(sol.length)
-      val j = util.Random.nextInt(sol.length)
-      val tmp = sol(j)
-      sol.updated(j, sol(i)).updated(i, tmp)
-    }
-
-    override def mutate(s: IndexedSeq[Scored[Solution]]): TraversableOnce[Solution] = {
-      s.map(scoredSol => {
-        val sol = scoredSol.solution
-        val out = mutateOneSolution(sol)
-        out
-      })
-    }
-  }
-
-  class NumInversions extends Objective[Solution]("Inversions", Minimize) {
-    override protected def objective(sol: Solution): Double = {
-      (for ((elem, index) <- sol.zipWithIndex) yield {
-        sol.drop(index).count(_ < elem)
-      }).sum
-    }
-  }
-
 
   /**
     * Creates a test Evvo instance running locally, that will use basic swapping
@@ -108,6 +62,54 @@ class LocalEvvoTest extends WordSpec with Matchers {
         .map(_.solution)
       pareto should contain(1 to listLength toList)
       pareto.size shouldBe 1
+    }
+  }
+}
+
+
+object LocalEvvoTestFixtures {
+
+  /** High level concept for the test:
+    *
+    * Create an island
+    * - Supply mutators, deletors, creators
+    * - Supply a termination condition
+    * - Supply a starting population
+    *
+    * Start the evolutionary process
+    *
+    * Wait for the process to terminate, and see if result is sorted.
+    */
+  type Solution = List[Int]
+
+  class Creator(listLength: Int) extends CreatorFunction[Solution]("Creator") {
+    override def create(): TraversableOnce[Solution] = {
+      Vector((listLength to 1 by -1).toList)
+    }
+  }
+
+  class Mutator extends MutatorFunction[Solution]("Mutator") {
+    private def mutateOneSolution(sol: Solution): Solution = {
+      val i = util.Random.nextInt(sol.length)
+      val j = util.Random.nextInt(sol.length)
+      val tmp = sol(j)
+      sol.updated(j, sol(i)).updated(i, tmp)
+    }
+
+    override def mutate(s: IndexedSeq[Scored[Solution]]): TraversableOnce[Solution] = {
+      s.map(scoredSol => {
+        val sol = scoredSol.solution
+        val out = mutateOneSolution(sol)
+        out
+      })
+    }
+  }
+
+  class NumInversions extends Objective[Solution]("Inversions", Minimize) {
+    override protected def objective(sol: Solution): Double = {
+      (for ((elem, index) <- sol.zipWithIndex) yield {
+        sol.drop(index).count(_ < elem)
+      }).sum
     }
   }
 }

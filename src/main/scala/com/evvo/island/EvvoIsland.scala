@@ -1,5 +1,6 @@
 package com.evvo.island
 
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
 import java.util.Calendar
 
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, PoisonPill, Props}
@@ -24,10 +25,23 @@ class EvvoIsland[Sol]
 (implicit log: LoggingAdapter)
   extends EvolutionaryProcess[Sol] {
 
-  private val pop: Population[Sol] = StandardPopulation(fitnesses)
-  private val creatorAgents = creators.map(c => CreatorAgent(c, pop))
-  private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
-  private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
+  def serializationRoundtrip[T](t: T): T = {
+    val baos = new ByteArrayOutputStream()
+    val outputStream = new ObjectOutputStream(baos)
+    outputStream.writeObject(t)
+
+    val bais = new ByteArrayInputStream(baos.toByteArray)
+    val inputStream = new ObjectInputStream(bais)
+    val deserializedObject = inputStream.readObject()
+    val deserializedT = deserializedObject.asInstanceOf[T]
+
+    deserializedT
+  }
+
+  private val pop: Population[Sol] = StandardPopulation(fitnesses.map(serializationRoundtrip))
+  private val creatorAgents = creators.map(c => CreatorAgent(serializationRoundtrip(c), pop))
+  private val mutatorAgents = mutators.map(m => MutatorAgent(serializationRoundtrip(m), pop))
+  private val deletorAgents = deletors.map(d => DeletorAgent(serializationRoundtrip(d), pop))
 
   private var emigrationTargets: Seq[EvolutionaryProcess[Sol]] = Seq()
   private var currentEmigrationTargetIndex: Int = 0

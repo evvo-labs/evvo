@@ -31,6 +31,7 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
     override def run(): Unit = {
       logger.info(s"${this}: Starting to run thread")
       var waitTime: Duration = strategy.waitTime(population.getInformation())
+      logger.info(s"${name}: Waiting for ${waitTime}")
       try {
         while (!Thread.interrupted()) {
           try {
@@ -51,6 +52,7 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
           if (numInvocations % 33 == 0) {
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)
+            logger.info(s"${name}: Waiting for ${waitTime}")
           }
           if (numInvocations % 100 == 0) {
             logger.debug(s"${this} hit ${numInvocations} invocations")
@@ -61,6 +63,9 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
         // called, so there's nothing more to do.
         case e: InterruptedException =>
           logger.info(f"${this}: Interrupted, terminating gracefully.")
+        case e: Exception =>
+          logger.info(f"${this}-${name}: Unexpected exception ${e}, stopping thread. " +
+            f"Stack trace: ${e.getStackTrace.mkString("\n")}")
       }
     }
   }
