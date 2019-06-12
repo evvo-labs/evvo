@@ -93,10 +93,10 @@ object ProfessorMatching {
   // =================================== MAIN ===================================================
   def main(args: Array[String]): Unit = {
     val islandBuilder = EvvoIsland.builder()
-      .addObjective(new CoursePreferences())
-      .addObjective(new SectionCountPreferences())
-      .addObjective(new NumPrepsPreferences())
-      .addObjective(new ScheduleObjective())
+//      .addObjective(new CoursePreferences())
+//      .addObjective(new SectionCountPreferences())
+//      .addObjective(new NumPrepsPreferences())
+      .addObjective(new ScheduleObjective(idToProf, idToSection, idToSchedule))
       .addCreator(new RandomScheduleCreator(idToProf, idToSection))
 //      .addCreator(new Creator2(idToProf, idToSection))
 //      .addCreator(new Creator3(idToProf, idToSection))
@@ -127,7 +127,10 @@ object ProfessorMatching {
 
 
   // =================================== OBJECTIVES ================================================
-  class ScheduleObjective extends Objective[PMSolution]("Sched", Maximize) {
+  class ScheduleObjective(idToProf: Map[ProfID, ProfPreferences],
+                          idToSection: Map[SectionID, Section],
+                          idToSchedule: Map[ScheduleID, SectionSchedule])
+    extends Objective[PMSolution]("Sched", Maximize) {
     override protected def objective(sol: PMSolution): Double = {
       sol.foldLeft(0) {
         case (soFar, (profID, sections)) =>

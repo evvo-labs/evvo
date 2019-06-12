@@ -36,7 +36,9 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
         while (!Thread.interrupted()) {
           try {
             numInvocations += 1
+            logger.info(f"numInvocations = $numInvocations")
             step()
+            logger.info(f"Completed $numInvocations steps")
           } catch {
             case e: Exception => {
               logger.warning(
@@ -44,6 +46,7 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
                   f"stack trace: ${e.getStackTrace.mkString("\n")}")
             }
           }
+          logger.info(s"${this}: Sleeping for ${waitTime}: $name")
           Thread.sleep(waitTime.toMillis)
 
           // TODO oh god, this is arbitrary. Now that populations are running locally and this
@@ -58,6 +61,7 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
             logger.debug(s"${this} hit ${numInvocations} invocations")
           }
         }
+        logger.error(f"$this: Completed the while loop in run() without being interrupted: $name")
       } catch {
         // if interrupted, silently exit. This thread is interrupted only when AAgent.stop() is
         // called, so there's nothing more to do.
@@ -67,6 +71,7 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
           logger.info(f"${this}-${name}: Unexpected exception ${e}, stopping thread. " +
             f"Stack trace: ${e.getStackTrace.mkString("\n")}")
       }
+      logger.info(f"$this: finished running $name")
     }
   }
 
@@ -84,7 +89,8 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
       logger.info(s"${this}: stopping after ${numInvocations} invocations")
       thread.interrupt()
     } else {
-      logger.warning(s"${this}: trying to stop already stopped agent")
+      logger.warning(s"${this}: trying to stop already stopped agent, " +
+        s"with ${numInvocations} invocations")
     }
   }
 
