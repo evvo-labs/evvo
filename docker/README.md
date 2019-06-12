@@ -39,7 +39,7 @@ docker push gcr.io/totemic-cursor-241919/ras
 Akka handles networking pretty well, so this runs fine without Kubernetes. It's something we're considering for the future, though, and let us know if it's a feature you want. To create a Compute Engine instance running the image, run:
 
 ```bash
-INSTANCE_NAME=evvo-instance-1
+INSTANCE_NAME=evvo-instance-$RANDOM
 PROJECT_NAME=totemic-cursor-241919
 
 gcloud beta compute \

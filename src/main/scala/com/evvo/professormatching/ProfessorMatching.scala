@@ -4,7 +4,7 @@ import java.io.File
 import java.time.LocalTime.parse
 import java.time.{DayOfWeek, LocalTime}
 
-import com.evvo.agent.{CreatorFunction, _}
+import com.evvo.agent._
 import com.evvo.island.population.{Maximize, Objective, Scored}
 import com.evvo.island.{EvvoIsland, RemoteIslandManager, StopAfter}
 import com.typesafe.config.ConfigFactory
@@ -97,7 +97,7 @@ object ProfessorMatching {
       .addObjective(new SectionCountPreferences())
       .addObjective(new NumPrepsPreferences())
       .addObjective(new ScheduleObjective())
-      .addCreator(new RandomScheduleCreator())
+      .addCreator(new RandomScheduleCreator(idToProf, idToSection))
       .addMutator(new SwapTwoCourses())
       .addMutator(new BalanceCourseload())
 
@@ -120,8 +120,8 @@ object ProfessorMatching {
 
   private val problem: Problem = readProblem()
   private val idToProf: Map[ProfID, ProfPreferences] = problem.profIDtoPref
-  private val idToSection = problem.sectionIDtoSection
-  private val idToSchedule = problem.scheduleIDtoSchedule
+  private val idToSection: Map[SectionID, Section] = problem.sectionIDtoSection
+  private val idToSchedule: Map[ScheduleID, SectionSchedule] = problem.scheduleIDtoSchedule
 
 
   // =================================== OBJECTIVES ================================================
@@ -175,23 +175,16 @@ object ProfessorMatching {
     }
   }
 
-
   // =================================== CREATOR ==================================================
-  class RandomScheduleCreator extends CreatorFunction[PMSolution]("schedulecreator") {
+  class RandomScheduleCreator(idToProf: Map[ProfID, ProfPreferences],
+                              idToSection: Map[SectionID, Section])
+    extends CreatorFunction[PMSolution]("RandomCreator") {
     override def create(): TraversableOnce[PMSolution] = {
       Vector.fill(10)(idToProf.keysIterator.zip( // scalastyle:ignore magic.number
         util.Random.shuffle(idToSection.keys.toVector)
           .grouped((idToSection.size / idToProf.size) + 1)
           .map(_.toSet)).toMap)
     }
-  }
-
-  def randomKey[A, B](map: Map[A, B]): A = {
-    map.keysIterator.drop(util.Random.nextInt(map.size)).next()
-  }
-
-  def randomElement[A](s: Set[A]): A = {
-    s.toVector(util.Random.nextInt(s.size))
   }
 
   // =================================== MUTATOR ===================================================
@@ -256,5 +249,14 @@ object ProfessorMatching {
 
       sols.map(_.solution).map(swap)
     }
+  }
+
+
+  def randomKey[A, B](map: Map[A, B]): A = {
+    map.keysIterator.drop(util.Random.nextInt(map.size)).next()
+  }
+
+  def randomElement[A](s: Set[A]): A = {
+    s.toVector(util.Random.nextInt(s.size))
   }
 }

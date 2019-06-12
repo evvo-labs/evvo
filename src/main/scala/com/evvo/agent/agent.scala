@@ -29,6 +29,7 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
   // number of tests needed by centralizing
   private val thread = new Thread {
     override def run(): Unit = {
+      logger.info(s"${this}: Starting to run thread")
       var waitTime: Duration = strategy.waitTime(population.getInformation())
       try {
         while (!Thread.interrupted()) {
@@ -38,8 +39,8 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
           } catch {
             case e: Exception => {
               logger.warning(
-                f"Agent ${this} encountered an exception during a step, " +
-                  f"stack trace: ${e.printStackTrace()}")
+                f"${this}: Agent ${name} encountered an exception during a step, " +
+                  f"stack trace: ${e.getStackTrace.mkString("\n")}")
             }
           }
           Thread.sleep(waitTime.toMillis)
@@ -58,14 +59,15 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
       } catch {
         // if interrupted, silently exit. This thread is interrupted only when AAgent.stop() is
         // called, so there's nothing more to do.
-        case e: InterruptedException => ()
+        case e: InterruptedException =>
+          logger.info(f"${this}: Interrupted, terminating gracefully.")
       }
     }
   }
 
   override def start(): Unit = {
     if (!thread.isAlive) {
-      logger.info(s"starting agent ${name}")
+      logger.info(s"${this}: Starting agent ${name}")
       thread.start()
     } else {
       logger.warning(s"trying to start already started agent")
@@ -77,10 +79,9 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
       logger.info(s"${this}: stopping after ${numInvocations} invocations")
       thread.interrupt()
     } else {
-      logger.warning(s"trying to stop already stopped agent")
+      logger.warning(s"${this}: trying to stop already stopped agent")
     }
   }
-
 
   /**
     * Performs one operation on the population.
