@@ -49,11 +49,11 @@ class LocalIslandManagerTest extends WordSpec with Matchers {
 
       val manager = new LocalIslandManager(7, builder)
 
-      manager.runBlocking(StopAfter(1.second))
+      manager.runBlocking(StopAfter(500.millis))
 
       val pareto = manager.currentParetoFrontier()
       assert(pareto.solutions.exists(s =>
-        s.score(("startV", Maximize)) > 10 && s.score(("endV", Maximize)) > 10))
+        s.score(("startV", Maximize)) > 4 && s.score(("endV", Maximize)) > 4))
     }
   }
 

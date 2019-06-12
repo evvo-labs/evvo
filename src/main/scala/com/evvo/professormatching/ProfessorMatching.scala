@@ -93,15 +93,13 @@ object ProfessorMatching {
   // =================================== MAIN ===================================================
   def main(args: Array[String]): Unit = {
     val islandBuilder = EvvoIsland.builder()
-//      .addObjective(new CoursePreferences())
-//      .addObjective(new SectionCountPreferences())
-//      .addObjective(new NumPrepsPreferences())
+      .addObjective(new CoursePreferences(idToProf, idToSection, idToSchedule))
+      .addObjective(new SectionCountPreferences(idToProf, idToSection, idToSchedule))
+      .addObjective(new NumPrepsPreferences(idToProf, idToSection, idToSchedule))
       .addObjective(new ScheduleObjective(idToProf, idToSection, idToSchedule))
       .addCreator(new RandomScheduleCreator(idToProf, idToSection))
-//      .addCreator(new Creator2(idToProf, idToSection))
-//      .addCreator(new Creator3(idToProf, idToSection))
-//      .addMutator(new SwapTwoCourses())
-//      .addMutator(new BalanceCourseload())
+      .addMutator(new SwapTwoCourses(idToProf))
+      .addMutator(new BalanceCourseload(idToProf))
 
     val config = ConfigFactory
       .parseFile(new File("src/main/resources/application.conf"))
@@ -144,7 +142,10 @@ object ProfessorMatching {
     }
   }
 
-  class CoursePreferences extends Objective[PMSolution]("Course", Maximize) {
+  class CoursePreferences(idToProf: Map[ProfID, ProfPreferences],
+                          idToSection: Map[SectionID, Section],
+                          idToSchedule: Map[ScheduleID, SectionSchedule])
+    extends Objective[PMSolution]("Course", Maximize) {
     override protected def objective(sol: PMSolution): Double = {
       sol.foldLeft(0) {
         case (soFar, (profID, sections)) =>
@@ -157,7 +158,10 @@ object ProfessorMatching {
     }
   }
 
-  class SectionCountPreferences extends Objective[PMSolution]("SectionCount", Maximize) {
+  class SectionCountPreferences(idToProf: Map[ProfID, ProfPreferences],
+                                idToSection: Map[SectionID, Section],
+                                idToSchedule: Map[ScheduleID, SectionSchedule])
+    extends Objective[PMSolution]("SectionCount", Maximize) {
     override protected def objective(sol: PMSolution): Double = {
       sol.foldLeft(0) {
         case (soFar, (profID, sections)) =>
@@ -166,7 +170,10 @@ object ProfessorMatching {
     }
   }
 
-  class NumPrepsPreferences extends Objective[PMSolution]("NumPreps", Maximize) {
+  class NumPrepsPreferences(idToProf: Map[ProfID, ProfPreferences],
+                            idToSection: Map[SectionID, Section],
+                            idToSchedule: Map[ScheduleID, SectionSchedule])
+    extends Objective[PMSolution]("NumPreps", Maximize) {
     override protected def objective(sol: PMSolution): Double = {
       sol.foldLeft(0) {
         case (soFar, (profID, sections)) =>
@@ -192,24 +199,10 @@ object ProfessorMatching {
     }
   }
 
-//  class Creator2(idToProf: Map[ProfID, ProfPreferences],
-//                 idToSection: Map[SectionID, Section])
-//    extends CreatorFunction[PMSolution]("Creator2") {
-//    override def create(): TraversableOnce[PMSolution] = {
-//      Vector.fill(1)(null)
-//    }
-//  }
-
-  class Creator3(idToProf: Map[ProfID, ProfPreferences],
-                 idToSection: Map[SectionID, Section])
-    extends CreatorFunction[PMSolution]("Creator3") {
-    override def create(): TraversableOnce[PMSolution] = {
-      Vector(idToProf.keys.map(_ -> Set[SectionID]()).toMap)
-    }
-  }
 
   // =================================== MUTATOR ===================================================
-  class SwapTwoCourses extends MutatorFunction[PMSolution]("SwapTwo") {
+  class SwapTwoCourses(idToProf: Map[ProfID, ProfPreferences])
+    extends MutatorFunction[PMSolution]("SwapTwo") {
     override def mutate(sols: IndexedSeq[Scored[PMSolution]]): TraversableOnce[PMSolution] = {
 
       def swap(sol: PMSolution): PMSolution = {
@@ -234,9 +227,18 @@ object ProfessorMatching {
 
       sols.map(_.solution).map(swap)
     }
+
+    def randomKey[A, B](map: Map[A, B]): A = {
+      map.keysIterator.drop(util.Random.nextInt(map.size)).next()
+    }
+
+    def randomElement[A](s: Set[A]): A = {
+      s.toVector(util.Random.nextInt(s.size))
+    }
   }
 
-  class BalanceCourseload extends MutatorFunction[PMSolution]("Balance") {
+  class BalanceCourseload(idToProf: Map[ProfID, ProfPreferences])
+    extends MutatorFunction[PMSolution]("Balance") {
     override def mutate(sols: IndexedSeq[Scored[PMSolution]]): TraversableOnce[PMSolution] = {
       def swap(sol: PMSolution): PMSolution = {
         val prof1: ProfPreferences = idToProf(randomKey(idToProf))
@@ -270,14 +272,13 @@ object ProfessorMatching {
 
       sols.map(_.solution).map(swap)
     }
-  }
 
+    def randomKey[A, B](map: Map[A, B]): A = {
+      map.keysIterator.drop(util.Random.nextInt(map.size)).next()
+    }
 
-  def randomKey[A, B](map: Map[A, B]): A = {
-    map.keysIterator.drop(util.Random.nextInt(map.size)).next()
-  }
-
-  def randomElement[A](s: Set[A]): A = {
-    s.toVector(util.Random.nextInt(s.size))
+    def randomElement[A](s: Set[A]): A = {
+      s.toVector(util.Random.nextInt(s.size))
+    }
   }
 }
