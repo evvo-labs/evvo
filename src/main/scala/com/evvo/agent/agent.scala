@@ -37,8 +37,9 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
             step()
           } catch {
             case e: Exception => {
-              e.printStackTrace()
-              //              log.error(e.toString)
+              logger.warning(
+                f"Agent ${this} encountered an exception during a step, " +
+                  f"stack trace: ${e.printStackTrace()}")
             }
           }
           Thread.sleep(waitTime.toMillis)

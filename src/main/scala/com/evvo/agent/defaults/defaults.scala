@@ -8,7 +8,6 @@
   */
 package com.evvo.agent.defaults
 
-import com.evvo.DeletorFunctionType
 import com.evvo.agent.DeletorFunction
 import com.evvo.island.population
 import com.evvo.island.population.{Maximize, Minimize, ParetoFrontier, Scored}

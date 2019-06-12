@@ -40,9 +40,10 @@ Akka handles networking pretty well, so this runs fine without Kubernetes. It's 
 
 ```bash
 INSTANCE_NAME=evvo-instance-1
+PROJECT_NAME=totemic-cursor-241919
 
 gcloud beta compute \
-    --project=totemic-cursor-241919 instances create-with-container $INSTANCE_NAME \
+    --project=$PROJECT_NAME instances create-with-container $INSTANCE_NAME \
     --zone=us-east4-c \
     --machine-type=n1-standard-1 \
     --subnet=default \
@@ -57,7 +58,7 @@ gcloud beta compute \
     --boot-disk-size=10GB \
     --boot-disk-type=pd-standard \
     --boot-disk-device-name=$INSTANCE_NAME \
-    --container-image=gcr.io/totemic-cursor-241919/ras \
+    --container-image=gcr.io/$PROJECT_NAME/ras:latest \
     --container-restart-policy=always \
     --labels=container-vm=cos-stable-74-11895-125-0
 ```

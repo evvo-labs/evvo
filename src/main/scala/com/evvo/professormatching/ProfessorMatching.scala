@@ -136,12 +136,49 @@ object ProfessorMatching {
     }
   }
 
+  class CoursePreferences extends Objective[PMSolution]("Course", Maximize) {
+    override protected def objective(sol: PMSolution): Double = {
+      sol.foldLeft(0) {
+        case (soFar, (profID, sections)) =>
+          soFar + sections.foldLeft(0)((tot, sectionID) => {
+            tot + idToProf(profID)
+              .courseToPreference(
+                idToSection(sectionID).courseID)
+          })
+      }
+    }
+  }
+
+  class SectionCountPreferences extends Objective[PMSolution]("SectionCount", Maximize) {
+    override protected def objective(sol: PMSolution): Double = {
+      sol.foldLeft(0) {
+        case (soFar, (profID, sections)) =>
+          soFar + (if (idToProf(profID).maxSections < sections.size) 1 else 0)
+      }
+    }
+  }
+
+  class NumPrepsPreferences extends Objective[PMSolution]("NumPreps", Maximize) {
+    override protected def objective(sol: PMSolution): Double = {
+      sol.foldLeft(0) {
+        case (soFar, (profID, sections)) =>
+          soFar + (
+            if (idToProf(profID).maxPreps < sections.map(idToSection(_).courseID).size) {
+              1
+            } else {
+              0
+            })
+      }
+    }
+  }
+
+
   // =================================== CREATOR ==================================================
   class RandomScheduleCreator extends CreatorFunction[PMSolution]("schedulecreator") {
     override def create(): TraversableOnce[PMSolution] = {
       Vector.fill(10)(idToProf.keysIterator.zip( // scalastyle:ignore magic.number
         util.Random.shuffle(idToSection.keys.toVector)
-          .grouped(idToSection.size / idToProf.size + 1)
+          .grouped((idToSection.size / idToProf.size) + 1)
           .map(_.toSet)).toMap)
     }
   }

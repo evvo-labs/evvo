@@ -27,6 +27,8 @@
     <buffered bufClass="com.evvo.agent.DeleteWorstHalfByRandomObjectiveTest" />
     <buffered bufClass="com.evvo.agent.DeletorAgentDefaultStrategyTest" />
     <buffered bufClass="com.evvo.agent.DeletorAgentDefaultStrategyTest" />
+    <buffered bufClass="com.evvo.agent.FunctionSerializabilityTest" />
+    <buffered bufClass="com.evvo.agent.FunctionSerializabilityTest" />
     <buffered bufClass="com.evvo.agent.MutatorAgentDefaultStrategyTest" />
     <buffered bufClass="com.evvo.agent.MutatorAgentDefaultStrategyTest" />
     <buffered bufClass="com.evvo.integration.LocalEvvoTest" />

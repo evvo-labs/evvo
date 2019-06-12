@@ -8,8 +8,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.evvo.agent._
 import com.evvo.island.population._
-import com.evvo.utils.UntypedSerializationPackage
-import com.evvo.{CreatorFunctionType, DeletorFunctionType, MutatorFunctionType, ObjectiveFunctionType}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,17 +17,17 @@ import scala.concurrent.{Await, Future}
 
 class EvvoIsland[Sol]
 (
-  creators: Vector[UntypedSerializationPackage[CreatorFunction[Sol]]],
-  mutators: Vector[UntypedSerializationPackage[MutatorFunction[Sol]]],
-  deletors: Vector[UntypedSerializationPackage[DeletorFunction[Sol]]],
-  fitnesses: Vector[UntypedSerializationPackage[Objective[Sol]]])
+  creators: Vector[CreatorFunction[Sol]],
+  mutators: Vector[MutatorFunction[Sol]],
+  deletors: Vector[DeletorFunction[Sol]],
+  fitnesses: Vector[Objective[Sol]])
 (implicit log: LoggingAdapter)
   extends EvolutionaryProcess[Sol] {
 
-  private val pop: Population[Sol] = StandardPopulation(fitnesses.map(_.content))
-  private val creatorAgents = creators.map(c => CreatorAgent(c.content, pop))
-  private val mutatorAgents = mutators.map(m => MutatorAgent(m.content, pop))
-  private val deletorAgents = deletors.map(d => DeletorAgent(d.content, pop))
+  private val pop: Population[Sol] = StandardPopulation(fitnesses)
+  private val creatorAgents = creators.map(c => CreatorAgent(c, pop))
+  private val mutatorAgents = mutators.map(m => MutatorAgent(m, pop))
+  private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
 
   private var emigrationTargets: Seq[EvolutionaryProcess[Sol]] = Seq()
   private var currentEmigrationTargetIndex: Int = 0
@@ -116,10 +114,6 @@ case class EvvoIslandBuilder[Sol]
   deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
   objectives: Set[Objective[Sol]] = Set[Objective[Sol]]()
 ) {
-//  def addCreatorFromFunction(creatorFunc: CreatorFunctionType[Sol]): EvvoIslandBuilder[Sol] = {
-//    this.copy(creators = creators + CreatorFunc(creatorFunc, creatorFunc.toString))
-//  }
-
   def addCreator(creatorFunc: CreatorFunction[Sol]): EvvoIslandBuilder[Sol] = {
     this.copy(creators = creators + creatorFunc)
   }
@@ -171,10 +165,10 @@ class LocalEvvoIsland[Sol]
   implicit val log: LoggingAdapter = LocalLogger
 ) extends EvolutionaryProcess[Sol] {
   private val island = new EvvoIsland(
-    creators.map(UntypedSerializationPackage(_)),
-    mutators.map(UntypedSerializationPackage(_)),
-    deletors.map(UntypedSerializationPackage(_)),
-    objectives.map(UntypedSerializationPackage(_)))
+    creators,
+    mutators,
+    deletors,
+    objectives)
 
   override def runBlocking(stopAfter: StopAfter): Unit = {
     island.runBlocking(stopAfter)
@@ -261,10 +255,10 @@ class RemoteEvvoIsland[Sol]
   implicit val logger: LoggingAdapter = log
 
   private val island = new EvvoIsland(
-    creators.map(UntypedSerializationPackage(_)),
-    mutators.map(UntypedSerializationPackage(_)),
-    deletors.map(UntypedSerializationPackage(_)),
-    objectives.map(UntypedSerializationPackage(_)))
+    creators,
+    mutators,
+    deletors,
+    objectives)
 
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.runBlocking(t)
