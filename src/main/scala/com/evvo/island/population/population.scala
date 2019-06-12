@@ -70,16 +70,11 @@ case class StandardPopulation[Sol](objectivesIter: TraversableOnce[Objective[Sol
   }
 
   private def score(solution: Sol): Scored[Sol] = {
-    logger.info(s"Started scoring $solution")
-    val scores = objectives.map(func => {
-      logger.info(s"Using objective $func")
-      val out = (func.name, func.optimizationDirection) -> func.score(solution)
-      logger.info(s"Used objective $func to produce $out")
-      out
-    }).toMap
-    logger.info(s"Created scores $scores for $solution")
+    val scores = objectives.map(func =>
+      (func.name, func.optimizationDirection) -> func.score(solution)
+    ).toMap
     val out = Scored(scores, solution, hashing)
-    logger.info(s"Scored solutions haven been created $out")
+    logger.debug(s"${this}: created $out")
     out
   }
 

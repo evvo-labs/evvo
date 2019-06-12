@@ -29,16 +29,13 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
   // number of tests needed by centralizing
   private val thread = new Thread {
     override def run(): Unit = {
-      logger.info(s"${this}: Starting to run thread")
       var waitTime: Duration = strategy.waitTime(population.getInformation())
-      logger.info(s"${name}: Waiting for ${waitTime}")
+      logger.debug(s"${name}: Waiting for ${waitTime}")
       try {
         while (!Thread.interrupted()) {
           try {
             numInvocations += 1
-            logger.info(f"numInvocations = $numInvocations")
             step()
-            logger.info(f"Completed $numInvocations steps")
           } catch {
             case e: Exception => {
               logger.warning(
@@ -46,7 +43,6 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
                   f"stack trace: ${e.getStackTrace.mkString("\n")}")
             }
           }
-          logger.info(s"${this}: Sleeping for ${waitTime}: $name")
           Thread.sleep(waitTime.toMillis)
 
           // TODO oh god, this is arbitrary. Now that populations are running locally and this
@@ -55,41 +51,41 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
           if (numInvocations % 33 == 0) {
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)
-            logger.info(s"${name}: Waiting for ${waitTime}")
+            logger.debug(s"${name}: Waiting for ${waitTime}")
           }
           if (numInvocations % 100 == 0) {
             logger.debug(s"${this} hit ${numInvocations} invocations")
           }
         }
-        logger.error(f"$this: Completed the while loop in run() without being interrupted: $name")
+        logger.debug(f"${this}-${name}: Interrupted during while loop, terminating gracefully.")
       } catch {
         // if interrupted, silently exit. This thread is interrupted only when AAgent.stop() is
         // called, so there's nothing more to do.
         case e: InterruptedException =>
-          logger.info(f"${this}: Interrupted, terminating gracefully.")
+          logger.info(f"${this}-${name}: Interrupted during sleep, terminating gracefully.")
         case e: Exception =>
-          logger.info(f"${this}-${name}: Unexpected exception ${e}, stopping thread. " +
+          logger.error(f"${this}-${name}: Unexpected exception ${e}, stopping thread. " +
             f"Stack trace: ${e.getStackTrace.mkString("\n")}")
       }
-      logger.info(f"$this: finished running $name")
+      logger.info(f"${this}-${name}: finished running")
     }
   }
 
   override def start(): Unit = {
     if (!thread.isAlive) {
-      logger.info(s"${this}: Starting agent ${name}")
+      logger.info(s"${this}-${name}: Starting agent")
       thread.start()
     } else {
-      logger.warning(s"trying to start already started agent")
+      logger.warning(s"${this}-${name}: trying to start already started agent")
     }
   }
 
   override def stop(): Unit = {
     if (thread.isAlive) {
-      logger.info(s"${this}: stopping after ${numInvocations} invocations")
+      logger.info(s"${this}-${name}: stopping after ${numInvocations} invocations")
       thread.interrupt()
     } else {
-      logger.warning(s"${this}: trying to stop already stopped agent, " +
+      logger.warning(s"${this}-${name}: trying to stop already stopped agent, " +
         s"with ${numInvocations} invocations")
     }
   }

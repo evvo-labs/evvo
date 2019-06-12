@@ -12,11 +12,9 @@ case class CreatorAgent[Sol](create: CreatorFunction[Sol],
   extends AAgent[Sol](strategy, population, create.name)(logger) {
 
   override protected def step(): Unit = {
-    logger.info(s"Step started for $this")
     val toAdd = create.create()
-    logger.info(s"Created solutions, $toAdd , $this")
+    logger.debug(s"Created solutions, $toAdd , $this")
     population.addSolutions(toAdd)
-    logger.info(s"Step over")
   }
 
   override def toString: String = s"CreatorAgent[$name]"
