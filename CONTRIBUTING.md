@@ -1,9 +1,18 @@
 # Contributing to Evvo
-First of all, thanks for looking at this page and considering contributing! We'd love to have you, and if you have any questions or this document is unclear, please let us know! Open an issue with your question, or email any contributor or admin at the emails found in our github profiles.
+First of all, thanks for looking at this page and considering contributing! We'd love to have you, and if you have any questions or this document is unclear, please let us know! Open an issue with your question, or email any contributor or admin at the emails found in our GitHub profiles.
 
 ----------------------------------------------------------------------------------------------------
-#### IntelliJ
-We all use IntelliJ as our primary editor for this project. If you prefer to use a different editor, let us know - there are probably things we failed to describe in this file because IntelliJ set them up for us. To set up IntelliJ for this project, you can simply clone it from Github using the "Import from VCS" dialogue, or clone it from the command line and then use the "Open project" dialogue.
+### Modules Overview
+#### [`agent`](./src/main/scala/com/evvo/agent/)
+This holds the agents (classes that extend `TAgent`), and supporting classes such as strategies. Each agent extends an abstract class ('`AAgent`'), which  implements common features of agents: logging, using a separate thread for work, and having that thread wait the amount of time that the strategies say to. New agent classes should extend 
+
+#### [`island`](./src/main/scala/com/evvo/island/)
+Implements islands and clusters of islands. The main point of this package are the classes that extend `TEvolutionaryProcess`. These classes are ready-to-use implementations of evolutionary processes, that only need to have creators, fitness functions, etc. plugged in to start solving problems. Each island has its own population.
+
+#### [`island/population`](src/main/scala/com/evvo/island/population/)
+Holds `Population`, `StandardPopulation`, and the classes required to support them. The population is a set of scored ('`Scored`') solutions, where uniqueness and equality are (by default) measured by the score and not the solution itself. This is for speed (we can hash a smaller piece of data - the score mapping), and for speed (because we have fewer solutions in the population, and anything with duplicate scores should be just as good as a solution).
+
+
 
 
 ----------------------------------------------------------------------------------------------------
@@ -37,14 +46,57 @@ Pull requests require approval from an approved reviewer before being merged int
 We use [`scalastyle`](http://www.scalastyle.org) as our style checker. You can find the configuration at [project/scalastyle_config.xml](project/scalastyle_config.xml). This style configuration may change over time, and we are open to suggestions – but make sure that any code you write passes the style configuration included in each push, or the Travis builds will fail. You can manually run the style checker with `mvn scalastyle:check`, which will print the filename and line number of every violation. You can also set up a pre-commit hook to run the style checker, as described [in the scalastyle docs](http://www.scalastyle.org/git-pre-commit-hook.html). Scalastyle is run on every pull request.
 
 #### Issues, Projects, Milestones
-Development is guided entirely by our [issues page](https://github.com/evvo-labs/evvo/issues). We use milestones to reflect which issues must be closed before the next tagged release. So, if you are looking for issues to start working on, start with issues tagged with the next milestone – those are the most pressing. Projects are used to bundle issues that all touch the same component, or which depend on each other. In other words, if having a kanban board would be useful, use a project so that you get a kanban board.
+Development is guided entirely by our [issues page](https://github.com/evvo-labs/evvo/issues). We use milestones to reflect which issues must be closed before the next tagged release. Projects are used to bundle issues that all touch the same component, or which depend on each other. In other words, if having a kanban board would be useful, use a project so that you get a kanban board.
+
+#### Overcommit
+We use [Overcommit](https://github.com/sds/overcommit) to run checks on every commit. Travis will also run these checks against any code it builds. Overcommit, when run locally, will only check files modified in the current commit, while Travis will run the checks on all files. While you don't have to use Overcommit, ensuring that your code will be accepted by Travis will be much easier if you do.
+
+To install Overcommit, you will need Ruby >=2.4. To check your version, run 
+```
+$ ruby -v
+ruby 2.3.7p456 (2018-03-28 revision 63024) [universal.x86_64-darwin18]
+```
+
+If your version is not 2.4 or greater, you will need to install a new Ruby. I used RVM to upgrade my Ruby installation, see [their docs](https://rvm.io/) to install it, and then you will be able to upgrade Ruby and install overcommit.
+
+```
+$ rvm install 2.4
+$ ruby -v
+ruby 2.4.6p354 (2019-04-01 revision 67394) [x86_64-darwin18]
+$ gem install overcommit
+```
+
+To allow Overcommit to run scalastyle checks, you'll need a `scalastyle` executable on your $PATH.
+```
+$ brew install scalastyle
+$ scalastyle -v
+scalastyle 1.0.0
+```
+
+Locally install the Overcommit hooks (and those hook's dependencies) for this repository:
+
+```
+overcommit --install
+gem install travis
+```
+
+Now, when you commit, you will see a message like
+```
+$ git commit
+Running pre-commit hooks
+
+✓ All pre-commit hooks passed
+
+Running commit-msg hooks
+
+✓ All commit-msg hooks passed
+```
 
 ----------------------------------------------------------------------------------------------------
-#### Slack 
-We know it's not in the open-source spirit, but we use Slack for some communication. Much of the conversation happens on Github, but if you want an invite to our slack workspace, drop us an email.
-
+### IntelliJ
+We all use IntelliJ as our primary editor for this project. If you prefer to use a different editor, let us know - there are probably things we failed to describe in this file because IntelliJ set them up for us. To set up IntelliJ for this project, you can simply clone it from Github using the "Import from VCS" dialogue, or clone it from the command line and then use the "Open project" dialogue.
 
 
 ----------------------------------------------------------------------------------------------------
 #### Next Steps
-Now that you understand how to develop on this project, you may want a better understanding of the project internals so that you can start contributing! For that, [`doc/ARCHITECTURE.md`](doc/ARCHITECTURE.md) will help you get started. Examples of using the framework can be found in the [examples](examples) directory. If you even read this far, we'd love feedback on how to make this file better – go ahead, file your first issue telling us what could be more clear!
+You can find issues that we think are good fits for new contributors [here](https://github.com/evvo-labs/evvo/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22). We look forward to seeing your PR! 
