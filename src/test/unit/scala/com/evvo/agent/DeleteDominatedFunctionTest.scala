@@ -10,7 +10,7 @@ class DeleteDominatedFunctionTest extends WordSpec with Matchers {
   val scored2 = population.Scored(Map(("a", Maximize) -> 2), 13)
   val scored3 = population.Scored(Map(("a", Maximize) -> 3), 14)
 
-  val deleteDominated = DeleteDominated[Int](5).delete.andThen(_.toVector)
+  val deleteDominated = (DeleteDominated[Int](5).delete _).andThen(_.toVector)
   "A DeleteDominated function" should {
     "not error on empty sets" in {
       deleteDominated(Vector())

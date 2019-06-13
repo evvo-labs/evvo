@@ -13,6 +13,7 @@ case class CreatorAgent[Sol](create: CreatorFunction[Sol],
 
   override protected def step(): Unit = {
     val toAdd = create.create()
+    logger.debug(s"Created solutions, $toAdd , $this")
     population.addSolutions(toAdd)
   }
 

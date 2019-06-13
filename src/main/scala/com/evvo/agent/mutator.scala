@@ -15,10 +15,10 @@ case class MutatorAgent[Sol](mutate: MutatorFunction[Sol],
   override protected def step(): Unit = {
     val in = population.getSolutions(mutate.numInputs)
     if (mutate.shouldRunWithPartialInput || in.length == mutate.numInputs) {
-      val mutatedSolutions = mutate(in)
+      val mutatedSolutions = mutate.mutate(in)
       population.addSolutions(mutatedSolutions)
     } else {
-      logger.info(s"${this}: not enough solutions in population: " +
+      logger.debug(s"${this}: not enough solutions in population: " +
         s"got ${in.length}, wanted ${mutate.numInputs}")
     }
   }

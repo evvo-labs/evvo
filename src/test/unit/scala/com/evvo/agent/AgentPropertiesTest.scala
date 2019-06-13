@@ -22,33 +22,41 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   // a mapping from each function to whether it has been called yet
   var agentFunctionCalled: mutable.Map[Any, Boolean] = _
 
-  val create: CreatorFunctionType[S] = () => {
-    agentFunctionCalled("create") = true
-    Set(1)
+  val creatorFunc = new CreatorFunction[S]("creator") {
+    override def create(): TraversableOnce[S] = {
+      agentFunctionCalled("create") = true
+      Vector(1)
+    }
   }
-  val creatorFunc = CreatorFunc(create, "create")
+
   var creatorAgent: Agent[S] = _
 
-  val mutate: MutatorFunctionType[S] = (seq: IndexedSeq[Scored[S]]) => {
-    agentFunctionCalled("mutate") = true
-    seq.map(_.solution + 1)
+  val mutatorFunc = new MutatorFunction[S]("mutator") {
+    def mutate(seq: IndexedSeq[Scored[S]]): IndexedSeq[S] = {
+      agentFunctionCalled("mutate") = true
+      seq.map(_.solution + 1)
+    }
   }
-  val mutatorFunc = MutatorFunc(mutate, "mutate")
+
   var mutatorAgent: Agent[S] = _
   val mutatorInput: Set[Scored[S]] = Set[Scored[S]](Scored(Map(("Score1", Minimize) -> 3), 2))
 
-  val delete: DeletorFunctionType[S] = set => {
-    agentFunctionCalled("delete") = true
-    set
+  val deletorFunc = new DeletorFunction[S]("deletor") {
+    override def delete(sols: IndexedSeq[Scored[S]]): TraversableOnce[Scored[S]] = {
+      agentFunctionCalled("delete") = true
+      sols
+    }
   }
-  val deletorFunc = DeletorFunc(delete, "delete", 1)
+
   var deletorAgent: Agent[S] = _
   val deletorInput: Set[Scored[S]] = mutatorInput
 
   var agents: Vector[Agent[S]] = _
   val strategy: AgentStrategy = _ => 70.millis
 
-  val fitnessFunc: Objective[S] = Objective(_.toDouble, "Double", Minimize)
+  val fitnessFunc: Objective[S] = new Objective[S]("Double", Minimize) {
+    override protected def objective(sol: S): Double = sol.toDouble
+  }
 
   before {
     pop = StandardPopulation[S](Vector(fitnessFunc))
@@ -94,19 +102,6 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
         agent.stop()
       }
     }
-
-    //    FIXME: This test
-    //    "stop when told to" taggedAs Slow in {
-    //      for (agent <- agents) {
-    //        agent.start()
-    //        agent.stop()
-    //
-    //        // not ideal that this test has to wait three seconds after the agent is stopped,
-    //        // but this is the best we can come up with
-    //        Thread.sleep(3000)
-    //        probe.expectNoMessage(3.seconds)
-    //      }
-    //    }
 
     "repeat as often as their strategies say to" taggedAs Slow in {
       for (agent <- agents) {

@@ -30,6 +30,7 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
   private val thread = new Thread {
     override def run(): Unit = {
       var waitTime: Duration = strategy.waitTime(population.getInformation())
+      logger.debug(s"${name}: Waiting for ${waitTime}")
       try {
         while (!Thread.interrupted()) {
           try {
@@ -37,8 +38,9 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
             step()
           } catch {
             case e: Exception => {
-              e.printStackTrace()
-              //              log.error(e.toString)
+              logger.warning(
+                f"${this}: Agent ${name} encountered an exception during a step, " +
+                  f"stack trace: ${e.getStackTrace.mkString("\n")}")
             }
           }
           Thread.sleep(waitTime.toMillis)
@@ -49,37 +51,44 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
           if (numInvocations % 33 == 0) {
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)
+            logger.debug(s"${name}: Waiting for ${waitTime}")
           }
           if (numInvocations % 100 == 0) {
             logger.debug(s"${this} hit ${numInvocations} invocations")
           }
         }
+        logger.debug(f"${this}-${name}: Interrupted during while loop, terminating gracefully.")
       } catch {
         // if interrupted, silently exit. This thread is interrupted only when AAgent.stop() is
         // called, so there's nothing more to do.
-        case e: InterruptedException => ()
+        case e: InterruptedException =>
+          logger.info(f"${this}-${name}: Interrupted during sleep, terminating gracefully.")
+        case e: Exception =>
+          logger.error(f"${this}-${name}: Unexpected exception ${e}, stopping thread. " +
+            f"Stack trace: ${e.getStackTrace.mkString("\n")}")
       }
+      logger.info(f"${this}-${name}: finished running")
     }
   }
 
   override def start(): Unit = {
     if (!thread.isAlive) {
-      logger.info(s"starting agent ${name}")
+      logger.info(s"${this}-${name}: Starting agent")
       thread.start()
     } else {
-      logger.warning(s"trying to start already started agent")
+      logger.warning(s"${this}-${name}: trying to start already started agent")
     }
   }
 
   override def stop(): Unit = {
     if (thread.isAlive) {
-      logger.info(s"${this}: stopping after ${numInvocations} invocations")
+      logger.info(s"${this}-${name}: stopping after ${numInvocations} invocations")
       thread.interrupt()
     } else {
-      logger.warning(s"trying to stop already stopped agent")
+      logger.warning(s"${this}-${name}: trying to stop already stopped agent, " +
+        s"with ${numInvocations} invocations")
     }
   }
-
 
   /**
     * Performs one operation on the population.

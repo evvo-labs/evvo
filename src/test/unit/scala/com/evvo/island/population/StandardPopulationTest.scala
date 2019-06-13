@@ -9,7 +9,9 @@ import org.scalatest._
 class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter {
   implicit val log: LoggingAdapter = NullLogger
 
-  val identityFitness = population.Objective[Double](x => x, "Identity", Minimize)
+  val identityFitness = new Objective[Double]("Identity", Minimize) {
+    override protected def objective(sol: Double): Double = sol
+  }
   val fitnesses = Set(identityFitness)
 
 
@@ -92,25 +94,30 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
     }
   }
 
-  val returnOne: Objective[Double] = population.Objective(x => 1, "one", Maximize)
-  val uniqueScore: Objective[Double] = population.Objective({
+  val returnOne: Objective[Double] = new Objective[Double]("one", Maximize) {
+    override protected def objective(sol: Double): Double = 1
+  }
+
+  val uniqueScore: Objective[Double] = new Objective[Double]("one", Maximize) {
     var counter = 0
-    _ => {
+
+    override protected def objective(sol: Double): Double = {
       counter += 1
       counter
     }
-  }, "one", Maximize)
+  }
+
   "A population hashing on solutions" should {
 
     "not allow duplicate solutions" in {
-      val pop = population.StandardPopulation(Vector(uniqueScore), HashingStrategy.ON_SOLUTIONS)
+      val pop = StandardPopulation(Vector(uniqueScore), HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions(Vector(1, 1))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 1
     }
 
     "allow duplicate scores for different solutions" in {
-      val pop = population.StandardPopulation(Vector(returnOne), HashingStrategy.ON_SOLUTIONS)
+      val pop = StandardPopulation(Vector(returnOne), HashingStrategy.ON_SOLUTIONS)
       pop.addSolutions(Vector(1, 2))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 2
@@ -120,14 +127,14 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
   "A population hashing on scores" should {
 
     "not allow duplicate scores" in {
-      val pop = population.StandardPopulation(Vector(returnOne), HashingStrategy.ON_SCORES)
+      val pop = StandardPopulation(Vector(returnOne), HashingStrategy.ON_SCORES)
       pop.addSolutions(Vector(1, 2))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 1
     }
 
     "allow duplicate solutions for different scores" in {
-      val pop = population.StandardPopulation(Vector(uniqueScore), HashingStrategy.ON_SCORES)
+      val pop = StandardPopulation(Vector(uniqueScore), HashingStrategy.ON_SCORES)
       pop.addSolutions(Vector(1, 1))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 2

@@ -1,0 +1,44 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="All Tests" type="ScalaTestRunConfiguration" factoryName="ScalaTest">
+    <module name="evvo" />
+    <setting name="path" value="" />
+    <setting name="vmparams" value="" />
+    <setting name="params" value="" />
+    <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <setting name="searchForTest" value="Across module dependencies" />
+    <setting name="showProgressMessages" value="true" />
+    <setting name="useSbt" value="false" />
+    <setting name="useUiWithSbt" value="false" />
+    <setting name="jrePath" value="" />
+    <envs />
+    <setting name="testKind" value="All in package" />
+    <setting name="package" value="" />
+    <buffered bufClass="com.evvo.ParetoFrontierTest" />
+    <buffered bufClass="com.evvo.ParetoFrontierTest" />
+    <buffered bufClass="com.evvo.ScoreHashingTest" />
+    <buffered bufClass="com.evvo.ScoreHashingTest" />
+    <buffered bufClass="com.evvo.agent.AgentPropertiesTest" />
+    <buffered bufClass="com.evvo.agent.AgentPropertiesTest" />
+    <buffered bufClass="com.evvo.agent.CreatorAgentDefaultStrategyTest" />
+    <buffered bufClass="com.evvo.agent.CreatorAgentDefaultStrategyTest" />
+    <buffered bufClass="com.evvo.agent.DeleteDominatedFunctionTest" />
+    <buffered bufClass="com.evvo.agent.DeleteDominatedFunctionTest" />
+    <buffered bufClass="com.evvo.agent.DeleteWorstHalfByRandomObjectiveTest" />
+    <buffered bufClass="com.evvo.agent.DeleteWorstHalfByRandomObjectiveTest" />
+    <buffered bufClass="com.evvo.agent.DeletorAgentDefaultStrategyTest" />
+    <buffered bufClass="com.evvo.agent.DeletorAgentDefaultStrategyTest" />
+    <buffered bufClass="com.evvo.agent.FunctionSerializabilityTest" />
+    <buffered bufClass="com.evvo.agent.FunctionSerializabilityTest" />
+    <buffered bufClass="com.evvo.agent.MutatorAgentDefaultStrategyTest" />
+    <buffered bufClass="com.evvo.agent.MutatorAgentDefaultStrategyTest" />
+    <buffered bufClass="com.evvo.integration.LocalEvvoTest" />
+    <buffered bufClass="com.evvo.integration.LocalEvvoTest" />
+    <buffered bufClass="com.evvo.integration.LocalIslandManagerTest" />
+    <buffered bufClass="com.evvo.integration.LocalIslandManagerTest" />
+    <buffered bufClass="com.evvo.island.population.StandardPopulationTest" />
+    <buffered bufClass="com.evvo.island.population.StandardPopulationTest" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

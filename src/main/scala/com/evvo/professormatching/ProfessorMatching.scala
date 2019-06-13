@@ -4,11 +4,9 @@ import java.io.File
 import java.time.LocalTime.parse
 import java.time.{DayOfWeek, LocalTime}
 
-import akka.actor.ActorSystem
-import com.evvo._
 import com.evvo.agent._
-import com.evvo.island.population.{Maximize, Objective}
-import com.evvo.island.{EvvoIsland, RemoteEvvoIsland, RemoteIslandManager, StopAfter}
+import com.evvo.island._
+import com.evvo.island.population.{Maximize, Objective, Scored}
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
@@ -94,25 +92,21 @@ object ProfessorMatching {
 
   // =================================== MAIN ===================================================
   def main(args: Array[String]): Unit = {
-
-    // TODO rename fitness to objective function
-    //      and provide class to create objective functions
     val islandBuilder = EvvoIsland.builder()
-      .addObjective(Objective(sumProfessorSchedulePreferences, "Sched", Maximize))
-      .addObjective(Objective(sumProfessorCoursePreferences, "Course", Maximize))
-      .addObjective(Objective(sumProfessorNumPrepsPreferences, "#Prep", Maximize))
-      .addObjective(Objective(sumProfessorSectionCountPreferences, "#Section", Maximize))
-      .addCreator(CreatorFunc(validScheduleCreator, "creator"))
-      .addMutator(MutatorFunc(swapTwoCourses, "swapTwoCourses"))
-      .addMutator(MutatorFunc(balanceCourseload, "balanceCourseload"))
+      .addObjective(new CoursePreferences(idToProf, idToSection, idToSchedule))
+      .addObjective(new SectionCountPreferences(idToProf, idToSection, idToSchedule))
+      .addObjective(new NumPrepsPreferences(idToProf, idToSection, idToSchedule))
+      .addObjective(new ScheduleObjective(idToProf, idToSection, idToSchedule))
+      .addCreator(new RandomScheduleCreator(idToProf, idToSection))
+      .addMutator(new SwapTwoCourses(idToProf))
+      .addMutator(new BalanceCourseload(idToProf))
 
     val config = ConfigFactory
       .parseFile(new File("src/main/resources/application.conf"))
       .resolve()
 
     val numIslands = 5
-    val manager = new RemoteIslandManager[PMSolution](numIslands, islandBuilder,
-      userConfig = "src/main/resources/remoting_example.conf")
+    val manager = new RemoteIslandManager[PMSolution](numIslands, islandBuilder)
     manager.runBlocking(StopAfter(1.second))
     val pareto = manager.currentParetoFrontier()
     manager.poisonPill()
@@ -121,85 +115,102 @@ object ProfessorMatching {
 
   def readProblem(): Problem = {
     DataReader.readFromJsonFile(
-      "examples/main/scala/com/evvo/professormatching/preferences_mock.json")
+      "src/main/scala/com/evvo/professormatching/preferences_mock.json")
   }
 
   private val problem: Problem = readProblem()
   private val idToProf: Map[ProfID, ProfPreferences] = problem.profIDtoPref
-  private val idToSection = problem.sectionIDtoSection
-  private val idToSchedule = problem.scheduleIDtoSchedule
+  private val idToSection: Map[SectionID, Section] = problem.sectionIDtoSection
+  private val idToSchedule: Map[ScheduleID, SectionSchedule] = problem.scheduleIDtoSchedule
 
 
-  // =================================== FITNESS ===================================================
-  val sumProfessorSchedulePreferences: ObjectiveFunctionType[PMSolution] = sol => {
-    sol.foldLeft(0) {
-      case (soFar, (profID, sections)) =>
-        val prof = idToProf(profID)
-        soFar + sections.foldLeft(0)((tot, sectionID) => {
-          val section: Section = idToSection(sectionID)
-          val schedule: SectionSchedule = idToSchedule(section.scheduleID)
-          tot + prof.sectionScheduleToPreference(schedule.id)
-        })
-    }
-  }
-
-  val sumProfessorCoursePreferences: ObjectiveFunctionType[PMSolution] = sol => {
-    sol.foldLeft(0) {
-      case (soFar, (profID, sections)) =>
-        soFar + sections.foldLeft(0)((tot, sectionID) => {
-          tot + idToProf(profID)
-            .courseToPreference(
-              idToSection(sectionID).courseID)
-        })
-    }
-  }
-
-  val sumProfessorSectionCountPreferences: ObjectiveFunctionType[PMSolution] = sol => {
-    sol.foldLeft(0) {
-      case (soFar, (profID, sections)) =>
-        soFar + (if (idToProf(profID).maxSections < sections.size) 1 else 0)
-    }
-  }
-
-  val sumProfessorNumPrepsPreferences: ObjectiveFunctionType[PMSolution] = sol => {
-    sol.foldLeft(0) {
-      case (soFar, (profID, sections)) =>
-        soFar + (
-          if (idToProf(profID).maxPreps < sections.map(idToSection(_).courseID).size) {
-            1
-          } else {
-            0
+  // =================================== OBJECTIVES ================================================
+  class ScheduleObjective(idToProf: Map[ProfID, ProfPreferences],
+                          idToSection: Map[SectionID, Section],
+                          idToSchedule: Map[ScheduleID, SectionSchedule])
+    extends Objective[PMSolution]("Sched", Maximize) {
+    override protected def objective(sol: PMSolution): Double = {
+      sol.foldLeft(0) {
+        case (soFar, (profID, sections)) =>
+          val prof = idToProf(profID)
+          soFar + sections.foldLeft(0)((tot, sectionID) => {
+            val section: Section = idToSection(sectionID)
+            val schedule: SectionSchedule = idToSchedule(section.scheduleID)
+            tot + prof.sectionScheduleToPreference(schedule.id)
           })
+      }
+    }
+  }
+
+  class CoursePreferences(idToProf: Map[ProfID, ProfPreferences],
+                          idToSection: Map[SectionID, Section],
+                          idToSchedule: Map[ScheduleID, SectionSchedule])
+    extends Objective[PMSolution]("Course", Maximize) {
+    override protected def objective(sol: PMSolution): Double = {
+      sol.foldLeft(0) {
+        case (soFar, (profID, sections)) =>
+          soFar + sections.foldLeft(0)((tot, sectionID) => {
+            tot + idToProf(profID)
+              .courseToPreference(
+                idToSection(sectionID).courseID)
+          })
+      }
+    }
+  }
+
+  class SectionCountPreferences(idToProf: Map[ProfID, ProfPreferences],
+                                idToSection: Map[SectionID, Section],
+                                idToSchedule: Map[ScheduleID, SectionSchedule])
+    extends Objective[PMSolution]("SectionCount", Maximize) {
+    override protected def objective(sol: PMSolution): Double = {
+      sol.foldLeft(0) {
+        case (soFar, (profID, sections)) =>
+          soFar + (if (idToProf(profID).maxSections < sections.size) 1 else 0)
+      }
+    }
+  }
+
+  class NumPrepsPreferences(idToProf: Map[ProfID, ProfPreferences],
+                            idToSection: Map[SectionID, Section],
+                            idToSchedule: Map[ScheduleID, SectionSchedule])
+    extends Objective[PMSolution]("NumPreps", Maximize) {
+    override protected def objective(sol: PMSolution): Double = {
+      sol.foldLeft(0) {
+        case (soFar, (profID, sections)) =>
+          soFar + (
+            if (idToProf(profID).maxPreps < sections.map(idToSection(_).courseID).size) {
+              1
+            } else {
+              0
+            })
+      }
     }
   }
 
   // =================================== CREATOR ==================================================
-  val validScheduleCreator: CreatorFunctionType[PMSolution] = () => {
-    Vector.fill(10)(idToProf.keysIterator.zip( // scalastyle:ignore magic.number
-      util.Random.shuffle(idToSection.keys.toVector)
-        .grouped(idToSection.size / idToProf.size + 1)
-        .map(_.toSet)).toMap).toSet
+  class RandomScheduleCreator(idToProf: Map[ProfID, ProfPreferences],
+                              idToSection: Map[SectionID, Section])
+    extends CreatorFunction[PMSolution]("RandomCreator") {
+    override def create(): TraversableOnce[PMSolution] = {
+      Vector.fill(10)(idToProf.keysIterator.zip( // scalastyle:ignore magic.number
+        util.Random.shuffle(idToSection.keys.toVector)
+          .grouped((idToSection.size / idToProf.size) + 1)
+          .map(_.toSet)).toMap)
+    }
   }
 
-  def randomKey[A, B](map: Map[A, B]): A = {
-    map.keysIterator.drop(util.Random.nextInt(map.size)).next()
-  }
-
-  def randomElement[A](s: Set[A]): A = {
-    s.toVector(util.Random.nextInt(s.size))
-  }
 
   // =================================== MUTATOR ===================================================
-  val swapTwoCourses: MutatorFunctionType[PMSolution] = {
-    sols => {
-      val lidToProf = idToProf
+  class SwapTwoCourses(idToProf: Map[ProfID, ProfPreferences])
+    extends MutatorFunction[PMSolution]("SwapTwo") {
+    override def mutate(sols: IndexedSeq[Scored[PMSolution]]): TraversableOnce[PMSolution] = {
 
       def swap(sol: PMSolution): PMSolution = {
-        val prof1: ProfPreferences = lidToProf(randomKey(lidToProf))
+        val prof1: ProfPreferences = idToProf(randomKey(idToProf))
         val prof2: ProfPreferences = {
           var prof2maybe: Option[ProfPreferences] = None
           do {
-            prof2maybe = Some(lidToProf(randomKey(lidToProf)))
+            prof2maybe = Some(idToProf(randomKey(idToProf)))
           } while (prof2maybe.contains(prof1))
           prof2maybe.get
         }
@@ -216,17 +227,25 @@ object ProfessorMatching {
 
       sols.map(_.solution).map(swap)
     }
+
+    def randomKey[A, B](map: Map[A, B]): A = {
+      map.keysIterator.drop(util.Random.nextInt(map.size)).next()
+    }
+
+    def randomElement[A](s: Set[A]): A = {
+      s.toVector(util.Random.nextInt(s.size))
+    }
   }
 
-  val balanceCourseload: MutatorFunctionType[PMSolution] = {
-    val lidToProf = idToProf
-    sols => {
+  class BalanceCourseload(idToProf: Map[ProfID, ProfPreferences])
+    extends MutatorFunction[PMSolution]("Balance") {
+    override def mutate(sols: IndexedSeq[Scored[PMSolution]]): TraversableOnce[PMSolution] = {
       def swap(sol: PMSolution): PMSolution = {
-        val prof1: ProfPreferences = lidToProf(randomKey(lidToProf))
+        val prof1: ProfPreferences = idToProf(randomKey(idToProf))
         val prof2: ProfPreferences = {
           var prof2maybe: Option[ProfPreferences] = None
           do {
-            prof2maybe = Some(lidToProf(randomKey(lidToProf)))
+            prof2maybe = Some(idToProf(randomKey(idToProf)))
           } while (prof2maybe.contains(prof1))
           prof2maybe.get
         }
@@ -253,18 +272,13 @@ object ProfessorMatching {
 
       sols.map(_.solution).map(swap)
     }
-  }
 
+    def randomKey[A, B](map: Map[A, B]): A = {
+      map.keysIterator.drop(util.Random.nextInt(map.size)).next()
+    }
 
-  // =================================== DELETOR ===================================================
-  val deleteWorstHalf: DeletorFunctionType[PMSolution] = s => {
-    if (s.isEmpty) {
-      s
-    } else {
-      val funcs = s.head.score.keys.toVector
-      val func = funcs(util.Random.nextInt(funcs.size))
-
-      s.toVector.sortBy(_.score(func)).take(s.size / 2).toSet
+    def randomElement[A](s: Set[A]): A = {
+      s.toVector(util.Random.nextInt(s.size))
     }
   }
 }
