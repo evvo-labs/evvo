@@ -16,6 +16,7 @@ object Maximize1Bits extends Objective[Bitstring]("1Bits", Maximize) {
   }
 }
 
+
 val islandBuilder = EvvoIsland.builder[Bitstring]()
   .addCreator(BitstringGenerator(length=16))
   .addMutator(Bitflipper())
@@ -190,6 +191,37 @@ This diagram shows a simplified version of our network model:
 
                                                             and so on, until your server budget runs out
 ```
+
+### Running a Custom Optimization Problem
+This is going to change in the future, eventually you'll be able to include Evvo as a [Maven or sbt](#downloads) dependency. If you want to use Evvo before then, all of your code has to be part of the same src directory as Evvo (this is in order to ensure that remote islands can be [deserialized](#serializability)).
+
+You'll want to check out our getting started (coming soon) for an example of how to use Evvo locally and remotely.
+
+#### Keeping your Code Private
+While we would love some well groomed examples in our repo, if you want to keep your code private, either put your new code in the [`src/main/scala/com/evvo/ignored`](src/main/scala/com/evvo/ignored) directory **or** locally ignore your new package/files with `git update-index --assume-unchanged [<file>...]`.
+
+##### Best VCS Practices -- Advanced
+Until we can be used as a dependency on Maven or sbt, things may look a little tricky. You can create a git repo inside the **ignored** directory, and use that to maintain your code.
+
+You may also want to create a new repo containing 2 (`git submodules`)[https://git-scm.com/book/en/v2/Git-Tools-Submodules], Evvo and your optimization problem repository (still in the ignored directory).This way, you can update evvo and your custom project and ensure they stay in sync.
+
+Here's how you can set it up:
+
+```bash
+mkdir my_new_project
+cd my_new_project
+echo "# README" > README.md
+
+git submodule add git@github.com:evvo-labs/evvo.git
+cd evvo/src/main/scala/com/evvo/ignored
+git submodule add <YOUR_PROJECT>
+cd ../../../../../../..
+git submodule init
+
+git add
+git commit -m "Life finds a way"
+```
+
 
 #### Setting up Servers
 Evvo is [dockerized](https://www.docker.com/). Follow the [instructions](docker/README.md) to get started running your own network-parallel instance.

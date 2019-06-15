@@ -1,6 +1,6 @@
 .gitconfig
 out/*
-
+src/main/scala/com/evvo/ignored/*
 Gemfile.lock
 
 # Created by https://www.gitignore.io/api/scala,macos,maven,intellij	
