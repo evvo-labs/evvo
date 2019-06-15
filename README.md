@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 
 object Maximize1Bits extends Objective[Bitstring]("1Bits", Maximize) {
   override protected def objective(sol: Bitstring): Double = {
-    sol.count(identity) // Bitstrings are represented as Seq[Boolean]
+    sol.count(identity) // Bitstrings are represented as Seq[Boolean], count `true`s
   }
 }
 
@@ -33,7 +33,7 @@ This will run three asynchronous agents locally. `BitstringGenerator` creates `B
 ParetoFrontier(Map(1Bits -> 16.0))
 ```
 
-This means that there was one solution on the pareto frontier, which scored `16.0` according to the objective named `"1Bits"`. Since the generated `Bitstring`s only have 16 bits, the best possible score is `16.0` bits that are 1.
+This means that there was one solution on the pareto frontier, which scored `16.0` according to the objective named `"1Bits"`. Since the generated `Bitstring`s only have 16 bits, the best possible score is `16.0` bits that are 1. Note that the pareto frontier doesn't print the actual solutions. The solutions are available within the `ParetoFrontier` class, but the `toString` method prints only the scores, because solutions to more complex problems are very large.
 
 If our [built-in](./src/main/scala/com/evvo/agent/defaults/defaults.scala) _Creators_, _Mutators_, and _Deletors_ do not work for your problem, you can define your own as easily as we defined `Maximize1Bits`.
 
@@ -192,9 +192,14 @@ This diagram shows a simplified version of our network model:
 ```
 
 #### Setting up Servers
-Evvo is [dockerized](https://www.docker.com/). Follow the [instructions](docker/README.md) to get started running your own network parallel instance.
+Evvo is [dockerized](https://www.docker.com/). Follow the [instructions](docker/README.md) to get started running your own network-parallel instance.
 
 #### Serializability
+Because we have to ship Islands to remote servers, Islands need to be [serializable](https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html). All of the code provided by Evvo is serializable, but the creators, mutators, deletors, and objectives that you provide must also be serializable for the Islands to serialize and deserialize correctly. 
+
+See [the relevant section](https://www.oreilly.com/library/view/scala-cookbook/9781449340292/ch12s08.html) of the Scala cookbook on serialization. Note that serialized classes should also have referential transparency, that is, they should not reference variables from an external scope. A class defined within an object (or another class, or a code block) that references variablees defined in the outer object (or class, or code block) may cause serialization issues if those values are not present in the deserialization context. In general, extending `Creator`, `Mutator`, or `DeletorFunction`, with case classes, and ensuring that those case classes take all the data they need as arguments will be sufficient to ensure that there are no serialization issues.
+
+If you use a `LocalIslandManager` to create `LocalEvvoIsland`s, your data will still be serialized and deserialized, albeit on the same machine. This means that some of the most flagrant serialization exceptions can be caught early by testing with `LocalIslandManager`. 
 
 -------------------------------------------------------------------------------
 ### Configuration
