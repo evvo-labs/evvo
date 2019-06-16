@@ -59,7 +59,7 @@ If our [built-in](./src/main/scala/com/evvo/agent/defaults/defaults.scala) _Crea
 
 **Modifier Agent**: often shortened to "Modifier", a Modifier Agent retrieves some number of solutions from the _population_, calls a function on that set of solutions to produce new solutions based on the input, and adds those new solutions to the _population_.
 
-**' Agent**: A type of _ModifierAgent_ that applies a one-to-one mapping over a set of solutions, and adds all the results.
+**Mutator Agent**: A type of _ModifierAgent_ that applies a one-to-one mapping over a set of solutions, and adds all the results.
 
 **Crossover Agent**: A type of _ModifierAgent_ that applies a two-to-one function over a set of solutions, taking part of each input solution and combining them to produce new solutions.
 

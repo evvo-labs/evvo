@@ -2,9 +2,9 @@ package com.evvo.integration
 
 import com.evvo.NullLogger
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
-import com.evvo.agent.{CreatorFunction, ModifierFunction}
-import com.evvo.integration.LocalEvvoTestFixtures.{Creator, Modifier, NumInversions, Solution}
-import com.evvo.island.population.{Minimize, Objective, Scored}
+import com.evvo.agent.{CreatorFunction, MutatorFunction}
+import com.evvo.integration.LocalEvvoTestFixtures.{Creator, Mutator, NumInversions, Solution}
+import com.evvo.island.population.{Minimize, Objective}
 import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import com.evvo.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
@@ -30,7 +30,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
 
     val islandBuilder = EvvoIslandBuilder[Solution]()
       .addCreator(new Creator(listLength))
-      .addModifier(new Modifier())
+      .addModifier(new Mutator())
       .addDeletor(DeleteWorstHalfByRandomObjective())
       .addObjective(new NumInversions())
 
@@ -67,20 +67,12 @@ object LocalEvvoTestFixtures {
     }
   }
 
-  class Modifier extends ModifierFunction[Solution]("Modifier") {
-    private def mutateOneSolution(sol: Solution): Solution = {
+  class Mutator extends MutatorFunction[Solution]("Modifier") {
+    override def mutate(sol: Solution): Solution = {
       val i = util.Random.nextInt(sol.length)
       val j = util.Random.nextInt(sol.length)
       val tmp = sol(j)
       sol.updated(j, sol(i)).updated(i, tmp)
-    }
-
-    override def modify(s: IndexedSeq[Scored[Solution]]): TraversableOnce[Solution] = {
-      s.map(scoredSol => {
-        val sol = scoredSol.solution
-        val out = mutateOneSolution(sol)
-        out
-      })
     }
   }
 

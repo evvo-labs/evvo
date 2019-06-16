@@ -6,20 +6,20 @@ import com.evvo.island.population.Population
 import scala.concurrent.duration._
 
 
-case class ModifierAgent[Sol](mutate: ModifierFunction[Sol],
+case class ModifierAgent[Sol](modifier: ModifierFunction[Sol],
                               population: Population[Sol],
                               strategy: AgentStrategy = ModifierAgentDefaultStrategy())
                              (implicit val logger: LoggingAdapter)
-  extends AAgent[Sol](strategy, population, mutate.name)(logger) {
+  extends AAgent[Sol](strategy, population, modifier.name)(logger) {
 
   override protected def step(): Unit = {
-    val in = population.getSolutions(mutate.numInputs)
-    if (mutate.shouldRunWithPartialInput || in.length == mutate.numInputs) {
-      val mutatedSolutions = mutate.modify(in)
-      population.addSolutions(mutatedSolutions)
+    val in = population.getSolutions(modifier.numInputs)
+    if (modifier.shouldRunWithPartialInput || in.length == modifier.numInputs) {
+      val newSolutions = modifier.modify(in)
+      population.addSolutions(newSolutions)
     } else {
       logger.debug(s"${this}: not enough solutions in population: " +
-        s"got ${in.length}, wanted ${mutate.numInputs}")
+        s"got ${in.length}, wanted ${modifier.numInputs}")
     }
   }
 

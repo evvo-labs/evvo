@@ -92,8 +92,8 @@ abstract class CrossoverFunction[Sol](name: String,
   /**
     * Combines two solutions to produce a new one.
     *
-    * @param sol1 The first solution. Order is random, and has no meaning.
-    * @param sol2 The second solution. Order is random, and has no meaning.[
+    * @param sol1 One solution. Order is random, and has no meaning.
+    * @param sol2 Another solution. Order is random, and has no meaning.
     * @return The new solution, to be added to the population.
     */
   protected def crossover(sol1: Sol, sol2: Sol): Sol
