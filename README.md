@@ -19,7 +19,7 @@ object Maximize1Bits extends Objective[Bitstring]("1Bits", Maximize) {
 
 val islandBuilder = EvvoIsland.builder[Bitstring]()
   .addCreator(BitstringGenerator(length=16))
-  .addMutator(Bitflipper())
+  .addModifier(Bitflipper())
   .addDeletor(DeleteDominated[Bitstring]())
   .addObjective(Maximize1Bits)
 
@@ -36,7 +36,7 @@ ParetoFrontier(Map(1Bits -> 16.0))
 
 This means that there was one solution on the pareto frontier, which scored `16.0` according to the objective named `"1Bits"`. Since the generated `Bitstring`s only have 16 bits, the best possible score is `16.0` bits that are 1. Note that the pareto frontier doesn't print the actual solutions. The solutions are available within the `ParetoFrontier` class, but the `toString` method prints only the scores, because solutions to more complex problems are very large.
 
-If our [built-in](./src/main/scala/com/evvo/agent/defaults/defaults.scala) _Creators_, _Mutators_, and _Deletors_ do not work for your problem, you can define your own as easily as we defined `Maximize1Bits`.
+If our [built-in](./src/main/scala/com/evvo/agent/defaults/defaults.scala) _Creators_, _Modifiers_, and _Deletors_ do not work for your problem, you can define your own as easily as we defined `Maximize1Bits`.
 
 -------------------------------------------------------------------------------
 ### Terminology
@@ -57,7 +57,11 @@ If our [built-in](./src/main/scala/com/evvo/agent/defaults/defaults.scala) _Crea
 
 **Creator Agent**: often shortened to "Creator", a Creator Agent generates a set of solutions and adds those solutions to the _population_. 
 
-**Mutator Agent**: often shortened to "Mutator", a Mutator Agent retrieves some number of solutions from the _population_, calls a function on that set of solutions to produce new solutions based on the input, and adds those new solutions to the _population_.
+**Modifier Agent**: often shortened to "Modifier", a Modifier Agent retrieves some number of solutions from the _population_, calls a function on that set of solutions to produce new solutions based on the input, and adds those new solutions to the _population_.
+
+**' Agent**: A type of _ModifierAgent_ that applies a one-to-one mapping over a set of solutions, and adds all the results.
+
+**Crossover Agent**: A type of _ModifierAgent_ that applies a two-to-one function over a set of solutions, taking part of each input solution and combining them to produce new solutions.
 
 **Deletor Agent**: often shortened to "Deletor", a Deletor Agent retrieves some number of solutions from the _population_ and deletes the bad ones (for whatever definition of bad it's working with) from the _population_.
 
@@ -68,7 +72,7 @@ If our [built-in](./src/main/scala/com/evvo/agent/defaults/defaults.scala) _Crea
 -------------------------------------------------------------------------------
 ### The Model
 #### Asycnchronous Evolutionary Computing
-As described in [John Rachlin's paper on paper mill optimization](https://www.researchgate.net/profile/Richard_Goodwin2/publication/245797473_Cooperative_Multiobjective_Decision_Support_for_the_Paper_Industry/links/0046352ca1becd5890000000.pdf), asynchronous multi-agent evolutionary computing systems consist of a common population and multiple "evolutionary agents" that operate on the population. These agents, working in parallel, gradually push the overall fitness of a population upwards. (Assuming that the mutators have a chance of improving fitness, and the deletors remove solutions that tend to be worse than average.) This system is easily parallelizable, as there is only one piece of shared memory - the set of solutions currently in the population. Much of the work (the work of computing new solutions, mutating existing solutions, and deciding which solutions to delete) can be distributed across multiple CPU cores, or even multiple machines.
+As described in [John Rachlin's paper on paper mill optimization](https://www.researchgate.net/profile/Richard_Goodwin2/publication/245797473_Cooperative_Multiobjective_Decision_Support_for_the_Paper_Industry/links/0046352ca1becd5890000000.pdf), asynchronous multi-agent evolutionary computing systems consist of a common population and multiple "evolutionary agents" that operate on the population. These agents, working in parallel, gradually push the overall fitness of a population upwards. (Assuming that the modifiers have a chance of improving fitness, and the deletors remove solutions that tend to be worse than average.) This system is easily parallelizable, as there is only one piece of shared memory - the set of solutions currently in the population. Much of the work (the work of computing new solutions, mutating existing solutions, and deciding which solutions to delete) can be distributed across multiple CPU cores, or even multiple machines.
 
 This diagram illustrates each of the major components in Evvo and their roles:
 ```
@@ -86,7 +90,7 @@ This diagram illustrates each of the major components in Evvo and their roles:
 |  +---------------+                                                      |
 |  |               | Reads some solutions           +------------------+  |<--+
 |  |  - Objectives |------------------------------->|                  |  |   |
-|  |               |                                | Mutator Agent(s) |  |   |
+|  |               |                                | Modifier Agent(s)|  |   |
 |  |  - Solutions  |<-------------------------------|                  |  |   | Immigration +
 |  |               |         Derives new solutions  +------------------+  |   | Emigration
 |  |               |                                                      |   |  Peer-to-peer gossip
@@ -248,9 +252,9 @@ Note that since this is in the ignored directory, everybody who clones your repo
 Evvo is [dockerized](https://www.docker.com/). Follow the [instructions](docker/README.md) to get started running your own network-parallel instance.
 
 #### Serializability
-Because we have to ship Islands to remote servers, Islands need to be [serializable](https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html). All of the code provided by Evvo is serializable, but the creators, mutators, deletors, and objectives that you provide must also be serializable for the Islands to serialize and deserialize correctly. 
+Because we have to ship Islands to remote servers, Islands need to be [serializable](https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html). All of the code provided by Evvo is serializable, but the creators, modifiers, deletors, and objectives that you provide must also be serializable for the Islands to serialize and deserialize correctly. 
 
-See [the relevant section](https://www.oreilly.com/library/view/scala-cookbook/9781449340292/ch12s08.html) of the Scala cookbook on serialization. Note that serialized classes should also have referential transparency, that is, they should not reference variables from an external scope. A class defined within an object (or another class, or a code block) that references variablees defined in the outer object (or class, or code block) may cause serialization issues if those values are not present in the deserialization context. In general, extending `Creator`, `Mutator`, or `DeletorFunction`, with case classes, and ensuring that those case classes take all the data they need as arguments will be sufficient to ensure that there are no serialization issues.
+See [the relevant section](https://www.oreilly.com/library/view/scala-cookbook/9781449340292/ch12s08.html) of the Scala cookbook on serialization. Note that serialized classes should also have referential transparency, that is, they should not reference variables from an external scope. A class defined within an object (or another class, or a code block) that references variablees defined in the outer object (or class, or code block) may cause serialization issues if those values are not present in the deserialization context. In general, extending `Creator`, `Modifier`, or `DeletorFunction`, with case classes, and ensuring that those case classes take all the data they need as arguments will be sufficient to ensure that there are no serialization issues.
 
 If you use a `LocalIslandManager` to create `LocalEvvoIsland`s, your data will still be serialized and deserialized, albeit on the same machine. This means that some of the most flagrant serialization exceptions can be caught early by testing with `LocalIslandManager`. 
 

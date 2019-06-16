@@ -2,8 +2,8 @@ package com.evvo.integration
 
 import com.evvo.NullLogger
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
-import com.evvo.agent.{CreatorFunction, MutatorFunction}
-import com.evvo.integration.LocalEvvoTestFixtures.{Creator, Mutator, NumInversions, Solution}
+import com.evvo.agent.{CreatorFunction, ModifierFunction}
+import com.evvo.integration.LocalEvvoTestFixtures.{Creator, Modifier, NumInversions, Solution}
 import com.evvo.island.population.{Minimize, Objective, Scored}
 import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import com.evvo.tags.{Performance, Slow}
@@ -14,7 +14,7 @@ import scala.concurrent.duration._
 /**
   * Tests a single island cluster.
   *
-  * The behavior under test is that an Island can sort a list given the proper mutator and fitness
+  * The behavior under test is that an Island can sort a list given the proper modifier and fitness
   * function, and terminate successfully returning a set of lists.
   */
 class LocalEvvoTest extends WordSpec with Matchers {
@@ -30,7 +30,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
 
     val islandBuilder = EvvoIslandBuilder[Solution]()
       .addCreator(new Creator(listLength))
-      .addMutator(new Mutator())
+      .addModifier(new Modifier())
       .addDeletor(DeleteWorstHalfByRandomObjective())
       .addObjective(new NumInversions())
 
@@ -41,13 +41,12 @@ class LocalEvvoTest extends WordSpec with Matchers {
 
   "Local Evvo" should {
     val timeout = 1
-    val listLength = 8
+    val listLength = 6
     f"be able to sort a list of length $listLength within $timeout seconds" taggedAs(Performance, Slow) in {
       val terminate = StopAfter(timeout.seconds)
 
       val evvo = getEvvo(listLength)
       evvo.runBlocking(terminate)
-
       val pareto: Set[Solution] = evvo
         .currentParetoFrontier()
         .solutions
@@ -60,18 +59,6 @@ class LocalEvvoTest extends WordSpec with Matchers {
 
 
 object LocalEvvoTestFixtures {
-
-  /** High level concept for the test:
-    *
-    * Create an island
-    * - Supply mutators, deletors, creators
-    * - Supply a termination condition
-    * - Supply a starting population
-    *
-    * Start the evolutionary process
-    *
-    * Wait for the process to terminate, and see if result is sorted.
-    */
   type Solution = List[Int]
 
   class Creator(listLength: Int) extends CreatorFunction[Solution]("Creator") {
@@ -80,7 +67,7 @@ object LocalEvvoTestFixtures {
     }
   }
 
-  class Mutator extends MutatorFunction[Solution]("Mutator") {
+  class Modifier extends ModifierFunction[Solution]("Modifier") {
     private def mutateOneSolution(sol: Solution): Solution = {
       val i = util.Random.nextInt(sol.length)
       val j = util.Random.nextInt(sol.length)
@@ -88,7 +75,7 @@ object LocalEvvoTestFixtures {
       sol.updated(j, sol(i)).updated(i, tmp)
     }
 
-    override def mutate(s: IndexedSeq[Scored[Solution]]): TraversableOnce[Solution] = {
+    override def modify(s: IndexedSeq[Scored[Solution]]): TraversableOnce[Solution] = {
       s.map(scoredSol => {
         val sol = scoredSol.solution
         val out = mutateOneSolution(sol)

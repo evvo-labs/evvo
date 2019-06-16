@@ -8,7 +8,7 @@
   */
 package com.evvo.agent.defaults
 
-import com.evvo.agent.{CreatorFunction, DeletorFunction, MutatorFunction}
+import com.evvo.agent.{CreatorFunction, DeletorFunction, ModifierFunction}
 import com.evvo.island.population
 import com.evvo.island.population.{Maximize, Minimize, Scored}
 
@@ -66,8 +66,8 @@ case class BitstringGenerator(length: Int, proportionOnes: Double = 0.5)
   *                  input set
   */
 case class Bitswapper(override val numInputs: Int = 32)
-  extends MutatorFunction[Bitstring]("Bitswapper") {
-  override def mutate(sols: IndexedSeq[Scored[Bitstring]]): TraversableOnce[Bitstring] = {
+  extends ModifierFunction[Bitstring]("Bitswapper") {
+  override def modify(sols: IndexedSeq[Scored[Bitstring]]): TraversableOnce[Bitstring] = {
     sols.map(s => {
       val bitstring = s.solution
       val index1 = util.Random.nextInt(bitstring.length)
@@ -86,8 +86,8 @@ case class Bitswapper(override val numInputs: Int = 32)
   *                  input set
   */
 case class Bitflipper(override val numInputs: Int = 32)
-  extends MutatorFunction[Bitstring]("Bitflipper") {
-  override def mutate(sols: IndexedSeq[Scored[Bitstring]]): TraversableOnce[Bitstring] = {
+  extends ModifierFunction[Bitstring]("Bitflipper") {
+  override def modify(sols: IndexedSeq[Scored[Bitstring]]): TraversableOnce[Bitstring] = {
     sols.map(s => {
       val bitstring = s.solution
       val index1 = util.Random.nextInt(bitstring.length)

@@ -6,16 +6,16 @@ import com.evvo.island.population.Population
 import scala.concurrent.duration._
 
 
-case class MutatorAgent[Sol](mutate: MutatorFunction[Sol],
-                             population: Population[Sol],
-                             strategy: AgentStrategy = MutatorAgentDefaultStrategy())
-                            (implicit val logger: LoggingAdapter)
+case class ModifierAgent[Sol](mutate: ModifierFunction[Sol],
+                              population: Population[Sol],
+                              strategy: AgentStrategy = ModifierAgentDefaultStrategy())
+                             (implicit val logger: LoggingAdapter)
   extends AAgent[Sol](strategy, population, mutate.name)(logger) {
 
   override protected def step(): Unit = {
     val in = population.getSolutions(mutate.numInputs)
     if (mutate.shouldRunWithPartialInput || in.length == mutate.numInputs) {
-      val mutatedSolutions = mutate.mutate(in)
+      val mutatedSolutions = mutate.modify(in)
       population.addSolutions(mutatedSolutions)
     } else {
       logger.debug(s"${this}: not enough solutions in population: " +
@@ -26,7 +26,7 @@ case class MutatorAgent[Sol](mutate: MutatorFunction[Sol],
   override def toString: String = s"MutatorAgent[$name, $numInvocations]"
 }
 
-case class MutatorAgentDefaultStrategy() extends AgentStrategy {
+case class ModifierAgentDefaultStrategy() extends AgentStrategy {
   override def waitTime(populationInformation: PopulationInformation): Duration = {
     0.millis
   }

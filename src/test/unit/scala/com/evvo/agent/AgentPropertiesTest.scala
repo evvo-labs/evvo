@@ -31,8 +31,8 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
 
   var creatorAgent: Agent[S] = _
 
-  val mutatorFunc = new MutatorFunction[S]("mutator") {
-    def mutate(seq: IndexedSeq[Scored[S]]): IndexedSeq[S] = {
+  val mutatorFunc = new ModifierFunction[S]("mutator") {
+    def modify(seq: IndexedSeq[Scored[S]]): IndexedSeq[S] = {
       agentFunctionCalled("mutate") = true
       seq.map(_.solution + 1)
     }
@@ -61,7 +61,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   before {
     pop = StandardPopulation[S](Vector(fitnessFunc))
     creatorAgent = CreatorAgent(creatorFunc, pop, strategy)
-    mutatorAgent = MutatorAgent(mutatorFunc, pop, strategy)
+    mutatorAgent = ModifierAgent(mutatorFunc, pop, strategy)
     deletorAgent = DeletorAgent(deletorFunc, pop, strategy)
     agents = Vector(creatorAgent, mutatorAgent, deletorAgent)
 
