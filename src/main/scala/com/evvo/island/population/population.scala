@@ -80,7 +80,6 @@ case class StandardPopulation[Sol](objectivesIter: TraversableOnce[Objective[Sol
 
 
   override def getSolutions(n: Int): Vector[Scored[Sol]] = {
-    // TODO: This can't be the final impl, inefficient space and time
     util.Random.shuffle(population.toVector).take(n)
   }
 

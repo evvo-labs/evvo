@@ -14,9 +14,8 @@ case class ParsedProblem(professors: Vector[ParsedProfPreferences], sections: Ve
 
 }
 
-// TODO how to link to another class in ScalaDoc?
 /**
-  * See ProfPreferences.
+  * See [[io.evvo.professormatching.ProfPreferences]].
   */
 case class ParsedProfPreferences(id: Int,
                                  sectionScheduleToPreference: Map[String, Int],

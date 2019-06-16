@@ -27,7 +27,6 @@ case class MutatorAgent[Sol](mutate: MutatorFunction[Sol],
 }
 
 case class MutatorAgentDefaultStrategy() extends AgentStrategy {
-  // TODO this is bad. fix it.
   override def waitTime(populationInformation: PopulationInformation): Duration = {
     0.millis
   }

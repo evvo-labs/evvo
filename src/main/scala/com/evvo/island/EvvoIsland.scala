@@ -51,12 +51,10 @@ class EvvoIsland[Sol]
     Future {
       log.info(s"Island running with stopAfter=${stopAfter}")
 
-      // TODO can we put all of these in some combined pool? don't like having to manage each
       creatorAgents.foreach(_.start())
       mutatorAgents.foreach(_.start())
       deletorAgents.foreach(_.start())
 
-      // TODO this is not ideal. fix wait time/add features to termination criteria
       val startTime = Calendar.getInstance().toInstant.toEpochMilli
 
       while (startTime + stopAfter.time.toMillis >

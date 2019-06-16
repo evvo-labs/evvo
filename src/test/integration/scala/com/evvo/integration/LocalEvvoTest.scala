@@ -28,17 +28,9 @@ class LocalEvvoTest extends WordSpec with Matchers {
     */
   def getEvvo(listLength: Int): EvolutionaryProcess[Solution] = {
 
-    // TODO add convenience constructor for adding multiple duplicate mutators/creators/deletors
     val islandBuilder = EvvoIslandBuilder[Solution]()
       .addCreator(new Creator(listLength))
       .addMutator(new Mutator())
-      .addMutator(new Mutator())
-      .addMutator(new Mutator())
-      .addMutator(new Mutator())
-      .addDeletor(DeleteWorstHalfByRandomObjective())
-      .addDeletor(DeleteWorstHalfByRandomObjective())
-      .addDeletor(DeleteWorstHalfByRandomObjective())
-      .addDeletor(DeleteWorstHalfByRandomObjective())
       .addDeletor(DeleteWorstHalfByRandomObjective())
       .addObjective(new NumInversions())
 
