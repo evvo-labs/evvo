@@ -8,9 +8,9 @@
   */
 package com.evvo.agent.defaults
 
-import com.evvo.agent.DeletorFunction
+import com.evvo.agent.{CreatorFunction, DeletorFunction, MutatorFunction}
 import com.evvo.island.population
-import com.evvo.island.population.{Maximize, Minimize, ParetoFrontier, Scored}
+import com.evvo.island.population.{Maximize, Minimize, Scored}
 
 /**
   * A deletor that deletes the dominated set, in a group of size `groupSize`
@@ -43,5 +43,55 @@ case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 3
 
       s.toVector.sortBy(_.score(objective))(ordering).take(s.size / 2)
     }
+  }
+}
+
+/**
+  * A creator that generates `Bitstring`s by filling them with random bits.
+  *
+  * @param length         how long each `Bitstring` should be
+  * @param proportionOnes the proportion of bits that start as 1
+  */
+case class BitstringGenerator(length: Int, proportionOnes: Double = 0.5)
+  extends CreatorFunction[Bitstring]("BitstringGenerator") {
+  override def create(): TraversableOnce[Seq[Boolean]] = {
+    Vector.fill(32)(Vector.fill(length)(util.Random.nextDouble() < proportionOnes))
+  }
+}
+
+/**
+  * A mutator that swaps two random bits.
+  *
+  * @param numInputs The number of solutions to request in the contents of each
+  *                  input set
+  */
+case class Bitswapper(override val numInputs: Int = 32)
+  extends MutatorFunction[Bitstring]("Bitswapper") {
+  override def mutate(sols: IndexedSeq[Scored[Bitstring]]): TraversableOnce[Bitstring] = {
+    sols.map(s => {
+      val bitstring = s.solution
+      val index1 = util.Random.nextInt(bitstring.length)
+      val index2 = util.Random.nextInt(bitstring.length)
+
+      // not mutation, doesn't need an intermediate temp variable
+      bitstring.updated(index1, bitstring(index2)).updated(index2, bitstring(index1))
+    })
+  }
+}
+
+/**
+  * A mutator for `Bitstring`s that flips a random bit.
+  *
+  * @param numInputs The number of solutions to request in the contents of each
+  *                  input set
+  */
+case class Bitflipper(override val numInputs: Int = 32)
+  extends MutatorFunction[Bitstring]("Bitflipper") {
+  override def mutate(sols: IndexedSeq[Scored[Bitstring]]): TraversableOnce[Bitstring] = {
+    sols.map(s => {
+      val bitstring = s.solution
+      val index1 = util.Random.nextInt(bitstring.length)
+      bitstring.updated(index1, !bitstring(index1))
+    })
   }
 }
