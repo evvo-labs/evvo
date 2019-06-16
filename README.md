@@ -72,48 +72,48 @@ As described in [John Rachlin's paper on paper mill optimization](https://www.re
 
 This diagram illustrates each of the major components in Evvo and their roles:
 ```
-+---------------------------------------------------------------------------+
-|                                                                           |
-| EvvoIsland                                                                |
-|                                                                           |
-+---------------------------------------------------------------------------+
-|                                                                           |
-|                                                   +-------------------+   |
-|  +---------------+       Generates new solutions  |                   |   |
-|  |               |<-------------------------------| Creator Agent(s)  |   |
-|  | Population    |                                |                   |   |
-|  |               |                                +-------------------+   |
-|  +---------------+                                                        |
-|  |               | Reads some solutions           +-------------------+   |<----+
-|  |  - Objectives |------------------------------->|                   |   |     |
-|  |               |                                | Mutator Agent(s)  |   |     |
-|  |  - Solutions  |<-------------------------------|                   |   |     |  Immigration / Emigration
-|  |               |         Derives new solutions  +-------------------+   |     |
-|  |               |                                                        |     |    Peer-to-peer gossip
-|  |               | Reads some solutions           +-------------------+   |     |    protocol for sharing
-|  |               |------------------------------->|                   |   |     |    solutions increases
-|  |               |                                | Deletor Agent(s)  |   |     |    scalability without
-|  |               |<-------------------------------|                   |   |     |    converging to local
-|  |               |        Chooses some to delete  +-------------------+   |     |    optima.
-|  +---------------+                                                        |     |
-|                                                                           |     |    This is how Evvo takes
-+---------------------------------------------------------------------------+     |    advantage of parallelism.
-                                   ^                                              |
-                                   |  Immigration / Emigration                    |
-                                   v                                              |
-+---------------------------------------------------------------------------+     |
-|                                                                           |     |
-| EvvoIsland     [Same contents as above, abbreviated for clarity]          |     |
-|                                                                           |     |
-+---------------------------------------------------------------------------+     |
-                                   ^                                              |
-                                   |  Immigration / Emigration                    |
-                                   v                                              |
-+---------------------------------------------------------------------------+     |
-|                                                                           |     |
-| EvvoIsland     [Same contents as above, abbreviated for clarity]          |<----+
-|                                                                           |
-+---------------------------------------------------------------------------+
++-------------------------------------------------------------------------+
+|                                                                         |
+| EvvoIsland                                                              |
+|                                                                         |
++-------------------------------------------------------------------------+
+|                                                                         |
+|                                                   +------------------+  |
+|  +---------------+       Generates new solutions  |                  |  |
+|  |               |<-------------------------------| Creator Agent(s) |  |
+|  | Population    |                                |                  |  |
+|  |               |                                +------------------+  |
+|  +---------------+                                                      |
+|  |               | Reads some solutions           +------------------+  |<--+
+|  |  - Objectives |------------------------------->|                  |  |   |
+|  |               |                                | Mutator Agent(s) |  |   |
+|  |  - Solutions  |<-------------------------------|                  |  |   | Immigration +
+|  |               |         Derives new solutions  +------------------+  |   | Emigration
+|  |               |                                                      |   |  Peer-to-peer gossip
+|  |               | Reads some solutions           +------------------+  |   |  protocol for
+|  |               |------------------------------->|                  |  |   |  sharing solutions
+|  |               |                                | Deletor Agent(s) |  |   |  increases
+|  |               |<-------------------------------|                  |  |   |  scalability without
+|  |               |        Chooses some to delete  +------------------+  |   |  converging to local
+|  +---------------+                                                      |   |  optima.
+|                                                                         |   |
++-------------------------------------------------------------------------+   |  This is how Evvo
+                                   ^                                          |  takes advantage of
+                                   |  Immigration / Emigration                |  parallelism.
+                                   v                                          |
++--------------------------------------------------------------------------+  |
+|                                                                          |  |
+| EvvoIsland     [Same contents as above, abbreviated for clarity]         |  |
+|                                                                          |  |
++--------------------------------------------------------------------------+  |
+                                   ^                                          |
+                                   |  Immigration / Emigration                |
+                                   v                                          |
++--------------------------------------------------------------------------+  |
+|                                                                          |  |
+| EvvoIsland     [Same contents as above, abbreviated for clarity]         |<-+
+|                                                                          |
++--------------------------------------------------------------------------+
 
                                     .
                                     .
@@ -126,70 +126,70 @@ This diagram illustrates each of the major components in Evvo and their roles:
 ### Distributing islands on a network
 This diagram shows a simplified version of our network model:
 ```
-                                                         +------------------------------------------------+
-                                                         |                                                |
-                                                         | Server                                         |
-                                                         |                                                |
-                                                         | +--------------------------------------------+ |
-                                                         | |                                            | |
-                                                  +----->| | JVM running ActorSystem with remoting      | |
-                                                  |      | |                                            | |
-                                                  |      | |  +----------+  +----------+  +----------+  | |
-+---------------------------------+               |      | |  |          |  |          |  |          |  | |
-|                                 |               |      | |  | Island 1 |  | Island 4 |  | Island 7 |  | |
-| IslandManager (client)          |               |      | |  |          |  |          |  |          |  | |
-|                                 |               |      | |  +----------+  +----------+  +----------+  | |
-+---------------------------------+               |      | |                                            | |
-|                                 |               |      | +--------------------------------------------+ |
-|  - Round robin deploys Islands  |<--------------+      |                                                |
-|     to remote ActorSystems      |               |      +------------------------------------------------+
-|                                 |               |             ^
-|  - Combines results at end      |               |             |  Some gossip happens over network
-|     of optimization             |               |             |  Some gossip happens within a server
-|                                 |               |             v
-+---------------------------------+               |      +------------------------------------------------+
-                                                  |      |                                                |
-                                                  |      | Server                                         |
-                                                  |      |                                                |
-                                                  |      | +--------------------------------------------+ |
-                                                  |      | |                                            | |
-                                                  +----->| | JVM running ActorSystem with remoting      | |
-                                                  |      | |                                            | |
-                                                  |      | |  +----------+  +----------+  +----------+  | |
-                                                  |      | |  |          |  |          |  |          |  | |
-                                                  |      | |  | Island 2 |  | Island 5 |  | Island 8 |  | |
-                                                  |      | |  |          |  |          |  |          |  | |
-                                                  |      | |  +----------+  +----------+  +----------+  | |
-                                                  |      | |                                            | |
-                                                  |      | +--------------------------------------------+ |
-                                                  |      |                                                |
-                                                  |      +------+-----------------------------------------+
-                                                  |             ^
-                                                  |             |
-                                                  |             v
-                                                  |      +------+-----------------------------------------+
-                                                  |      |                                                |
-                                                  |      | Server                                         |
-                                                  |      |                                                |
-                                                  |      | +--------------------------------------------+ |
-                                                  |      | |                                            | |
-                                                  +----->| | JVM running ActorSystem with remoting      | |
-                                                         | |                                            | |
-                                                         | |  +----------+  +----------+                | |
-                                                         | |  |          |  |          |                | |
-                                                         | |  | Island 3 |  | Island 6 |                | |
-                                                         | |  |          |  |          |                | |
-                                                         | |  +----------+  +----------+                | |
-                                                         | |                                            | |
-                                                         | +--------------------------------------------+ |
-                                                         |                                                |
-                                                         +------------------------------------------------+
+                                                  +------------------------------------------------+
+                                                  |                                                |
+                                                  | Server                                         |
+                                                  |                                                |
+                                                  | +--------------------------------------------+ |
+                                                  | |                                            | |
+                                           +----->| | JVM running ActorSystem with remoting      | |
+                                           |      | |                                            | |
+                                           |      | |  +----------+  +----------+  +----------+  | |
++---------------------------------+        |      | |  |          |  |          |  |          |  | |
+|                                 |        |      | |  | Island 1 |  | Island 4 |  | Island 7 |  | |
+| IslandManager (client)          |        |      | |  |          |  |          |  |          |  | |
+|                                 |        |      | |  +----------+  +----------+  +----------+  | |
++---------------------------------+        |      | |                                            | |
+|                                 |        |      | +--------------------------------------------+ |
+|  - Round robin deploys Islands  |<-------+      |                                                |
+|     to remote ActorSystems      |        |      +------------------------------------------------+
+|                                 |        |             ^
+|  - Combines results at end      |        |             |  Some gossip happens over network
+|     of optimization             |        |             |  Some gossip happens within a server
+|                                 |        |             v
++---------------------------------+        |      +------------------------------------------------+
+                                           |      |                                                |
+                                           |      | Server                                         |
+                                           |      |                                                |
+                                           |      | +--------------------------------------------+ |
+                                           |      | |                                            | |
+                                           +----->| | JVM running ActorSystem with remoting      | |
+                                           |      | |                                            | |
+                                           |      | |  +----------+  +----------+  +----------+  | |
+                                           |      | |  |          |  |          |  |          |  | |
+                                           |      | |  | Island 2 |  | Island 5 |  | Island 8 |  | |
+                                           |      | |  |          |  |          |  |          |  | |
+                                           |      | |  +----------+  +----------+  +----------+  | |
+                                           |      | |                                            | |
+                                           |      | +--------------------------------------------+ |
+                                           |      |                                                |
+                                           |      +------------------------------------------------+
+                                           |             ^
+                                           |             |
+                                           |             v
+                                           |      +------------------------------------------------+
+                                           |      |                                                |
+                                           |      | Server                                         |
+                                           |      |                                                |
+                                           |      | +--------------------------------------------+ |
+                                           |      | |                                            | |
+                                           +----->| | JVM running ActorSystem with remoting      | |
+                                                  | |                                            | |
+                                                  | |  +----------+  +----------+                | |
+                                                  | |  |          |  |          |                | |
+                                                  | |  | Island 3 |  | Island 6 |                | |
+                                                  | |  |          |  |          |                | |
+                                                  | |  +----------+  +----------+                | |
+                                                  | |                                            | |
+                                                  | +--------------------------------------------+ |
+                                                  |                                                |
+                                                  +------------------------------------------------+
 
-                                                                                 .
-                                                                                 .
-                                                                                 .
+                                                                          .
+                                                                          .
+                                                                          .
 
-                                                            and so on, until your server budget runs out
+                                                     and so on, until your server budget runs out
 ```
 
 ### Running a Custom Optimization Problem
@@ -232,11 +232,11 @@ git checkout <STABLE_COMMIT>
 cd ..
 
 git add -A
-git commit -m "All major theme parks have delays. When they opened Disneyland in 1956, nothing worked"
+git commit -m "Major theme parks have delays. When they opened Disneyland in 1956, nothing worked"
 git push
 ```
 
-Now, it is possible, but messy, to hard link the files to get around the lack of support for non-recursive nested submodules to make development possible (instead of just version pinning) using `my_new_project`. Note that it is not possible to hard link directories, so you would have to hard link every file indiviudally. I do not recommend this, but will leave the option open to you. For each file in <YOUR_PROJECT>, run:
+Now, it is possible, but messy, to hard link the files to get around the lack of support for non-recursive nested submodules to make development possible (instead of just version pinning) using `my_new_project`. Note that it is not possible to hard link directories, so you would have to hard link every file indiviudally. I do not recommend this, but will leave the option open to you. For each file in `<YOUR_PROJECT>`, run:
 
 ```bash
 ln <YOUR_PROJECT_DIR>/<YOUR_FILE_PATH> ./evvo/src/main/scala/com/evvo/ignored/<HARD_LINK_NAME>
