@@ -212,7 +212,7 @@ Here's how you can set it up:
 mkdir my_new_project
 cd my_new_project
 git init
-echo "# Uh... it's... it's a dinosaur!" > README.md
+echo "# Uh... it's... it's a dinosaur" > README.md
 
 git submodule add git@github.com:evvo-labs/evvo.git
 git submodule add <YOUR_PROJECT>
@@ -232,9 +232,17 @@ git checkout <STABLE_COMMIT>
 cd ..
 
 git add -A
-git commit -m "All major theme parks have delays. When they opened Disneyland in 1956, nothing worked!"
+git commit -m "All major theme parks have delays. When they opened Disneyland in 1956, nothing worked"
 git push
 ```
+
+Now, it is possible, but messy, to hard link the files to get around the lack of support for non-recursive nested submodules to make development possible (instead of just version pinning) using `my_new_project`. Note that it is not possible to hard link directories, so you would have to hard link every file indiviudally. I do not recommend this, but will leave the option open to you. For each file in <YOUR_PROJECT>, run:
+
+```bash
+ln <YOUR_PROJECT_DIR>/<YOUR_FILE_PATH> ./evvo/src/main/scala/com/evvo/ignored/<HARD_LINK_NAME>
+```
+
+Note that since this is in the ignored directory, everybody who clones your repo will not have the hard links set up, so you probably want to include a setup script that creates the hard links in `my_new_project`.
 
 #### Setting up Servers
 Evvo is [dockerized](https://www.docker.com/). Follow the [instructions](docker/README.md) to get started running your own network-parallel instance.
