@@ -200,28 +200,41 @@ You'll want to check out our getting started (coming soon) for an example of how
 #### Keeping your Code Private
 While we would love some well groomed examples in our repo, if you want to keep your code private, either put your new code in the [`src/main/scala/com/evvo/ignored`](src/main/scala/com/evvo/ignored) directory **or** locally ignore your new package/files with `git update-index --assume-unchanged [<file>...]`.
 
-##### Best VCS Practices -- Advanced
-Until we can be used as a dependency on Maven or sbt, things may look a little tricky. You can create a git repo inside the **ignored** directory, and use that to maintain your code.
+##### Best VCS Practices
+For now, you should create a git repo inside the [`src/main/scala/com/evvo/ignored`](src/main/scala/com/evvo/ignored) directory and use that to version your code.
 
-You may also want to create a new repo containing 2 (`git submodules`)[https://git-scm.com/book/en/v2/Git-Tools-Submodules], Evvo and your optimization problem repository (still in the ignored directory).This way, you can update evvo and your custom project and ensure they stay in sync.
+###### Using Submodules (Advanced)
+Until Evvo is a Maven or sbt dependency, things may look a little tricky. If you need to freeze Evvo's version with the version of your optimization problem repository (`<YOUR_PROJECT>`), you could use 2 [`git submodules`](https://git-scm.com/book/en/v2/Git-Tools-Submodules): one for Evvo and one for your project. If you don't need to, please skip this section. Unfortunately, git doesn't support non-recursive nested submodules, so development would be difficult to do using the repo with the submodules.
 
 Here's how you can set it up:
 
 ```bash
 mkdir my_new_project
 cd my_new_project
-echo "# README" > README.md
+git init
+echo "# Uh... it's... it's a dinosaur!" > README.md
 
 git submodule add git@github.com:evvo-labs/evvo.git
-cd evvo/src/main/scala/com/evvo/ignored
 git submodule add <YOUR_PROJECT>
-cd ../../../../../../..
 git submodule init
 
-git add
+git add -A
 git commit -m "Life finds a way"
 ```
 
+Every time you want to freeze a version of your code with a version of Evvo, just checkout the Evvo and optimization problem commits that you wish to pair:
+
+```bash
+cd evvo
+git checkout <STABLE_COMMIT>
+cd ../<YOUR_PROJECT_DIR>
+git checkout <STABLE_COMMIT>
+cd ..
+
+git add -A
+git commit -m "All major theme parks have delays. When they opened Disneyland in 1956, nothing worked!"
+git push
+```
 
 #### Setting up Servers
 Evvo is [dockerized](https://www.docker.com/). Follow the [instructions](docker/README.md) to get started running your own network-parallel instance.
