@@ -3,7 +3,7 @@ package com.evvo.island
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
 import java.util.Calendar
 
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, PoisonPill, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill}
 import akka.event.{LoggingAdapter, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
@@ -16,7 +16,7 @@ import scala.concurrent.duration.{Duration, _}
 import scala.concurrent.{Await, Future}
 
 
-class EvvoIsland[Sol]
+private class EvvoIsland[Sol]
 (
   creators: Vector[CreatorFunction[Sol]],
   mutators: Vector[MutatorFunction[Sol]],
@@ -25,7 +25,16 @@ class EvvoIsland[Sol]
 (implicit log: LoggingAdapter)
   extends EvolutionaryProcess[Sol] {
 
-  def serializationRoundtrip[T](t: T): T = {
+  /**
+    * Serialize and deserialize the given value, returning the deserialized data.
+    * Roundtripping like this allows all Islands to catch (some) serialization bugs before
+    * deploying remotely.
+    *
+    * @param t The value to deserialize
+    * @tparam T The type of the value to deserialize
+    * @return The value after the roundtrip
+    */
+  private def serializationRoundtrip[T](t: T): T = {
     val baos = new ByteArrayOutputStream()
     val outputStream = new ObjectOutputStream(baos)
     outputStream.writeObject(t)
@@ -43,7 +52,9 @@ class EvvoIsland[Sol]
   private val mutatorAgents = mutators.map(m => MutatorAgent(serializationRoundtrip(m), pop))
   private val deletorAgents = deletors.map(d => DeletorAgent(serializationRoundtrip(d), pop))
 
+  /** The list of all other islands, to send emigrating solutions to. */
   private var emigrationTargets: Seq[EvolutionaryProcess[Sol]] = Seq()
+  /** The index of the current "target" that will receive the next emigration. */
   private var currentEmigrationTargetIndex: Int = 0
 
   override def runAsync(stopAfter: StopAfter)
@@ -111,56 +122,13 @@ class EvvoIsland[Sol]
 }
 
 object EvvoIsland {
+  /**
+    * @tparam Sol the type of solutions processeed by this island.
+    * @return A builder for an EvvoIsland.
+    */
   def builder[Sol](): EvvoIslandBuilder[Sol] = EvvoIslandBuilder[Sol]()
 }
 
-
-/**
-  * @param creators   the functions to be used for creating new solutions.
-  * @param mutators   the functions to be used for creating new solutions from current solutions.
-  * @param deletors   the functions to be used for deciding which solutions to delete.
-  * @param objectives the objective functions to maximize.
-  */
-case class EvvoIslandBuilder[Sol]
-(
-  creators: Set[CreatorFunction[Sol]] = Set[CreatorFunction[Sol]](),
-  mutators: Set[MutatorFunction[Sol]] = Set[MutatorFunction[Sol]](),
-  deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
-  objectives: Set[Objective[Sol]] = Set[Objective[Sol]]()
-) {
-  def addCreator(creatorFunc: CreatorFunction[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(creators = creators + creatorFunc)
-  }
-
-  def addMutator(mutatorFunc: MutatorFunction[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(mutators = mutators + mutatorFunc)
-  }
-
-  def addDeletor(deletorFunc: DeletorFunction[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(deletors = deletors + deletorFunc)
-  }
-
-  def addObjective(objective: Objective[Sol])
-  : EvvoIslandBuilder[Sol] = {
-    this.copy(objectives = objectives + objective)
-  }
-
-  def toProps()(implicit system: ActorSystem): Props = {
-    Props(new RemoteEvvoIsland[Sol](
-      creators.toVector,
-      mutators.toVector,
-      deletors.toVector,
-      objectives.toVector))
-  }
-
-  def buildLocalEvvo(): EvolutionaryProcess[Sol] = {
-    new LocalEvvoIsland[Sol](
-      creators.toVector,
-      mutators.toVector,
-      deletors.toVector,
-      objectives.toVector)
-  }
-}
 
 // =================================================================================================
 // Local EvvoIsland wrapper
@@ -209,12 +177,6 @@ class LocalEvvoIsland[Sol]
   }
 }
 
-
-object LocalEvvoIsland {
-  def builder[Sol](): EvvoIslandBuilder[Sol] = EvvoIslandBuilder[Sol]()
-}
-
-
 object LocalLogger extends LoggingAdapter {
   private val logger = LoggerFactory.getLogger("LocalEvvoIsland")
 
@@ -252,7 +214,7 @@ object LocalLogger extends LoggingAdapter {
 
 /**
   * A single-island evolutionary system, which will run on one computer (although on multiple
-  * CPU cores). Because it is an Akka actor, generally people will use SingleIslandEvvo.Wrapped
+  * threads). Because it is an Akka actor, generally people will use SingleIslandEvvo.Wrapped
   * to use it in a type-safe way, instead of throwing messages.
   */
 class RemoteEvvoIsland[Sol]
@@ -263,7 +225,7 @@ class RemoteEvvoIsland[Sol]
   objectives: Vector[Objective[Sol]]
 )
   extends Actor with EvolutionaryProcess[Sol] with ActorLogging {
-  // for messages
+  // for messages, which are case classes defined within RemoteEvvoIsland's companion objeect
   import com.evvo.island.RemoteEvvoIsland._ // scalastyle:ignore import.grouping
 
   implicit val logger: LoggingAdapter = log
@@ -308,14 +270,12 @@ class RemoteEvvoIsland[Sol]
 }
 
 object RemoteEvvoIsland {
-
-  def builder[Sol](): EvvoIslandBuilder[Sol] = EvvoIslandBuilder[Sol]()
-
   /**
-    * This is a wrapper for ActorRefs containing SingleIslandEvvo actors, serving as an
-    * adapter to the TIsland interface
+    * This is a wrapper for ActorRefs of SingleIslandEvvo actors, serving as an
+    * adapter to the EvolutionaryProcess interface. This allows strongly-typed code to
+    * still use Akka for async message passing.
     *
-    * @param ref the reference to wrap
+    * @param ref The reference to wrap
     */
   case class Wrapper[Sol](ref: ActorRef) extends EvolutionaryProcess[Sol] {
     implicit val timeout: Timeout = Timeout(5.days)
@@ -345,11 +305,13 @@ object RemoteEvvoIsland {
     }
   }
 
-  case class Run(stopAfter: StopAfter)
 
-  case object GetParetoFrontier
+  // All of these are meant to be used as Akka messages.
+  private[island] case class Run(stopAfter: StopAfter)
 
-  case class Immigrate[Sol](solutions: Seq[Sol])
+  private[island] case object GetParetoFrontier
 
-  case class RegisterIslands[Sol](islands: Seq[EvolutionaryProcess[Sol]])
+  private[island] case class Immigrate[Sol](solutions: Seq[Sol])
+
+  private[island] case class RegisterIslands[Sol](islands: Seq[EvolutionaryProcess[Sol]])
 }
