@@ -5,7 +5,7 @@ import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.agent.{CreatorFunction, MutatorFunction}
 import com.evvo.integration.LocalEvvoTestFixtures.{Creator, Mutator, NumInversions, Solution}
 import com.evvo.island.population.{Minimize, Objective, Scored}
-import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
+import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter, UnfinishedEvvoIslandBuilder}
 import com.evvo.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
 

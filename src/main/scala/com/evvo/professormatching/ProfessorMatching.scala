@@ -5,6 +5,7 @@ import java.time.LocalTime.parse
 import java.time.{DayOfWeek, LocalTime}
 
 import com.evvo.agent._
+import com.evvo.agent.defaults.DeleteDominated
 import com.evvo.island._
 import com.evvo.island.population.{Maximize, Objective, Scored}
 import com.typesafe.config.ConfigFactory
@@ -100,6 +101,7 @@ object ProfessorMatching {
       .addCreator(new RandomScheduleCreator(idToProf, idToSection))
       .addMutator(new SwapTwoCourses(idToProf))
       .addMutator(new BalanceCourseload(idToProf))
+      .addDeletor(new DeleteDominated[PMSolution]())
 
     val config = ConfigFactory
       .parseFile(new File("src/main/resources/application.conf"))

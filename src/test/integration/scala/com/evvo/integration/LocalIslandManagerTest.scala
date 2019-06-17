@@ -3,7 +3,7 @@ package com.evvo.integration
 import com.evvo.agent.defaults.DeleteDominated
 import com.evvo.agent.{CreatorFunction, MutatorFunction}
 import com.evvo.island.population.{Maximize, Objective, Scored}
-import com.evvo.island.{EvvoIslandBuilder, LocalIslandManager, StopAfter}
+import com.evvo.island.{EvvoIslandBuilder, LocalIslandManager, StopAfter, UnfinishedEvvoIslandBuilder}
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
