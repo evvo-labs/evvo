@@ -13,7 +13,7 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
           override protected def objective(sol: Bitstring): Double = 3d
         })
         .addCreator(BitstringGenerator(length=16))
-        .addMutator(Bitflipper())
+        .addModifier(Bitflipper())
         .addDeletor(DeleteDominated())
 
       builder.buildLocalEvvo()
@@ -26,7 +26,9 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
         .addObjective(new Objective[Bitstring]("Three", Maximize) {
           override protected def objective(sol: Bitstring): Double = 3d
         })
-        .addMutator(Bitflipper())
+        .addModifier(Bitflipper())
+
+      builder.buildLocalEvvo()
     }
 
     "require at least one Objective, Creator, Mutator, Deletor" in {

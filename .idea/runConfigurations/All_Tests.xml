@@ -21,6 +21,8 @@
     <buffered bufClass="com.evvo.agent.AgentPropertiesTest" />
     <buffered bufClass="com.evvo.agent.CreatorAgentDefaultStrategyTest" />
     <buffered bufClass="com.evvo.agent.CreatorAgentDefaultStrategyTest" />
+    <buffered bufClass="com.evvo.agent.CrossoverFunctionTest" />
+    <buffered bufClass="com.evvo.agent.CrossoverFunctionTest" />
     <buffered bufClass="com.evvo.agent.DeleteDominatedFunctionTest" />
     <buffered bufClass="com.evvo.agent.DeleteDominatedFunctionTest" />
     <buffered bufClass="com.evvo.agent.DeleteWorstHalfByRandomObjectiveTest" />

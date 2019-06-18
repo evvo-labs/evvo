@@ -1,7 +1,7 @@
 package com.evvo.island
 
 import akka.actor.{ActorSystem, Props}
-import com.evvo.agent.{CreatorFunction, DeletorFunction, MutatorFunction}
+import com.evvo.agent.{CreatorFunction, DeletorFunction, ModifierFunction, MutatorFunction}
 import com.evvo.island.EvvoIslandBuilder.HAS_SOME
 import com.evvo.island.population.Objective
 
@@ -20,39 +20,39 @@ import com.evvo.island.population.Objective
   * </p>
   *
   * @param creators   the functions to be used for creating new solutions.
-  * @param mutators   the functions to be used for creating new solutions from current solutions.
+  * @param modifiers   the functions to be used for creating new solutions from current solutions.
   * @param deletors   the functions to be used for deciding which solutions to delete.
   * @param objectives the objective functions to maximize.
   * @tparam HasCreators   HAS_SOME if the builder has at least one creator, HAS_NONE otherwise.
-  * @tparam HasMutators   same as HasCreators
+  * @tparam HasModifiers   same as HasCreators
   * @tparam HasDeletors   same as HasCreators
   * @tparam HasObjectives same as HasCreators
   */
-case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasMutators, HasDeletors, HasObjectives]
+case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives]
 (
   creators: Set[CreatorFunction[Sol]] = Set[CreatorFunction[Sol]](),
-  mutators: Set[MutatorFunction[Sol]] = Set[MutatorFunction[Sol]](),
+  modifiers: Set[ModifierFunction[Sol]] = Set[ModifierFunction[Sol]](),
   deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
   objectives: Set[Objective[Sol]] = Set[Objective[Sol]]()
 ) {
   def addCreator(creatorFunc: CreatorFunction[Sol]):
-  UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HasMutators, HasDeletors, HasObjectives] = {
-    UnfinishedEvvoIslandBuilder(creators + creatorFunc, mutators, deletors, objectives)
+  UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HasModifiers, HasDeletors, HasObjectives] = {
+    UnfinishedEvvoIslandBuilder(creators + creatorFunc, modifiers, deletors, objectives)
   }
 
-  def addMutator(mutatorFunc: MutatorFunction[Sol]):
+  def addModifier(modifierFunc: ModifierFunction[Sol]):
   UnfinishedEvvoIslandBuilder[Sol, HasCreators, HAS_SOME, HasDeletors, HasObjectives] = {
-    UnfinishedEvvoIslandBuilder(creators, mutators + mutatorFunc, deletors, objectives)
+    UnfinishedEvvoIslandBuilder(creators, modifiers + modifierFunc, deletors, objectives)
   }
 
   def addDeletor(deletorFunc: DeletorFunction[Sol]):
-  UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasMutators, HAS_SOME, HasObjectives] = {
-    UnfinishedEvvoIslandBuilder(creators, mutators, deletors + deletorFunc, objectives)
+  UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HAS_SOME, HasObjectives] = {
+    UnfinishedEvvoIslandBuilder(creators, modifiers, deletors + deletorFunc, objectives)
   }
 
   def addObjective(objective: Objective[Sol]):
-  UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasMutators, HasDeletors, HAS_SOME] = {
-    UnfinishedEvvoIslandBuilder(creators, mutators, deletors, objectives + objective)
+  UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HAS_SOME] = {
+    UnfinishedEvvoIslandBuilder(creators, modifiers, deletors, objectives + objective)
   }
 }
 
@@ -63,19 +63,19 @@ case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasMutators, HasDeletor
 case class FinishedEvvoIslandBuilder[Sol]
 (
   creators: Set[CreatorFunction[Sol]],
-  mutators: Set[MutatorFunction[Sol]],
+  modifiers: Set[ModifierFunction[Sol]],
   deletors: Set[DeletorFunction[Sol]],
   objectives: Set[Objective[Sol]]
 ) {
   assert(creators.nonEmpty)
-  assert(mutators.nonEmpty)
+  assert(modifiers.nonEmpty)
   assert(deletors.nonEmpty)
   assert(objectives.nonEmpty)
 
   def toProps()(implicit system: ActorSystem): Props = {
     Props(new RemoteEvvoIsland[Sol](
       creators.toVector,
-      mutators.toVector,
+      modifiers.toVector,
       deletors.toVector,
       objectives.toVector))
   }
@@ -83,7 +83,7 @@ case class FinishedEvvoIslandBuilder[Sol]
   def buildLocalEvvo(): EvolutionaryProcess[Sol] = {
     new LocalEvvoIsland[Sol](
       creators.toVector,
-      mutators.toVector,
+      modifiers.toVector,
       deletors.toVector,
       objectives.toVector)
   }
@@ -107,7 +107,7 @@ object EvvoIslandBuilder {
     builder: UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HAS_SOME, HAS_SOME, HAS_SOME]
   ): FinishedEvvoIslandBuilder[Sol] = {
     FinishedEvvoIslandBuilder(
-      builder.creators, builder.mutators, builder.deletors, builder.objectives)
+      builder.creators, builder.modifiers, builder.deletors, builder.objectives)
   }
 
 
