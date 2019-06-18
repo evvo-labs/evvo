@@ -6,6 +6,8 @@ import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.island.population.Scored
 import org.scalatest.{Matchers, WordSpec}
 
+import scala.collection.TraversableOnce
+
 /**
   * Creator, Mutator, and Deletor Functions all have to be serializable for akka actor
   * deployment to work.
@@ -36,8 +38,8 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
         override def create(): TraversableOnce[Double] = Vector(3)
       }
 
-      val m = new MutatorFunction[Double]("m") {
-        override def mutate(sols: IndexedSeq[Scored[Double]]): TraversableOnce[Double] = {
+      val m = new ModifierFunction[Double]("m") {
+        override def modify(sols: IndexedSeq[Scored[Double]]): TraversableOnce[Double] = {
           Vector(sols.head.solution)
         }
       }
@@ -58,8 +60,8 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
         override def create(): TraversableOnce[Double] = Vector(3)
       }
 
-      class M extends MutatorFunction[Double]("d") {
-        override def mutate(sols: IndexedSeq[Scored[Double]]): TraversableOnce[Double] = {
+      class M extends ModifierFunction[Double]("d") {
+        override def modify(sols: IndexedSeq[Scored[Double]]): TraversableOnce[Double] = {
           Vector(sols.head.solution)
         }
       }
@@ -83,8 +85,8 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
       }
 
       class M extends MutatorFunction[G]("d") {
-        override def mutate(sols: IndexedSeq[Scored[G]]): TraversableOnce[G] = {
-          Vector(sols.head.solution)
+        override def mutate(sol: G): G = {
+          sol
         }
       }
 
@@ -110,8 +112,8 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
       }
 
       class M extends MutatorFunction[CC]("d") {
-        override def mutate(sols: IndexedSeq[Scored[CC]]): TraversableOnce[CC] = {
-          Vector(sols.head.solution)
+        override def mutate(sol: CC): CC = {
+          sol
         }
       }
 
@@ -135,8 +137,8 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
       }
 
       class M extends MutatorFunction[Clazz]("d") {
-        override def mutate(sols: IndexedSeq[Scored[Clazz]]): TraversableOnce[Clazz] = {
-          Vector(sols.head.solution)
+        override def mutate(sol: Clazz): Clazz = {
+          sol
         }
       }
 

@@ -31,15 +31,15 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
 
   var creatorAgent: Agent[S] = _
 
-  val mutatorFunc = new MutatorFunction[S]("mutator") {
-    def mutate(seq: IndexedSeq[Scored[S]]): IndexedSeq[S] = {
-      agentFunctionCalled("mutate") = true
+  val mutatorFunc = new ModifierFunction[S]("modifier") {
+    def modify(seq: IndexedSeq[Scored[S]]): IndexedSeq[S] = {
+      agentFunctionCalled("modify") = true
       seq.map(_.solution + 1)
     }
   }
 
-  var mutatorAgent: Agent[S] = _
-  val mutatorInput: Set[Scored[S]] = Set[Scored[S]](Scored(Map(("Score1", Minimize) -> 3), 2))
+  var modifierAgent: Agent[S] = _
+  val modifierInput: Set[Scored[S]] = Set[Scored[S]](Scored(Map(("Score1", Minimize) -> 3), 2))
 
   val deletorFunc = new DeletorFunction[S]("deletor") {
     override def delete(sols: IndexedSeq[Scored[S]]): TraversableOnce[Scored[S]] = {
@@ -49,7 +49,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   }
 
   var deletorAgent: Agent[S] = _
-  val deletorInput: Set[Scored[S]] = mutatorInput
+  val deletorInput: Set[Scored[S]] = modifierInput
 
   var agents: Vector[Agent[S]] = _
   val strategy: AgentStrategy = _ => 70.millis
@@ -61,13 +61,13 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   before {
     pop = StandardPopulation[S](Vector(fitnessFunc))
     creatorAgent = CreatorAgent(creatorFunc, pop, strategy)
-    mutatorAgent = MutatorAgent(mutatorFunc, pop, strategy)
+    modifierAgent = ModifierAgent(mutatorFunc, pop, strategy)
     deletorAgent = DeletorAgent(deletorFunc, pop, strategy)
-    agents = Vector(creatorAgent, mutatorAgent, deletorAgent)
+    agents = Vector(creatorAgent, modifierAgent, deletorAgent)
 
     agentFunctionCalled = mutable.Map(
       "create" -> false,
-      "mutate" -> false,
+      "modify" -> false,
       "delete" -> false)
   }
 

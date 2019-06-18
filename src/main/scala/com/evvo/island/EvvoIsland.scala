@@ -19,7 +19,7 @@ import scala.concurrent.{Await, Future}
 private class EvvoIsland[Sol]
 (
   creators: Vector[CreatorFunction[Sol]],
-  mutators: Vector[MutatorFunction[Sol]],
+  mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
   fitnesses: Vector[Objective[Sol]])
 (implicit log: LoggingAdapter)
@@ -49,7 +49,7 @@ private class EvvoIsland[Sol]
 
   private val pop: Population[Sol] = StandardPopulation(fitnesses.map(serializationRoundtrip))
   private val creatorAgents = creators.map(c => CreatorAgent(serializationRoundtrip(c), pop))
-  private val mutatorAgents = mutators.map(m => MutatorAgent(serializationRoundtrip(m), pop))
+  private val mutatorAgents = mutators.map(m => ModifierAgent(serializationRoundtrip(m), pop))
   private val deletorAgents = deletors.map(d => DeletorAgent(serializationRoundtrip(d), pop))
 
   /** The list of all other islands, to send emigrating solutions to. */
@@ -62,12 +62,10 @@ private class EvvoIsland[Sol]
     Future {
       log.info(s"Island running with stopAfter=${stopAfter}")
 
-      // TODO can we put all of these in some combined pool? don't like having to manage each
       creatorAgents.foreach(_.start())
       mutatorAgents.foreach(_.start())
       deletorAgents.foreach(_.start())
 
-      // TODO this is not ideal. fix wait time/add features to termination criteria
       val startTime = Calendar.getInstance().toInstant.toEpochMilli
 
       while (startTime + stopAfter.time.toMillis >
@@ -140,7 +138,7 @@ object EvvoIsland {
 class LocalEvvoIsland[Sol]
 (
   creators: Vector[CreatorFunction[Sol]],
-  mutators: Vector[MutatorFunction[Sol]],
+  mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
   objectives: Vector[Objective[Sol]]
 )(
@@ -220,7 +218,7 @@ object LocalLogger extends LoggingAdapter {
 class RemoteEvvoIsland[Sol]
 (
   creators: Vector[CreatorFunction[Sol]],
-  mutators: Vector[MutatorFunction[Sol]],
+  mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
   objectives: Vector[Objective[Sol]]
 )
