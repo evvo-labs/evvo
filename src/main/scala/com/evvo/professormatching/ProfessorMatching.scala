@@ -98,8 +98,8 @@ object ProfessorMatching {
       .addObjective(new NumPrepsPreferences(idToProf, idToSection, idToSchedule))
       .addObjective(new ScheduleObjective(idToProf, idToSection, idToSchedule))
       .addCreator(new RandomScheduleCreator(idToProf, idToSection))
-      .addMutator(new SwapTwoCourses(idToProf))
-      .addMutator(new BalanceCourseload(idToProf))
+      .addModifier(new SwapTwoCourses(idToProf))
+      .addModifier(new BalanceCourseload(idToProf))
 
     val config = ConfigFactory
       .parseFile(new File("src/main/resources/application.conf"))
@@ -202,8 +202,8 @@ object ProfessorMatching {
 
   // =================================== MUTATOR ===================================================
   class SwapTwoCourses(idToProf: Map[ProfID, ProfPreferences])
-    extends MutatorFunction[PMSolution]("SwapTwo") {
-    override def mutate(sols: IndexedSeq[Scored[PMSolution]]): TraversableOnce[PMSolution] = {
+    extends ModifierFunction[PMSolution]("SwapTwo") {
+    override def modify(sols: IndexedSeq[Scored[PMSolution]]): TraversableOnce[PMSolution] = {
 
       def swap(sol: PMSolution): PMSolution = {
         val prof1: ProfPreferences = idToProf(randomKey(idToProf))
@@ -238,8 +238,8 @@ object ProfessorMatching {
   }
 
   class BalanceCourseload(idToProf: Map[ProfID, ProfPreferences])
-    extends MutatorFunction[PMSolution]("Balance") {
-    override def mutate(sols: IndexedSeq[Scored[PMSolution]]): TraversableOnce[PMSolution] = {
+    extends ModifierFunction[PMSolution]("Balance") {
+    override def modify(sols: IndexedSeq[Scored[PMSolution]]): TraversableOnce[PMSolution] = {
       def swap(sol: PMSolution): PMSolution = {
         val prof1: ProfPreferences = idToProf(randomKey(idToProf))
         val prof2: ProfPreferences = {

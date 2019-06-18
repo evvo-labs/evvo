@@ -111,7 +111,6 @@ class RemoteIslandManager[Sol](val numIslands: Int,
   }
 
   def runBlocking(stopAfter: StopAfter): Unit = {
-    // TODO replace Duration.Inf
     this.islandManager.runBlocking(stopAfter)
   }
 
@@ -153,7 +152,6 @@ class LocalIslandManager[Sol](val numIslands: Int,
   }
 
   def runBlocking(stopAfter: StopAfter): Unit = {
-    // TODO replace Duration.Inf
     this.islandManager.runBlocking(stopAfter)
   }
 

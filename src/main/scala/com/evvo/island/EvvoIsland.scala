@@ -19,7 +19,7 @@ import scala.concurrent.{Await, Future}
 class EvvoIsland[Sol]
 (
   creators: Vector[CreatorFunction[Sol]],
-  mutators: Vector[MutatorFunction[Sol]],
+  mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
   fitnesses: Vector[Objective[Sol]])
 (implicit log: LoggingAdapter)
@@ -40,7 +40,7 @@ class EvvoIsland[Sol]
 
   private val pop: Population[Sol] = StandardPopulation(fitnesses.map(serializationRoundtrip))
   private val creatorAgents = creators.map(c => CreatorAgent(serializationRoundtrip(c), pop))
-  private val mutatorAgents = mutators.map(m => MutatorAgent(serializationRoundtrip(m), pop))
+  private val mutatorAgents = mutators.map(m => ModifierAgent(serializationRoundtrip(m), pop))
   private val deletorAgents = deletors.map(d => DeletorAgent(serializationRoundtrip(d), pop))
 
   private var emigrationTargets: Seq[EvolutionaryProcess[Sol]] = Seq()
@@ -51,12 +51,10 @@ class EvvoIsland[Sol]
     Future {
       log.info(s"Island running with stopAfter=${stopAfter}")
 
-      // TODO can we put all of these in some combined pool? don't like having to manage each
       creatorAgents.foreach(_.start())
       mutatorAgents.foreach(_.start())
       deletorAgents.foreach(_.start())
 
-      // TODO this is not ideal. fix wait time/add features to termination criteria
       val startTime = Calendar.getInstance().toInstant.toEpochMilli
 
       while (startTime + stopAfter.time.toMillis >
@@ -117,27 +115,27 @@ object EvvoIsland {
 
 /**
   * @param creators   the functions to be used for creating new solutions.
-  * @param mutators   the functions to be used for creating new solutions from current solutions.
+  * @param modifiers   the functions to be used for creating new solutions from current solutions.
   * @param deletors   the functions to be used for deciding which solutions to delete.
   * @param objectives the objective functions to maximize.
   */
 case class EvvoIslandBuilder[Sol]
 (
   creators: Set[CreatorFunction[Sol]] = Set[CreatorFunction[Sol]](),
-  mutators: Set[MutatorFunction[Sol]] = Set[MutatorFunction[Sol]](),
+  modifiers: Set[ModifierFunction[Sol]] = Set[ModifierFunction[Sol]](),
   deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
   objectives: Set[Objective[Sol]] = Set[Objective[Sol]]()
 ) {
-  def addCreator(creatorFunc: CreatorFunction[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(creators = creators + creatorFunc)
+  def addCreator(creatorFunction: CreatorFunction[Sol]): EvvoIslandBuilder[Sol] = {
+    this.copy(creators = creators + creatorFunction)
   }
 
-  def addMutator(mutatorFunc: MutatorFunction[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(mutators = mutators + mutatorFunc)
+  def addModifier(modifierFunction: ModifierFunction[Sol]): EvvoIslandBuilder[Sol] = {
+    this.copy(modifiers = modifiers + modifierFunction)
   }
 
-  def addDeletor(deletorFunc: DeletorFunction[Sol]): EvvoIslandBuilder[Sol] = {
-    this.copy(deletors = deletors + deletorFunc)
+  def addDeletor(deleteFunctino: DeletorFunction[Sol]): EvvoIslandBuilder[Sol] = {
+    this.copy(deletors = deletors + deleteFunctino)
   }
 
   def addObjective(objective: Objective[Sol])
@@ -148,7 +146,7 @@ case class EvvoIslandBuilder[Sol]
   def toProps()(implicit system: ActorSystem): Props = {
     Props(new RemoteEvvoIsland[Sol](
       creators.toVector,
-      mutators.toVector,
+      modifiers.toVector,
       deletors.toVector,
       objectives.toVector))
   }
@@ -156,7 +154,7 @@ case class EvvoIslandBuilder[Sol]
   def buildLocalEvvo(): EvolutionaryProcess[Sol] = {
     new LocalEvvoIsland[Sol](
       creators.toVector,
-      mutators.toVector,
+      modifiers.toVector,
       deletors.toVector,
       objectives.toVector)
   }
@@ -172,7 +170,7 @@ case class EvvoIslandBuilder[Sol]
 class LocalEvvoIsland[Sol]
 (
   creators: Vector[CreatorFunction[Sol]],
-  mutators: Vector[MutatorFunction[Sol]],
+  mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
   objectives: Vector[Objective[Sol]]
 )(
@@ -258,7 +256,7 @@ object LocalLogger extends LoggingAdapter {
 class RemoteEvvoIsland[Sol]
 (
   creators: Vector[CreatorFunction[Sol]],
-  mutators: Vector[MutatorFunction[Sol]],
+  mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
   objectives: Vector[Objective[Sol]]
 )
