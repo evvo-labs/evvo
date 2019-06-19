@@ -12,14 +12,19 @@ trait EvolutionaryProcess[Sol] {
     * Run this island, until the specified termination criteria is met. This call will block
     * until the termination criteria is completed.
     *
-    * @return this
+    * @param stopAfter Specifies when to stop running the island.
     */
   def runBlocking(stopAfter: StopAfter): Unit
 
+  /**
+    * Starts this island running, then immediately returns.
+    * @param stopAfter Specifies when to stop running the island.
+    * @return A future that resolves after the island is done running.
+    */
   def runAsync(stopAfter: StopAfter): Future[Unit]
 
   /**
-    * @return the current pareto frontier of solutions on this island?
+    * @return the current pareto frontier of solutions on this island
     */
   def currentParetoFrontier(): ParetoFrontier[Sol]
 

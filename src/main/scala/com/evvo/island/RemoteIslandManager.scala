@@ -74,7 +74,7 @@ class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]])
   * Launches and manages multiple `EvvoIslandActor`s.
   */
 class RemoteIslandManager[Sol](val numIslands: Int,
-                               islandBuilder: EvvoIslandBuilder[Sol],
+                               islandBuilder: FinishedEvvoIslandBuilder[Sol],
                                val actorSystemName: String = "EvvoNode",
                                val userConfig: String = "src/main/resources/application.conf")
   extends EvolutionaryProcess[Sol] {
@@ -135,7 +135,7 @@ class RemoteIslandManager[Sol](val numIslands: Int,
   * Launches and manages multiple `LocalEvvoIsland`s.
   */
 class LocalIslandManager[Sol](val numIslands: Int,
-                              islandBuilder: EvvoIslandBuilder[Sol])
+                              islandBuilder: FinishedEvvoIslandBuilder[Sol])
   extends EvolutionaryProcess[Sol] {
 
   private val islands: IndexedSeq[EvolutionaryProcess[Sol]] =
