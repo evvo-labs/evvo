@@ -1,6 +1,6 @@
-package com.evvo.professormatching
+package com.evvo.examples.professormatching
 
-import com.evvo.professormatching.ProfessorMatching._
+import com.evvo.examples.professormatching.ProfessorMatching._
 import io.circe.generic.auto._
 import io.circe.parser._
 

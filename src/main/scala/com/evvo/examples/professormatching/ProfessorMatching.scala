@@ -1,4 +1,4 @@
-package com.evvo.professormatching
+package com.evvo.examples.professormatching
 
 import java.io.File
 import java.time.LocalTime.parse
