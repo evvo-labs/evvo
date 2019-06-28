@@ -37,6 +37,10 @@
     <buffered bufClass="com.evvo.agent.ModifierFunctionTest" />
     <buffered bufClass="com.evvo.agent.MutatorFunctionTest" />
     <buffered bufClass="com.evvo.agent.MutatorFunctionTest" />
+    <buffered bufClass="com.evvo.agent.defaults.BitflipperTest" />
+    <buffered bufClass="com.evvo.agent.defaults.BitflipperTest" />
+    <buffered bufClass="com.evvo.agent.defaults.DeleteDominatedTest" />
+    <buffered bufClass="com.evvo.agent.defaults.DeleteDominatedTest" />
     <buffered bufClass="com.evvo.integration.LocalEvvoTest" />
     <buffered bufClass="com.evvo.integration.LocalEvvoTest" />
     <buffered bufClass="com.evvo.integration.LocalIslandManagerTest" />
