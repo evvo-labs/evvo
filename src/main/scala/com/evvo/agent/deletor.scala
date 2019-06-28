@@ -4,6 +4,10 @@ import akka.event.LoggingAdapter
 import com.evvo.island.population.Population
 import scala.concurrent.duration._
 
+/**
+  * Deletes solutions from the population.
+  * @param delete A function that, given a set of solutions, tells you which to delete.
+  */
 case class DeletorAgent[Sol](delete: DeletorFunction[Sol],
                              population: Population[Sol],
                              strategy: AgentStrategy = DeletorAgentDefaultStrategy())
