@@ -13,7 +13,7 @@ trait Agent[Sol] {
 
   def stop(): Unit
 
-  protected def numInvocations: Int
+  def numInvocations: Int
 }
 
 /**
@@ -33,7 +33,7 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
   extends Agent[Sol] {
 
   /** The number of  times this agent has run its function. */
-  protected var numInvocations: Int = 0
+  var numInvocations: Int = 0
 
   // consider factoring this out into a separate component and using
   // composition instead of inheriting a thread field. This will reduce the
