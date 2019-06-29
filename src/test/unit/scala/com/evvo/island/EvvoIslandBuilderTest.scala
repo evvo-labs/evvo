@@ -6,17 +6,17 @@ import org.scalatest.{Matchers, WordSpec}
 
 class EvvoIslandBuilderTest extends WordSpec with Matchers {
   "EvvoIslandBuilders" should {
+    val completeBuilder = EvvoIsland.builder[Bitstring]()
+      .addObjective(new Objective[Bitstring]("Three", Maximize) {
+        override protected def objective(sol: Bitstring): Double = 3d
+      })
+      .addCreator(BitstringGenerator(length=16))
+      .addModifier(Bitflipper())
+      .addDeletor(DeleteDominated())
+      .withImmigrationStrategy(ElitistImmigrationStrategy)
+
     "be able to produce LocalIslands" in {
-
-      val builder = EvvoIsland.builder[Bitstring]()
-        .addObjective(new Objective[Bitstring]("Three", Maximize) {
-          override protected def objective(sol: Bitstring): Double = 3d
-        })
-        .addCreator(BitstringGenerator(length=16))
-        .addModifier(Bitflipper())
-        .addDeletor(DeleteDominated())
-
-      builder.buildLocalEvvo()
+      completeBuilder.buildLocalEvvo()
     }
 
     "allow adding items in any order" in {
@@ -29,6 +29,17 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
         .addModifier(Bitflipper())
 
       builder.buildLocalEvvo()
+    }
+
+    "allow building without immigration strategy" in {
+      EvvoIsland.builder[Bitstring]()
+        .addObjective(new Objective[Bitstring]("Three", Maximize) {
+          override protected def objective(sol: Bitstring): Double = 3d
+        })
+        .addCreator(BitstringGenerator(length=16))
+        .addModifier(Bitflipper())
+        .addDeletor(DeleteDominated())
+        .buildLocalEvvo()
     }
 
     "require at least one Objective, Creator, Mutator, Deletor" in {

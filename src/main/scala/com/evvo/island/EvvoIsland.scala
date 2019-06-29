@@ -21,7 +21,8 @@ private class EvvoIsland[Sol]
   creators: Vector[CreatorFunction[Sol]],
   mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
-  fitnesses: Vector[Objective[Sol]])
+  fitnesses: Vector[Objective[Sol]],
+  immigrationStrategy: ImmigrationStrategy)
 (implicit log: LoggingAdapter)
   extends EvolutionaryProcess[Sol] {
 
@@ -140,7 +141,8 @@ class LocalEvvoIsland[Sol]
   creators: Vector[CreatorFunction[Sol]],
   mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
-  objectives: Vector[Objective[Sol]]
+  objectives: Vector[Objective[Sol]],
+  immigrationStrategy: ImmigrationStrategy
 )(
   implicit val log: LoggingAdapter = LocalLogger
 ) extends EvolutionaryProcess[Sol] {
@@ -148,7 +150,8 @@ class LocalEvvoIsland[Sol]
     creators,
     mutators,
     deletors,
-    objectives)
+    objectives,
+    immigrationStrategy)
 
   override def runBlocking(stopAfter: StopAfter): Unit = {
     island.runBlocking(stopAfter)
@@ -220,7 +223,8 @@ class RemoteEvvoIsland[Sol]
   creators: Vector[CreatorFunction[Sol]],
   mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
-  objectives: Vector[Objective[Sol]]
+  objectives: Vector[Objective[Sol]],
+  immigrationStrategy: ImmigrationStrategy
 )
   extends Actor with EvolutionaryProcess[Sol] with ActorLogging {
   // for messages, which are case classes defined within RemoteEvvoIsland's companion objeect
@@ -232,7 +236,8 @@ class RemoteEvvoIsland[Sol]
     creators,
     mutators,
     deletors,
-    objectives)
+    objectives,
+    immigrationStrategy)
 
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.runBlocking(t)
