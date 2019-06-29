@@ -3,10 +3,9 @@ package com.evvo.integration
 import com.evvo.NullLogger
 import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.agent.{CreatorFunction, MutatorFunction}
-import com.evvo.integration.LocalEvvoTestFixtures.{Creator, Mutator, NumInversions, Solution}
-import com.evvo.island.population.{Minimize, Objective, Scored}
-import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter, UnfinishedEvvoIslandBuilder}
-import com.evvo.island.population.{Minimize, Objective}
+import com.evvo.integration.LocalEvvoTestFixtures.{NumInversions, ReverseListCreator, Solution, SwapTwoElementsModifier}
+import com.evvo.island.population.{Maximize, Minimize, Objective, ParetoFrontier}
+import com.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import com.evvo.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
 
@@ -30,8 +29,8 @@ class LocalEvvoTest extends WordSpec with Matchers {
   def getEvvo(listLength: Int): EvolutionaryProcess[Solution] = {
 
     val islandBuilder = EvvoIslandBuilder[Solution]()
-      .addCreator(new Creator(listLength))
-      .addModifier(new Mutator())
+      .addCreator(new ReverseListCreator(listLength))
+      .addModifier(new SwapTwoElementsModifier())
       .addDeletor(DeleteWorstHalfByRandomObjective())
       .addObjective(new NumInversions())
 
@@ -48,12 +47,8 @@ class LocalEvvoTest extends WordSpec with Matchers {
 
       val evvo = getEvvo(listLength)
       evvo.runBlocking(terminate)
-      val pareto: Set[Solution] = evvo
-        .currentParetoFrontier()
-        .solutions
-        .map(_.solution)
-      pareto should contain(1 to listLength toList)
-      pareto.size shouldBe 1
+      val pareto: ParetoFrontier[Solution] = evvo.currentParetoFrontier()
+      assert(pareto.solutions.exists(_.score(("Inversions", Minimize)) == 0d))
     }
   }
 }
@@ -62,26 +57,36 @@ class LocalEvvoTest extends WordSpec with Matchers {
 object LocalEvvoTestFixtures {
   type Solution = List[Int]
 
-  class Creator(listLength: Int) extends CreatorFunction[Solution]("Creator") {
+  class ReverseListCreator(listLength: Int)
+    extends CreatorFunction[Solution]("ReverseCreator") {
     override def create(): TraversableOnce[Solution] = {
       Vector((listLength to 1 by -1).toList)
     }
   }
 
-  class Mutator extends MutatorFunction[Solution]("Modifier") {
+  class SwapTwoElementsModifier extends MutatorFunction[Solution]("SwapTwo") {
     override def mutate(sol: Solution): Solution = {
       val i = util.Random.nextInt(sol.length)
       val j = util.Random.nextInt(sol.length)
-      val tmp = sol(j)
-      sol.updated(j, sol(i)).updated(i, tmp)
+      sol.updated(j, sol(i)).updated(i, sol(j))
     }
   }
 
   class NumInversions extends Objective[Solution]("Inversions", Minimize) {
     override protected def objective(sol: Solution): Double = {
-      (for ((elem, index) <- sol.zipWithIndex) yield {
-        sol.drop(index).count(_ < elem)
-      }).sum
+      // Old way of doing it: still works, but more clear with tails: left for clarity
+      //      (for ((elem, index) <- sol.zipWithIndex) yield {
+      //        sol.drop(index).count(_ < elem)
+      //      }).sum
+
+      // For each item, add the number of elements in the rest of the list less than this item.
+      // Once you're at the last item, make no change.
+      sol.tails.foldRight(0d)((list, numInversionsSoFar) => {
+        list match {
+          case item :: rest => numInversionsSoFar + rest.count(_ < item)
+          case _ => numInversionsSoFar
+        }
+      })
     }
   }
 }
