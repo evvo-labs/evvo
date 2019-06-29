@@ -41,6 +41,10 @@
     <buffered bufClass="com.evvo.integration.LocalEvvoTest" />
     <buffered bufClass="com.evvo.integration.LocalIslandManagerTest" />
     <buffered bufClass="com.evvo.integration.LocalIslandManagerTest" />
+    <buffered bufClass="com.evvo.island.AllowAllImmigrationStrategyTest" />
+    <buffered bufClass="com.evvo.island.AllowAllImmigrationStrategyTest" />
+    <buffered bufClass="com.evvo.island.ElitistImmigrationStrategyTest" />
+    <buffered bufClass="com.evvo.island.ElitistImmigrationStrategyTest" />
     <buffered bufClass="com.evvo.island.EvvoIslandBuilderTest" />
     <buffered bufClass="com.evvo.island.EvvoIslandBuilderTest" />
     <buffered bufClass="com.evvo.island.population.StandardPopulationTest" />
