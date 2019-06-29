@@ -15,8 +15,8 @@
     <setting name="package" value="" />
     <buffered bufClass="com.evvo.ParetoFrontierTest" />
     <buffered bufClass="com.evvo.ParetoFrontierTest" />
-    <buffered bufClass="com.evvo.ScoreHashingTest" />
-    <buffered bufClass="com.evvo.ScoreHashingTest" />
+    <buffered bufClass="com.evvo.ScoredTest" />
+    <buffered bufClass="com.evvo.ScoredTest" />
     <buffered bufClass="com.evvo.agent.AgentPropertiesTest" />
     <buffered bufClass="com.evvo.agent.AgentPropertiesTest" />
     <buffered bufClass="com.evvo.agent.CreatorAgentDefaultStrategyTest" />
