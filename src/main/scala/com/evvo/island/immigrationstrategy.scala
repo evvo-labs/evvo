@@ -13,16 +13,16 @@ trait ImmigrationStrategy {
     * @param population The current population.
     * @return The set of solutions which should be added to the population.
     */
-  def filter[Sol](immigrants: IndexedSeq[Scored[Sol]], population: Population[Sol])
-  : IndexedSeq[Scored[Sol]]
+  def filter[Sol](immigrants: Seq[Scored[Sol]], population: Population[Sol])
+  : Seq[Scored[Sol]]
 }
 
 /**
   * Only allows new immigrants if they would advance the Pareto frontier on the island.
   */
 object ElitistImmigrationStrategy extends ImmigrationStrategy {
-  override def filter[Sol](immigrants: IndexedSeq[Scored[Sol]], population: Population[Sol])
-  : IndexedSeq[Scored[Sol]] = {
+  override def filter[Sol](immigrants: Seq[Scored[Sol]], population: Population[Sol])
+  : Seq[Scored[Sol]] = {
     val currentParetoFrontier = population.getParetoFrontier()
     // Remove the solutions that the pareto frontier dominates, leaving the "Elites".
     immigrants.filter(currentParetoFrontier.dominatedBy)
@@ -33,7 +33,7 @@ object ElitistImmigrationStrategy extends ImmigrationStrategy {
   *
   */
 object AllowAllImmigrationStrategy extends ImmigrationStrategy {
-  override def filter[Sol](immigrants: IndexedSeq[Scored[Sol]], population: Population[Sol])
-  : IndexedSeq[Scored[Sol]] =
+  override def filter[Sol](immigrants: Seq[Scored[Sol]], population: Population[Sol])
+  : Seq[Scored[Sol]] =
     immigrants
 }

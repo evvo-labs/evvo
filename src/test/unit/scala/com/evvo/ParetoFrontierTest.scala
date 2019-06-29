@@ -45,5 +45,30 @@ class ParetoFrontierTest extends WordSpec with Matchers {
       maxParetoFrontier should not contain(lowMaxSolution)
       maxParetoFrontier should contain(highMaxSolution)
     }
+
+    "Always be dominated if empty" in {
+      assert(ParetoFrontier[String](Set()).dominatedBy(Scored(Map(("a", Maximize) -> 0), "test")))
+    }
+
+    "Never dominate if empty" in {
+      assert(!ParetoFrontier[String](Set()).dominates(Scored(Map(("a", Maximize) -> 0), "test")))
+    }
+
+    // A Pareto Frontier with just 3
+    val sol3 = Scored(Map(("a", Maximize) -> 3), "str")
+    val pf3 = ParetoFrontier[String](Set(sol3))
+
+    "Dominate points that would not be on the Pareto frontier if added" in {
+      assert(pf3.dominates(Scored(Map(("a", Maximize) -> 2), "str")))
+    }
+
+    "Be dominated by points that would extend the Pareto frontier if added" in {
+      assert(pf3.dominates(Scored(Map(("a", Maximize) -> 2), "str")))
+    }
+
+    "Not dominate or be dominated by points that are on the Pareto frontier exactly" in {
+      assert(!pf3.dominates(sol3))
+      assert(!pf3.dominatedBy(sol3))
+    }
   }
 }

@@ -9,7 +9,7 @@ import com.typesafe.config.ConfigFactory
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.{Duration, _}
+import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 /**
@@ -53,7 +53,7 @@ class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]])
     }
   }
 
-  override def immigrate(solutions: Seq[Sol]): Unit = {
+  override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     this.islands.foreach(_.immigrate(solutions))
   }
 
@@ -102,7 +102,7 @@ class RemoteIslandManager[Sol](val numIslands: Int,
 
   val islandManager = new IslandManager[Sol](islands)
 
-  def immigrate(solutions: Seq[Sol]): Unit = {
+  def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     this.islandManager.immigrate(solutions)
   }
 
@@ -143,7 +143,7 @@ class LocalIslandManager[Sol](val numIslands: Int,
 
   val islandManager = new IslandManager[Sol](islands)
 
-  def immigrate(solutions: Seq[Sol]): Unit = {
+  def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     this.islandManager.immigrate(solutions)
   }
 

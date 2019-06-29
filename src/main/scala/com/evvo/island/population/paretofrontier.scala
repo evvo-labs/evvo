@@ -28,7 +28,7 @@ case class ParetoFrontier[Sol](solutions: Set[Scored[Sol]]) {
 
   /** @return Whether this Pareto frontier is domianted by the given solution. */
   def dominatedBy(sol: Scored[Sol]): Boolean = {
-    this.solutions.exists(sol.dominates)
+    this.solutions.isEmpty || this.solutions.exists(sol.dominates)
   }
 }
 
