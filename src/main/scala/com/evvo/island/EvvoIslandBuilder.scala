@@ -35,8 +35,10 @@ case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeleto
   modifiers: Set[ModifierFunction[Sol]] = Set[ModifierFunction[Sol]](),
   deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
   objectives: Set[Objective[Sol]] = Set[Objective[Sol]](),
-  immigrationStrategy: ImmigrationStrategy = AllowAllImmigrationStrategy
+  immigrationStrategy: ImmigrationStrategy = AllowAllImmigrationStrategy,
+  emigrationStrategy: EmigrationStrategy = RandomSampleEmigrationStrategy(4)
 ) {
+
   def addCreator(creatorFunc: CreatorFunction[Sol]):
   UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(creators = creators + creatorFunc)
@@ -73,7 +75,8 @@ case class FinishedEvvoIslandBuilder[Sol]
   modifiers: Set[ModifierFunction[Sol]],
   deletors: Set[DeletorFunction[Sol]],
   objectives: Set[Objective[Sol]],
-  immigrationStrategy: ImmigrationStrategy
+  immigrationStrategy: ImmigrationStrategy,
+  emigrationStrategy: EmigrationStrategy
 ) {
   assert(creators.nonEmpty)
   assert(modifiers.nonEmpty)
@@ -86,7 +89,8 @@ case class FinishedEvvoIslandBuilder[Sol]
       modifiers.toVector,
       deletors.toVector,
       objectives.toVector,
-      immigrationStrategy))
+      immigrationStrategy,
+      emigrationStrategy))
   }
 
   def buildLocalEvvo(): EvolutionaryProcess[Sol] = {
@@ -95,7 +99,8 @@ case class FinishedEvvoIslandBuilder[Sol]
       modifiers.toVector,
       deletors.toVector,
       objectives.toVector,
-      immigrationStrategy)
+      immigrationStrategy,
+      emigrationStrategy)
   }
 }
 
@@ -122,7 +127,8 @@ object EvvoIslandBuilder {
       builder.modifiers,
       builder.deletors,
       builder.objectives,
-      builder.immigrationStrategy)
+      builder.immigrationStrategy,
+      builder.emigrationStrategy)
   }
 
   // Whether the builder has something or not, used in type parameters.

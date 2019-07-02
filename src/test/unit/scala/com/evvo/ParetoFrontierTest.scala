@@ -63,7 +63,7 @@ class ParetoFrontierTest extends WordSpec with Matchers {
     }
 
     "Be dominated by points that would extend the Pareto frontier if added" in {
-      assert(pf3.dominates(Scored(Map(("a", Maximize) -> 2), "str")))
+      assert(pf3.dominatedBy(Scored(Map(("a", Maximize) -> 4), "str")))
     }
 
     "Not dominate or be dominated by points that are on the Pareto frontier exactly" in {

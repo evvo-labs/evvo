@@ -22,7 +22,8 @@ private class EvvoIsland[Sol]
   mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
   fitnesses: Vector[Objective[Sol]],
-  immigrationStrategy: ImmigrationStrategy)
+  immigrationStrategy: ImmigrationStrategy,
+  emigrationStrategy: EmigrationStrategy)
 (implicit log: LoggingAdapter)
   extends EvolutionaryProcess[Sol] {
 
@@ -114,7 +115,9 @@ private class EvvoIsland[Sol]
     if (emigrationTargets.isEmpty) {
       log.info("Trying to emigrate without any emigration targets")
     } else {
-      val emigrants = this.pop.getSolutions(4)
+      val emigrants = emigrationStrategy.chooseSolutions(this.pop)
+
+      // Hardcoded to round robin for now - will be updated when we add network topology.
       this.emigrationTargets(currentEmigrationTargetIndex).immigrate(emigrants)
       currentEmigrationTargetIndex = (currentEmigrationTargetIndex + 1) % emigrationTargets.length
     }
@@ -143,7 +146,8 @@ class LocalEvvoIsland[Sol]
   mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
   objectives: Vector[Objective[Sol]],
-  immigrationStrategy: ImmigrationStrategy
+  immigrationStrategy: ImmigrationStrategy,
+  emigrationStrategy: EmigrationStrategy
 )(
   implicit val log: LoggingAdapter = LocalLogger
 ) extends EvolutionaryProcess[Sol] {
@@ -152,7 +156,8 @@ class LocalEvvoIsland[Sol]
     mutators,
     deletors,
     objectives,
-    immigrationStrategy)
+    immigrationStrategy,
+    emigrationStrategy)
 
   override def runBlocking(stopAfter: StopAfter): Unit = {
     island.runBlocking(stopAfter)
@@ -225,7 +230,8 @@ class RemoteEvvoIsland[Sol]
   mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
   objectives: Vector[Objective[Sol]],
-  immigrationStrategy: ImmigrationStrategy
+  immigrationStrategy: ImmigrationStrategy,
+  emigrationStrategy: EmigrationStrategy
 )
   extends Actor with EvolutionaryProcess[Sol] with ActorLogging {
   // for messages, which are case classes defined within RemoteEvvoIsland's companion objeect
@@ -238,7 +244,8 @@ class RemoteEvvoIsland[Sol]
     mutators,
     deletors,
     objectives,
-    immigrationStrategy)
+    immigrationStrategy,
+    emigrationStrategy)
 
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.runBlocking(t)
