@@ -19,11 +19,11 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
-        <scala.compat.version>2.12</scala.compat.version>
-        <scala.version>${scala.compat.version}.6</scala.version>
+        <scala.compat.version>2.13</scala.compat.version>
+        <scala.version>${scala.compat.version}.0</scala.version>
         <spec2.version>4.2.0</spec2.version>
-        <akka.version>2.5.22</akka.version>
-        <circe.version>0.11.1</circe.version>
+        <akka.version>2.5.23</akka.version>
+        <json4s.version>3.6.7</json4s.version>
     </properties>
 
     <dependencies>
@@ -64,22 +64,9 @@
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.compat.version}</artifactId>
-            <version>3.0.5</version>
+            <version>3.0.8</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.specs2</groupId>
-            <artifactId>specs2-core_${scala.compat.version}</artifactId>
-            <version>${spec2.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.specs2</groupId>
-            <artifactId>specs2-junit_${scala.compat.version}</artifactId>
-            <version>${spec2.version}</version>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -87,19 +74,14 @@
         </dependency>
 
         <dependency>
-            <groupId>io.circe</groupId>
-            <artifactId>circe-core_${scala.compat.version}</artifactId>
-            <version>${circe.version}</version>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-native_${scala.compat.version}</artifactId>
+            <version>${json4s.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.circe</groupId>
-            <artifactId>circe-parser_${scala.compat.version}</artifactId>
-            <version>${circe.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.circe</groupId>
-            <artifactId>circe-generic_${scala.compat.version}</artifactId>
-            <version>${circe.version}</version>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-jackson_${scala.compat.version}</artifactId>
+            <version>${json4s.version}</version>
         </dependency>
     </dependencies>
 
