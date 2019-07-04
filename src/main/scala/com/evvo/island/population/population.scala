@@ -62,7 +62,7 @@ case class StandardPopulation[Sol](objectivesIter: Iterable[Objective[Sol]],
                                   (implicit val logger: LoggingAdapter)
   extends Population[Sol] {
   private val objectives = objectivesIter.iterator.toSet
-  private var population = mutable.ParSet[Scored[Sol]]()
+  private var population = Set[Scored[Sol]]()
 
   override def addSolutions(solutions: Iterable[Sol]): Unit = {
     population ++= solutions.iterator.map(score)
@@ -70,29 +70,29 @@ case class StandardPopulation[Sol](objectivesIter: Iterable[Objective[Sol]],
   }
 
   private def score(solution: Sol): Scored[Sol] = {
-    val scores = objectives.map(func =>
+    val scores = this.objectives.map(func =>
       (func.name, func.optimizationDirection) -> func.score(solution)
     ).toMap
     val out = Scored(scores, solution, hashing)
-    logger.debug(s"${this}: created $out")
+    logger.debug(s"StandardPopulation: created $out")
     out
   }
-  
-  override def getSolutions(n: Int): Vector[Scored[Sol]] = {
-    util.Random.shuffle(population.toVector).take(n)
+
+  override def getSolutions(n: Int): IndexedSeq[Scored[Sol]] = {
+    util.Random.shuffle(this.population.toVector).take(n)
   }
 
   override def deleteSolutions(solutions: Iterable[Scored[Sol]]): Unit = {
-    population --= solutions
+    this.population --= solutions
   }
 
   override def getParetoFrontier(): ParetoFrontier[Sol] = {
-    ParetoFrontier(this.population.seq.toSet)
+    ParetoFrontier(this.population)
   }
 
   override def getInformation(): PopulationInformation = {
-    val out = PopulationInformation(population.size)
-    logger.debug(s"getInformation returning ${out}")
+    val out = PopulationInformation(this.population.size)
+    logger.debug(s"StandardPopulation: getInformation returning ${out}")
     out
   }
 }
