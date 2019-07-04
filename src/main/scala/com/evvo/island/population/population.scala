@@ -3,7 +3,7 @@ package com.evvo.island.population
 import akka.event.LoggingAdapter
 import com.evvo.agent.PopulationInformation
 
-import scala.collection.{TraversableOnce, mutable}
+import scala.collection.parallel.mutable
 
 
 /**
@@ -21,7 +21,7 @@ trait Population[Sol] {
     *
     * @param solutions the solutions to add
     */
-  def addSolutions(solutions: TraversableOnce[Sol]): Unit
+  def addSolutions(solutions: Iterable[Sol]): Unit
 
   /**
     * Selects a random sample of the population.
@@ -39,7 +39,7 @@ trait Population[Sol] {
     *
     * @param solutions the solutions to remove
     */
-  def deleteSolutions(solutions: TraversableOnce[Scored[Sol]]): Unit
+  def deleteSolutions(solutions: Iterable[Scored[Sol]]): Unit
 
   /**
     * @return the current pareto frontier of this population
@@ -57,16 +57,16 @@ trait Population[Sol] {
   *
   * @tparam Sol the type of the solutions in the population
   */
-case class StandardPopulation[Sol](objectivesIter: TraversableOnce[Objective[Sol]],
+case class StandardPopulation[Sol](objectivesIter: Iterable[Objective[Sol]],
                                    hashing: HashingStrategy.Value = HashingStrategy.ON_SCORES)
                                   (implicit val logger: LoggingAdapter)
   extends Population[Sol] {
-  private val objectives = objectivesIter.toSet
-  private var population = mutable.Set[Scored[Sol]]()
+  private val objectives = objectivesIter.iterator.toSet
+  private var population = mutable.ParSet[Scored[Sol]]()
 
-  override def addSolutions(solutions: TraversableOnce[Sol]): Unit = {
-    population ++= solutions.map(score)
-    logger.debug(f"Added ${solutions.size} solutions, new population size ${population.size}")
+  override def addSolutions(solutions: Iterable[Sol]): Unit = {
+    population ++= solutions.iterator.map(score)
+    logger.debug(f"Added ${solutions.iterator.size} solutions, new population size ${population.size}")
   }
 
   private def score(solution: Sol): Scored[Sol] = {
@@ -77,18 +77,17 @@ case class StandardPopulation[Sol](objectivesIter: TraversableOnce[Objective[Sol
     logger.debug(s"${this}: created $out")
     out
   }
-
-
+  
   override def getSolutions(n: Int): Vector[Scored[Sol]] = {
     util.Random.shuffle(population.toVector).take(n)
   }
 
-  override def deleteSolutions(solutions: TraversableOnce[Scored[Sol]]): Unit = {
+  override def deleteSolutions(solutions: Iterable[Scored[Sol]]): Unit = {
     population --= solutions
   }
 
   override def getParetoFrontier(): ParetoFrontier[Sol] = {
-    ParetoFrontier(this.population.toSet)
+    ParetoFrontier(this.population.seq.toSet)
   }
 
   override def getInformation(): PopulationInformation = {

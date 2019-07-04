@@ -7,10 +7,10 @@ import akka.remote.RemoteScope
 import com.evvo.island.population.{ParetoFrontier, Scored}
 import com.typesafe.config.ConfigFactory
 
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.{Duration, _}
+import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.jdk.CollectionConverters._
 
 /**
   * Common component implementing management of islands.

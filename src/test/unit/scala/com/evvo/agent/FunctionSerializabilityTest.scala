@@ -6,7 +6,7 @@ import com.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import com.evvo.island.population.Scored
 import org.scalatest.{Matchers, WordSpec}
 
-import scala.collection.TraversableOnce
+import scala.collection.Iterable
 
 /**
   * Creator, Mutator, and Deletor Functions all have to be serializable for akka actor
@@ -35,17 +35,17 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
   "Creator, Mutator, and Deletor Functions" should {
     "be serializable when extended as anonymous classes" in {
       val c = new CreatorFunction[Double]("c") {
-        override def create(): TraversableOnce[Double] = Vector(3)
+        override def create(): Iterable[Double] = Vector(3)
       }
 
       val m = new ModifierFunction[Double]("m") {
-        override def modify(sols: IndexedSeq[Scored[Double]]): TraversableOnce[Double] = {
+        override def modify(sols: IndexedSeq[Scored[Double]]): Iterable[Double] = {
           Vector(sols.head.solution)
         }
       }
 
       val d = new DeletorFunction[Double]("d") {
-        override def delete(sols: IndexedSeq[Scored[Double]]): TraversableOnce[Scored[Double]] = {
+        override def delete(sols: IndexedSeq[Scored[Double]]): Iterable[Scored[Double]] = {
           sols.take(sols.length / 2)
         }
       }
@@ -57,17 +57,17 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
 
     "be serializable when operating on base types" in {
       class C extends CreatorFunction[Double]("c") {
-        override def create(): TraversableOnce[Double] = Vector(3)
+        override def create(): Iterable[Double] = Vector(3)
       }
 
       class M extends ModifierFunction[Double]("d") {
-        override def modify(sols: IndexedSeq[Scored[Double]]): TraversableOnce[Double] = {
+        override def modify(sols: IndexedSeq[Scored[Double]]): Iterable[Double] = {
           Vector(sols.head.solution)
         }
       }
 
       class D extends DeletorFunction[Double]("m") {
-        override def delete(sols: IndexedSeq[Scored[Double]]): TraversableOnce[Scored[Double]] = {
+        override def delete(sols: IndexedSeq[Scored[Double]]): Iterable[Scored[Double]] = {
           sols.take(sols.length / 2)
         }
       }
@@ -81,7 +81,7 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
 
       type G = Set[Option[Double]]
       class C extends CreatorFunction[G]("c") {
-        override def create(): TraversableOnce[G] = Vector(Set(Some(3)), Set(None, Some(5d)))
+        override def create(): Iterable[G] = Vector(Set(Some(3)), Set(None, Some(5d)))
       }
 
       class M extends MutatorFunction[G]("d") {
@@ -91,7 +91,7 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
       }
 
       class D extends DeletorFunction[G]("m") {
-        override def delete(sols: IndexedSeq[Scored[G]]): TraversableOnce[Scored[G]] = {
+        override def delete(sols: IndexedSeq[Scored[G]]): Iterable[Scored[G]] = {
           sols.take(sols.length / 2)
         }
       }
@@ -108,7 +108,7 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
       // in
 
       class C extends CreatorFunction[CC]("c") {
-        override def create(): TraversableOnce[CC] = Vector(CC(List(3)))
+        override def create(): Iterable[CC] = Vector(CC(List(3)))
       }
 
       class M extends MutatorFunction[CC]("d") {
@@ -118,7 +118,7 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
       }
 
       class D extends DeletorFunction[CC]("m") {
-        override def delete(sols: IndexedSeq[Scored[CC]]): TraversableOnce[Scored[CC]] = {
+        override def delete(sols: IndexedSeq[Scored[CC]]): Iterable[Scored[CC]] = {
           sols.take(sols.length / 2)
         }
       }
@@ -133,7 +133,7 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
       // Clazz is defined at the bottom of this file. See case class test for reasoning.
 
       class C extends CreatorFunction[Clazz]("c") with Serializable {
-        override def create(): TraversableOnce[Clazz] = Vector(new Clazz(5))
+        override def create(): Iterable[Clazz] = Vector(new Clazz(5))
       }
 
       class M extends MutatorFunction[Clazz]("d") {
@@ -143,7 +143,7 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
       }
 
       class D extends DeletorFunction[Clazz]("m") {
-        override def delete(sols: IndexedSeq[Scored[Clazz]]): TraversableOnce[Scored[Clazz]] = {
+        override def delete(sols: IndexedSeq[Scored[Clazz]]): Iterable[Scored[Clazz]] = {
           sols.take(sols.length / 2)
         }
       }

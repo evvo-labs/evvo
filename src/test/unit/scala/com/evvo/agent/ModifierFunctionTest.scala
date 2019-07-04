@@ -8,7 +8,7 @@ class ModifierFunctionTest extends WordSpec{
     "call its function on the input set" in {
 
       val modifier = new ModifierFunction[Double]("Modifier") {
-        override def modify(sols: IndexedSeq[Scored[Double]]): TraversableOnce[Double] = {
+        override def modify(sols: IndexedSeq[Scored[Double]]): Iterable[Double] = {
           Vector(3)
         }
       }

@@ -32,6 +32,11 @@
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-parallel-collections_${scala.compat.version}</artifactId>
+            <version>0.2.0</version>
+        </dependency>
 
         <!-- Akka -->
         <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-cluster -->
@@ -105,6 +110,7 @@
                             <args>
                                 <arg>-dependencyfile</arg>
                                 <arg>${project.build.directory}/.scala_dependencies</arg>
+                                <arg>-deprecation</arg>
                             </args>
                         </configuration>
                     </execution>

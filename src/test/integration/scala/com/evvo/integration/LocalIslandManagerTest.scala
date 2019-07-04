@@ -28,7 +28,7 @@ class LocalIslandManagerTest extends WordSpec with Matchers {
       }
 
       val creator = new CreatorFunction[Solution]("create") {
-        override def create(): TraversableOnce[Solution] = Vector("evvo")
+        override def create(): Iterable[Solution] = Vector("evvo")
       }
 
       val mutator = new MutatorFunction[Solution]("mutate") {

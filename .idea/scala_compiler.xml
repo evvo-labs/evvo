@@ -9,6 +9,7 @@
       </parameters>
     </profile>
     <profile name="Maven 2" modules="evvo">
+      <option name="deprecationWarnings" value="true" />
       <parameters>
         <parameter value="-dependencyfile" />
         <parameter value="$PROJECT_DIR$/target/.scala_dependencies" />

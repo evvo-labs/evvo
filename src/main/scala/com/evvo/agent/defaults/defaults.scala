@@ -54,7 +54,7 @@ case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 3
   */
 case class BitstringGenerator(length: Int, proportionOnes: Double = 0.5)
   extends CreatorFunction[Bitstring]("BitstringGenerator") {
-  override def create(): TraversableOnce[Seq[Boolean]] = {
+  override def create(): Iterable[Seq[Boolean]] = {
     Vector.fill(32)(Vector.fill(length)(util.Random.nextDouble() < proportionOnes))
   }
 }
