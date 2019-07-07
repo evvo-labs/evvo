@@ -1,24 +1,28 @@
 
 package com.evvo.examples.tsp
 
-import com.evvo.agent.{CreatorFunction, MutatorFunction}
-import com.evvo.island.population.{Minimize, Objective}
+import com.evvo.agent.{CreatorFunction, CrossoverFunction, ModifierFunction, MutatorFunction}
+import com.evvo.island.population.{Minimize, Objective, Scored}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-
-case class CostObjective(override val name: String, distances: CostMatrix)
-  extends Objective[TSPSolution](name, Minimize) {
-  override protected def objective(sol: TSPSolution): Double = {
-    sol.sliding(2).map { case Vector(u, v) => distances(u, v) }.sum + distances(sol.last, sol.head)
+/**
+  * An objective in TSP2.
+  * @param name                  the name of this objective
+  * @param cost The cost of getting from each city to each city.
+  */
+case class CostObjective(override val name: String, cost: CostMatrix)
+  extends Objective[Tour](name, Minimize) {
+  override protected def objective(sol: Tour): Double = {
+    sol.sliding(2).map { case Vector(u, v) => cost(u, v) }.sum + cost(sol.last, sol.head)
   }
 }
 
 case class RandomTourCreator(numCities: Int, numSolutions: Int = 10)
-  extends CreatorFunction[TSPSolution]("RandomTourCreator") {
-  override def create(): TraversableOnce[TSPSolution] = {
-    Vector.fill(numSolutions)(util.Random.shuffle((0 until numCities).toVector))
+  extends CreatorFunction[Tour]("RandomTourCreator") {
+  override def create(): Iterable[Tour] = {
+    Vector.fill(numSolutions)(util.Random.shuffle(Vector.range(0, numCities)))
   }
 }
 
@@ -29,8 +33,8 @@ case class RandomTourCreator(numCities: Int, numSolutions: Int = 10)
   * @param fromBestN The number to choose.
   */
 case class GreedyTourCreator(distanceMatrix: CostMatrix, fromBestN: Int)
-  extends CreatorFunction[TSPSolution]("GreedyTourCreator") {
-  override def create(): TraversableOnce[TSPSolution] = {
+  extends CreatorFunction[Tour]("GreedyTourCreator") {
+  override def create(): Iterable[Tour] = {
     val tour: mutable.ArrayBuffer[Int] = mutable.ArrayBuffer()
     val visited: mutable.Set[Int] = mutable.Set[Int]()
 
@@ -50,11 +54,20 @@ case class GreedyTourCreator(distanceMatrix: CostMatrix, fromBestN: Int)
   }
 }
 
-case class SwapTwoCitiesModifier() extends MutatorFunction[TSPSolution]("SwapTwoCities") {
-  override protected def mutate(sol: TSPSolution): TSPSolution = {
+case class SwapTwoCitiesModifier() extends MutatorFunction[Tour]("SwapTwoCities") {
+  override protected def mutate(sol: Tour): Tour = {
     val index1 = util.Random.nextInt(sol.length)
     val index2 = util.Random.nextInt(sol.length)
 
     sol.updated(index1, sol(index2)).updated(index2, sol(index1))
+  }
+}
+
+case class CrossoverModifier() extends CrossoverFunction[Tour](name="Crossover") {
+  override protected def crossover(sol1: Tour, sol2: Tour): Tour = {
+    val crossoverPoint = util.Random.nextInt(sol1.length)
+    val firstHalf = sol1.take(crossoverPoint) // Up to the crossover point, it's all sol1
+    // And we need the rest of the cities, so take them from sol2, in the order of sol2
+    firstHalf ++ sol2.filterNot(firstHalf.contains)
   }
 }

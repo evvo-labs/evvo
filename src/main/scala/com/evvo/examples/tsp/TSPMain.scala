@@ -27,8 +27,8 @@ object TSPMain {
     val tsp2 = TSP2.fromEuclideanPoints(parseEuclideanCoordinates(filename1), parseEuclideanCoordinates(filename2))
 
     val islandBuilder = EvvoIsland.builder()
-      .addObjective(CostObjective("DistanceA", tsp2.cost1))
-      .addObjective(CostObjective("DistanceB", tsp2.cost2))
+      .addObjective(CostObjective("CostA", tsp2.cost1))
+      .addObjective(CostObjective("CostB", tsp2.cost2))
       .addCreator(RandomTourCreator(tsp2.numCities))
       .addCreator(GreedyTourCreator(tsp2.cost1, 3))
       .addCreator(GreedyTourCreator(tsp2.cost2, 3))
@@ -36,7 +36,7 @@ object TSPMain {
       .addModifier(SwapTwoCitiesModifier())
       .addDeletor(DeleteDominated())
 
-    val islandManager = new LocalIslandManager[TSPSolution](1, islandBuilder)
+    val islandManager = new LocalIslandManager[Tour](1, islandBuilder)
 
     islandManager.runBlocking(StopAfter(100.seconds))
 

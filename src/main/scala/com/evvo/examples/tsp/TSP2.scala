@@ -8,6 +8,7 @@ package com.evvo.examples.tsp
   * @param cost2 The cost of getting from each city to each, by the second objective.
   */
 case class TSP2(cost1: CostMatrix, cost2: CostMatrix) {
+  require(cost1.numCities == cost2.numCities)
   def numCities: Int = cost1.numCities
 }
 
@@ -20,10 +21,6 @@ object TSP2 {
   def fromEuclideanPoints(coordsA: IndexedSeq[(Double, Double)],
                           coordsB: IndexedSeq[(Double, Double)]
                          ): TSP2 = {
-    require(coordsA.length == coordsB.length,
-      "The two distance matrices must have the same length, " +
-        "otherwise it is unclear how many cities there are.")
-
     def costMatrix(coords: IndexedSeq[(Double, Double)]): CostMatrix = {
       CostMatrix(Vector.tabulate(coords.length, coords.length)((city1index, city2index) =>
         euclideanDistance(coords(city1index), coords(city2index))))

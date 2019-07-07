@@ -4,7 +4,7 @@ package object tsp {
   /**
     * Represents an ordered sequence of visited cities by index.
     */
-  type TSPSolution = IndexedSeq[Int]
+  type Tour = IndexedSeq[Int]
 
   /**
     * When indexed by (from,to) gives cost from `from` to `to` by this objective.
