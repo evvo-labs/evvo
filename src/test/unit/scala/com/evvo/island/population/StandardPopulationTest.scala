@@ -39,7 +39,7 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
 
     "have an empty pareto frontier" in {
       val paretoFront = emptyPop.getParetoFrontier()
-      paretoFront.solutions shouldBe 'empty
+      paretoFront.solutions shouldBe empty
     }
 
     "has zero elements, according to getInformation()" in {
@@ -60,7 +60,7 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
       val sol = pop.getSolutions(1)
       pop.deleteSolutions(sol)
       val remaining = pop.getSolutions(popSize)
-      remaining.toSet & sol.toSet shouldBe 'empty
+      remaining.toSet & sol.toSet shouldBe empty
     }
 
     "only remove the specified elements" in {
