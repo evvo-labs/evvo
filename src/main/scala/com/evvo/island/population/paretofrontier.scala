@@ -4,8 +4,9 @@ import scala.collection.mutable
 
 /**
   * A set of solutions, none of which dominate each other.
+  * @param solutions A non-dominated set.
   */
-case class ParetoFrontier[Sol](solutions: Set[Scored[Sol]]) {
+case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
   if (!ParetoFrontier.isParetoFrontier(solutions)) {
     throw new IllegalArgumentException(
       s"""
@@ -33,6 +34,10 @@ case class ParetoFrontier[Sol](solutions: Set[Scored[Sol]]) {
 }
 
 object ParetoFrontier {
+  /**
+    * @param solutions The solutions set to create the pareto frontier from.
+    * @return A ParetoFrontier with the non-dominated solutions from the given set.
+    */
   def apply[Sol](solutions: Set[Scored[Sol]]): ParetoFrontier[Sol] = {
     new ParetoFrontier(setToParetoFrontier(solutions))
   }
@@ -43,6 +48,10 @@ object ParetoFrontier {
     solutions.filterNot(s => solutions.exists(_.dominates(s)))
   }
 
+  /**
+    * Is the given set of solutions a Pareto Frontier? That is, does it contain only
+    * non-dominated solutions?
+    */
   def isParetoFrontier[Sol](solutions: Set[Scored[Sol]]): Boolean = {
     solutions == ParetoFrontier.setToParetoFrontier(solutions)
   }

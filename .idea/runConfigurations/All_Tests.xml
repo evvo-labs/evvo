@@ -15,7 +15,6 @@
     <setting name="package" value="" />
     <buffered bufClass="com.evvo.ParetoFrontierTest" />
     <buffered bufClass="com.evvo.ScoredTest" />
-    <buffered bufClass="com.evvo.ScoreHashingTest" />
     <buffered bufClass="com.evvo.agent.AgentPropertiesTest" />
     <buffered bufClass="com.evvo.agent.CreatorAgentDefaultStrategyTest" />
     <buffered bufClass="com.evvo.agent.CrossoverFunctionTest" />
@@ -26,6 +25,8 @@
     <buffered bufClass="com.evvo.agent.ModifierAgentDefaultStrategyTest" />
     <buffered bufClass="com.evvo.agent.ModifierFunctionTest" />
     <buffered bufClass="com.evvo.agent.MutatorFunctionTest" />
+    <buffered bufClass="com.evvo.agent.defaults.BitflipperTest" />
+    <buffered bufClass="com.evvo.agent.defaults.DeleteDominatedTest" />
     <buffered bufClass="com.evvo.integration.LocalEvvoTest" />
     <buffered bufClass="com.evvo.integration.LocalIslandManagerTest" />
     <buffered bufClass="com.evvo.island.AllowAllImmigrationStrategyTest" />

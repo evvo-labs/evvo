@@ -2,17 +2,23 @@ package com.evvo.island.population
 
 
 /**
+  * An objective is a goal to be maximized (or minimized) by the evolutionary process.
+  *
   * @param name                  the name of this objective
-  * @param optimizationDirection oneof `Minimize` or `Maximize`
+  * @param optimizationDirection one of `Minimize` or `Maximize`
   * @param precision             how many decimal points to round to. For example, if given 1,
   *                              .015 and .018 will be considered equal.
   */
-abstract class Objective[Sol](
-                          val name: String,
-                          val optimizationDirection: OptimizationDirection,
-                          precision: Int = 3)  // scalastyle:ignore magic.number
+abstract class Objective[Sol](val name: String,
+                              val optimizationDirection: OptimizationDirection,
+                              precision: Int = 3)
   extends Serializable {
-  /** The underlying function: takes a `Sol` and scores it. */
+  /** The underlying function: takes a `Sol` and scores it. Protected because external callers
+    * should be using `score` instead.
+    *
+    * @param sol The solution to score.
+    * @return The score the given `Sol` earned.
+    */
   protected def objective(sol: Sol): Double
 
   /** Scores the given solution, rounding to the precision specified. */
@@ -22,6 +28,7 @@ abstract class Objective[Sol](
   }
 }
 
+/** An OptimizationDirection is either Minimize or Maximize. */
 sealed trait OptimizationDirection
 case object Minimize extends OptimizationDirection
 case object Maximize extends OptimizationDirection

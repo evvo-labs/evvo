@@ -15,7 +15,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, _}
 import scala.concurrent.{Await, Future}
 
-
+/**
+  * This component is used to do all the actual work of managing the island, without managing
+  * or being tied to where the island is deployed to.
+  */
 private class EvvoIsland[Sol]
 (
   creators: Vector[CreatorFunction[Sol]],
@@ -69,7 +72,6 @@ private class EvvoIsland[Sol]
       deletorAgents.foreach(_.start())
 
       val startTime = Calendar.getInstance().toInstant.toEpochMilli
-
       while (startTime + stopAfter.time.toMillis >
         Calendar.getInstance().toInstant.toEpochMilli) {
         Thread.sleep(500)
@@ -79,7 +81,6 @@ private class EvvoIsland[Sol]
       }
 
       log.info(f"c=${startTime}, now=${Calendar.getInstance().toInstant.toEpochMilli}")
-
       stop()
     }
   }
@@ -95,7 +96,6 @@ private class EvvoIsland[Sol]
   override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     pop.addSolutions(immigrationStrategy.filter(solutions, pop).map(_.solution))
   }
-
 
   override def poisonPill(): Unit = {
     stop()
@@ -318,11 +318,11 @@ object RemoteEvvoIsland {
 
 
   // All of these are meant to be used as Akka messages.
-  private[island] case class Run(stopAfter: StopAfter)
+  private case class Run(stopAfter: StopAfter)
 
-  private[island] case object GetParetoFrontier
+  private case object GetParetoFrontier
 
-  private[island] case class Immigrate[Sol](solutions: Seq[Scored[Sol]])
+  private case class Immigrate[Sol](solutions: Seq[Scored[Sol]])
 
-  private[island] case class RegisterIslands[Sol](islands: Seq[EvolutionaryProcess[Sol]])
+  private case class RegisterIslands[Sol](islands: Seq[EvolutionaryProcess[Sol]])
 }

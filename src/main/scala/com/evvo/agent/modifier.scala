@@ -5,7 +5,11 @@ import com.evvo.island.population.Population
 
 import scala.concurrent.duration._
 
-
+/**
+  * Grabs some solutions from the population, creates new solutions based on the old ones, and
+  * adds the new ones to the population.
+  * @param modifier The function that generates new solutions from existing ones.
+  */
 case class ModifierAgent[Sol](modifier: ModifierFunction[Sol],
                               population: Population[Sol],
                               strategy: AgentStrategy = ModifierAgentDefaultStrategy())
@@ -23,7 +27,7 @@ case class ModifierAgent[Sol](modifier: ModifierFunction[Sol],
     }
   }
 
-  override def toString: String = s"MutatorAgent[$name, $numInvocations]"
+  override def toString: String = s"MutatorAgent[$name]"
 }
 
 case class ModifierAgentDefaultStrategy() extends AgentStrategy {

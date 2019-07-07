@@ -66,7 +66,7 @@ abstract class MutatorFunction[Sol](name: String,
 }
 
 /**
-  * A function that uses a one-to-one mapping to derive a new set of solutions from some
+  * A function that uses a two-to-one mapping to derive a new set of solutions from some
   * input set of solutions.
   */
 abstract class CrossoverFunction[Sol](name: String,

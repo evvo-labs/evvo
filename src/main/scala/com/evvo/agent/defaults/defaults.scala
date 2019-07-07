@@ -12,21 +12,31 @@ import com.evvo.agent.{CreatorFunction, DeletorFunction, MutatorFunction}
 import com.evvo.island.population
 import com.evvo.island.population.{Maximize, Minimize, Scored}
 
+
+// =================================================================================================
+// Generic Deletors
 /**
   * A deletor that deletes the dominated set, in a group of size `groupSize`
   *
   * @param numInputs the number of solutions to pull at a time
   */
-case class DeleteDominated[Sol](override val numInputs: Int = 32) // scalastyle:ignore magic.number
+case class DeleteDominated[Sol](override val numInputs: Int = 32)
   extends DeletorFunction[Sol]("DeleteDominated") {
 
   override def delete(sols: IndexedSeq[Scored[Sol]]): IndexedSeq[Scored[Sol]] = {
     val nonDominatedSet = population.ParetoFrontier(sols.toSet).solutions
+    // If it's not in the non-dominated set, then it is dominated.
     sols.filterNot(elem => nonDominatedSet.contains(elem))
   }
 }
 
-case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 32) // scalastyle:ignore magic.number
+/**
+  * Picks a random objective, then grabs `numInputs` solutions and removes the worst half,
+  * as measured by that objective.
+  * @param numInputs                 The number of solutions to request in the contents of each
+  *                                  input set
+  */
+case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 32)
   extends DeletorFunction[Sol]("DeleteWorstHalfByRandomObjective") {
 
   override def delete(s: IndexedSeq[Scored[Sol]]): IndexedSeq[Scored[Sol]] = {
@@ -46,6 +56,9 @@ case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 3
   }
 }
 
+// =================================================================================================
+// Bitstrings
+
 /**
   * A creator that generates `Bitstring`s by filling them with random bits.
   *
@@ -54,7 +67,8 @@ case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 3
   */
 case class BitstringGenerator(length: Int, proportionOnes: Double = 0.5)
   extends CreatorFunction[Bitstring]("BitstringGenerator") {
-  override def create(): Iterable[Seq[Boolean]] = {
+  override def create(): Iterable[Bitstring] = {
+    // `<`, because we want the proportion of `true` to increase if `proportionOnes` increases
     Vector.fill(32)(Vector.fill(length)(util.Random.nextDouble() < proportionOnes))
   }
 }
@@ -72,7 +86,7 @@ case class Bitswapper()
 }
 
 /**
-  * A mutator for `Bitstring`s that flips a random bit.
+  * A mutator for `Bitstring`s that flips a random bit in the bitstring.
   *
   * @param numInputs The number of solutions to request in the contents of each
   *                  input set
