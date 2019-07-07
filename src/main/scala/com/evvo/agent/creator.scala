@@ -5,6 +5,10 @@ import com.evvo.island.population.Population
 import scala.concurrent.duration._
 
 
+/**
+  * An [[com.evvo.agent.Agent]] that produces new solutions and adds them to the population.
+  * @param create The function that creates new solutions.
+  */
 case class CreatorAgent[Sol](create: CreatorFunction[Sol],
                              population: Population[Sol],
                              strategy: AgentStrategy = CreatorAgentDefaultStrategy())

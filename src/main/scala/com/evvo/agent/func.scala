@@ -2,7 +2,6 @@ package com.evvo.agent
 
 import com.evvo.island.population.Scored
 
-import scala.collection.TraversableOnce
 
 /**
   * A named function. Common class for all functions that go in agents, so that utilities and
@@ -19,7 +18,7 @@ abstract class NamedFunction(val name: String) extends Serializable
   */
 abstract class CreatorFunction[Sol](name: String) extends NamedFunction(name) {
   /** @return The function to call to produce new solutions */
-  def create(): TraversableOnce[Sol]
+  def create(): Iterable[Sol]
 }
 
 /**
@@ -38,7 +37,7 @@ abstract class ModifierFunction[Sol](name: String,
   /**
     * @return The function to call to produce new solutions
     */
-  def modify(sols: IndexedSeq[Scored[Sol]]): TraversableOnce[Sol]
+  def modify(sols: IndexedSeq[Scored[Sol]]): Iterable[Sol]
 }
 
 /**
@@ -51,7 +50,7 @@ abstract class MutatorFunction[Sol](name: String,
   // Pass shouldRunWithPartialInput as true always - we know there is no requirement for more
   // than 1 solution at a time, so safe to run on any number of solutions.
 
-  override final def modify(sols: IndexedSeq[Scored[Sol]]): TraversableOnce[Sol] = {
+  override final def modify(sols: IndexedSeq[Scored[Sol]]): Iterable[Sol] = {
     // We can define modify in terms of mutation, and ask implementors to just provide a one-to-one
     // mutator function to map over the solutions.
     sols.map(_.solution).map(mutate)
@@ -67,7 +66,7 @@ abstract class MutatorFunction[Sol](name: String,
 }
 
 /**
-  * A function that uses a one-to-one mapping to derive a new set of solutions from some
+  * A function that uses a two-to-one mapping to derive a new set of solutions from some
   * input set of solutions.
   */
 abstract class CrossoverFunction[Sol](name: String,
@@ -77,7 +76,7 @@ abstract class CrossoverFunction[Sol](name: String,
   // than 2 solutions at a time, so safe to run on, say, 16 or 23 solutions. We will have to be
   // careful about odd numbers of solutions.
 
-  override final def modify(sols: IndexedSeq[Scored[Sol]]): TraversableOnce[Sol] = {
+  override final def modify(sols: IndexedSeq[Scored[Sol]]): Iterable[Sol] = {
     // We can define modify in terms of crossover, and ask implementors to just provide a two-to-one
     // crossover function to map over the solutions.
     val groups = sols.map(_.solution).grouped(2)
@@ -86,7 +85,7 @@ abstract class CrossoverFunction[Sol](name: String,
     // we never hit a runtime error, like we would with indexing into each group.
     groups.collect {
       case IndexedSeq(sol1, sol2) => crossover(sol1, sol2)
-    }
+    }.toVector
   }
 
   /**
@@ -115,5 +114,5 @@ abstract class DeletorFunction[Sol](name: String,
                                     val shouldRunWithPartialInput: Boolean = true)
   extends NamedFunction(name) {
   /** @return The function to call to identify which solutions to delete */
-  def delete(sols: IndexedSeq[Scored[Sol]]): TraversableOnce[Scored[Sol]]
+  def delete(sols: IndexedSeq[Scored[Sol]]): Iterable[Scored[Sol]]
 }

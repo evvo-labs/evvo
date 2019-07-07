@@ -12,10 +12,11 @@ class MutatorFunctionTest extends WordSpec with Matchers {
         }
       }
 
-      mutator.modify(Vector()).toVector should be(empty)
-      mutator.modify(Vector(Scored(Map(), 3d))).toVector should contain(4d)
+      mutator.modify(Vector()).iterator should have length 0
+      mutator.modify(Vector(Scored(Map(), 3d))) should contain(4d)
 
-      val fourAndFive = mutator.modify(Vector(Scored(Map(), 3d), Scored(Map(), 4d))).toVector
+      val fourAndFive = mutator.modify(Vector(Scored(Map(), 3d), Scored(Map(), 4d)))
+          .iterator.toVector
       fourAndFive should have length 2
       fourAndFive should contain(4d)
       fourAndFive should contain(5d)

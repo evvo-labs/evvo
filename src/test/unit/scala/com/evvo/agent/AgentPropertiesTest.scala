@@ -23,7 +23,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   var agentFunctionCalled: mutable.Map[Any, Boolean] = _
 
   val creatorFunc = new CreatorFunction[S]("creator") {
-    override def create(): TraversableOnce[S] = {
+    override def create(): Iterable[S] = {
       agentFunctionCalled("create") = true
       Vector(1)
     }
@@ -42,7 +42,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   val modifierInput: Set[Scored[S]] = Set[Scored[S]](Scored(Map(("Score1", Minimize) -> 3), 2))
 
   val deletorFunc = new DeletorFunction[S]("deletor") {
-    override def delete(sols: IndexedSeq[Scored[S]]): TraversableOnce[Scored[S]] = {
+    override def delete(sols: IndexedSeq[Scored[S]]): Iterable[Scored[S]] = {
       agentFunctionCalled("delete") = true
       sols
     }

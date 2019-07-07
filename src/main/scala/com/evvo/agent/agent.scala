@@ -16,12 +16,23 @@ trait Agent[Sol] {
   def numInvocations: Int
 }
 
+/**
+  * Common behavior for all agents. Orchestrates the main loop, decides how often to run, etc.
+  * All that is left to the subclasses is the actual content of the main loop.
+  * @param population The population to add solutions to.
+  * @param strategy Tells the CreatorAgent how often to run.
+  * @param logger Where logs are written to. Not that this must extend the Akka
+  *               [[akka.event.LoggingAdapter]] interface, not a more common logback
+  *               or slf4s interface.
+  * @param name The name of this agent. Used for logging.
+  */
 abstract class AAgent[Sol](private val strategy: AgentStrategy,
                            private val population: Population[Sol],
                            protected val name: String)
                           (private implicit val logger: LoggingAdapter)
   extends Agent[Sol] {
 
+  /** The number of  times this agent has run its function. */
   var numInvocations: Int = 0
 
   // consider factoring this out into a separate component and using
@@ -31,8 +42,14 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
     override def run(): Unit = {
       var waitTime: Duration = strategy.waitTime(population.getInformation())
       logger.debug(s"${name}: Waiting for ${waitTime}")
+      // The whole main loop in is in a try/catch block so we can log on exit, particularly
+      // if there was an uncaught exception or a ThreadInterruptedException.
       try {
         while (!Thread.interrupted()) {
+          // Each step in the main loop just calls the `step()` function, which subclasses override,
+          // and increases the number of invocations, logging any exceptions but continuing to run.
+          // Because the step() method tends to be stochastic, throwing an error this time doesn't
+          // mean an error will be thrown next time, so we persist.
           try {
             numInvocations += 1
             step()
@@ -89,9 +106,10 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
   }
 
   /**
-    * Performs one operation on the population.
+    * Performs one operation on the population. Once the agent is started, this method will be
+    * called repeatedly until the agent is stopped.
     */
   protected def step(): Unit
 
-  override def toString: String = f"Agent[$name, $numInvocations]"
+  override def toString: String = f"Agent[$name]"
 }
