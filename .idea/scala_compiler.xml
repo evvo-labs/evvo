@@ -3,6 +3,7 @@
   <component name="ScalaCompilerConfiguration">
     <profile name="Maven 1" modules="diatom">
       <option name="postfixOps" value="true" />
+      <option name="implicitConversions" value="true" />
       <parameters>
         <parameter value="-dependencyfile" />
         <parameter value="$PROJECT_DIR$/target/.scala_dependencies" />
