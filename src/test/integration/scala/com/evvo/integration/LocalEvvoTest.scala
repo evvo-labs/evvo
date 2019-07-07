@@ -59,7 +59,7 @@ object LocalEvvoTestFixtures {
 
   class ReverseListCreator(listLength: Int)
     extends CreatorFunction[Solution]("ReverseCreator") {
-    override def create(): TraversableOnce[Solution] = {
+    override def create(): Iterable[Solution] = {
       Vector((listLength to 1 by -1).toList)
     }
   }

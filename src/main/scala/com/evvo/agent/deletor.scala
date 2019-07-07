@@ -18,7 +18,7 @@ case class DeletorAgent[Sol](delete: DeletorFunction[Sol],
     val in = population.getSolutions(delete.numInputs)
     if (delete.shouldRunWithPartialInput || in.length == delete.numInputs) {
       val toDelete = delete.delete(in)
-      logger.debug(f"Deleted ${toDelete.size} solutions out of ${in.size}")
+      logger.debug(f"Deleted ${toDelete.iterator.size} solutions out of ${in.size}")
       population.deleteSolutions(toDelete)
     } else {
       logger.debug(s"${this}: not enough solutions in population: " +
