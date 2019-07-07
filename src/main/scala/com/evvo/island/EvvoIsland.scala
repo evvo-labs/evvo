@@ -24,7 +24,9 @@ private class EvvoIsland[Sol]
   creators: Vector[CreatorFunction[Sol]],
   mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
-  fitnesses: Vector[Objective[Sol]])
+  fitnesses: Vector[Objective[Sol]],
+  immigrationStrategy: ImmigrationStrategy,
+  emigrationStrategy: EmigrationStrategy)
 (implicit log: LoggingAdapter)
   extends EvolutionaryProcess[Sol] {
 
@@ -91,8 +93,8 @@ private class EvvoIsland[Sol]
     pop.getParetoFrontier()
   }
 
-  override def immigrate(solutions: Seq[Sol]): Unit = {
-    pop.addSolutions(solutions)
+  override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
+    pop.addSolutions(immigrationStrategy.filter(solutions, pop).map(_.solution))
   }
 
   override def poisonPill(): Unit = {
@@ -113,7 +115,9 @@ private class EvvoIsland[Sol]
     if (emigrationTargets.isEmpty) {
       log.info("Trying to emigrate without any emigration targets")
     } else {
-      val emigrants = this.pop.getSolutions(4).map(_.solution)
+      val emigrants = emigrationStrategy.chooseSolutions(this.pop)
+
+      // Hardcoded to round robin for now - will be updated when we add network topology.
       this.emigrationTargets(currentEmigrationTargetIndex).immigrate(emigrants)
       currentEmigrationTargetIndex = (currentEmigrationTargetIndex + 1) % emigrationTargets.length
     }
@@ -141,7 +145,9 @@ class LocalEvvoIsland[Sol]
   creators: Vector[CreatorFunction[Sol]],
   mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
-  objectives: Vector[Objective[Sol]]
+  objectives: Vector[Objective[Sol]],
+  immigrationStrategy: ImmigrationStrategy,
+  emigrationStrategy: EmigrationStrategy
 )(
   implicit val log: LoggingAdapter = LocalLogger
 ) extends EvolutionaryProcess[Sol] {
@@ -149,7 +155,9 @@ class LocalEvvoIsland[Sol]
     creators,
     mutators,
     deletors,
-    objectives)
+    objectives,
+    immigrationStrategy,
+    emigrationStrategy)
 
   override def runBlocking(stopAfter: StopAfter): Unit = {
     island.runBlocking(stopAfter)
@@ -163,7 +171,7 @@ class LocalEvvoIsland[Sol]
     island.currentParetoFrontier()
   }
 
-  override def immigrate(solutions: Seq[Sol]): Unit = {
+  override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     island.immigrate(solutions)
   }
 
@@ -221,7 +229,9 @@ class RemoteEvvoIsland[Sol]
   creators: Vector[CreatorFunction[Sol]],
   mutators: Vector[ModifierFunction[Sol]],
   deletors: Vector[DeletorFunction[Sol]],
-  objectives: Vector[Objective[Sol]]
+  objectives: Vector[Objective[Sol]],
+  immigrationStrategy: ImmigrationStrategy,
+  emigrationStrategy: EmigrationStrategy
 )
   extends Actor with EvolutionaryProcess[Sol] with ActorLogging {
   // for messages, which are case classes defined within RemoteEvvoIsland's companion objeect
@@ -233,12 +243,14 @@ class RemoteEvvoIsland[Sol]
     creators,
     mutators,
     deletors,
-    objectives)
+    objectives,
+    immigrationStrategy,
+    emigrationStrategy)
 
   override def receive: Receive = LoggingReceive({
     case Run(t) => sender ! this.runBlocking(t)
     case GetParetoFrontier => sender ! this.currentParetoFrontier()
-    case Immigrate(solutions: Seq[Sol]) => this.immigrate(solutions)
+    case Immigrate(solutions: Seq[Scored[Sol]]) => this.immigrate(solutions)
     case RegisterIslands(islands: Seq[EvolutionaryProcess[Sol]]) => this.registerIslands(islands)
   })
 
@@ -255,7 +267,7 @@ class RemoteEvvoIsland[Sol]
     island.currentParetoFrontier()
   }
 
-  override def immigrate(solutions: Seq[Sol]): Unit = {
+  override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     island.immigrate(solutions)
   }
 
@@ -291,7 +303,7 @@ object RemoteEvvoIsland {
       Await.result(ref ? GetParetoFrontier, Duration.Inf).asInstanceOf[ParetoFrontier[Sol]]
     }
 
-    override def immigrate(solutions: Seq[Sol]): Unit = {
+    override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
       ref ! Immigrate(solutions)
     }
 
@@ -310,7 +322,7 @@ object RemoteEvvoIsland {
 
   private case object GetParetoFrontier
 
-  private case class Immigrate[Sol](solutions: Seq[Sol])
+  private case class Immigrate[Sol](solutions: Seq[Scored[Sol]])
 
   private case class RegisterIslands[Sol](islands: Seq[EvolutionaryProcess[Sol]])
 }

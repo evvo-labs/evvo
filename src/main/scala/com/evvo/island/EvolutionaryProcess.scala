@@ -2,7 +2,7 @@ package com.evvo.island
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
-import com.evvo.island.population.ParetoFrontier
+import com.evvo.island.population.{ParetoFrontier, Scored}
 
 /**
   * `EvolutionaryProcess` is a generic interface for evolutionary problem solvers.
@@ -33,7 +33,7 @@ trait EvolutionaryProcess[Sol] {
     *
     * @param solutions the solutions to add
     */
-  def immigrate(solutions: Seq[Sol]): Unit
+  def immigrate(solutions: Seq[Scored[Sol]])
 
   /**
     * Sends a poison pill to the evolutionary process.

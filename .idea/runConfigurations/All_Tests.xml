@@ -14,7 +14,7 @@
     <setting name="testKind" value="All in package" />
     <setting name="package" value="" />
     <buffered bufClass="com.evvo.ParetoFrontierTest" />
-    <buffered bufClass="com.evvo.ScoreHashingTest" />
+    <buffered bufClass="com.evvo.ScoredTest" />
     <buffered bufClass="com.evvo.agent.AgentPropertiesTest" />
     <buffered bufClass="com.evvo.agent.CreatorAgentDefaultStrategyTest" />
     <buffered bufClass="com.evvo.agent.CrossoverFunctionTest" />
@@ -29,7 +29,10 @@
     <buffered bufClass="com.evvo.agent.defaults.DeleteDominatedTest" />
     <buffered bufClass="com.evvo.integration.LocalEvvoTest" />
     <buffered bufClass="com.evvo.integration.LocalIslandManagerTest" />
+    <buffered bufClass="com.evvo.island.AllowAllImmigrationStrategyTest" />
+    <buffered bufClass="com.evvo.island.ElitistImmigrationStrategyTest" />
     <buffered bufClass="com.evvo.island.EvvoIslandBuilderTest" />
+    <buffered bufClass="com.evvo.island.EvvoIslandTest" />
     <buffered bufClass="com.evvo.island.population.StandardPopulationTest" />
     <method v="2">
       <option name="Make" enabled="true" />
