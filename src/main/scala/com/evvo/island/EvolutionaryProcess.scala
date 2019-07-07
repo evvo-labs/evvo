@@ -33,7 +33,7 @@ trait EvolutionaryProcess[Sol] {
     *
     * @param solutions the solutions to add
     */
-  def immigrate(solutions: Seq[Scored[Sol]])
+  def immigrate(solutions: Seq[Scored[Sol]]): Unit
 
   /**
     * Sends a poison pill to the evolutionary process.

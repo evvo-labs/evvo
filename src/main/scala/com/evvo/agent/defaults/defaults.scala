@@ -25,6 +25,7 @@ case class DeleteDominated[Sol](override val numInputs: Int = 32)
 
   override def delete(sols: IndexedSeq[Scored[Sol]]): IndexedSeq[Scored[Sol]] = {
     val nonDominatedSet = population.ParetoFrontier(sols.toSet).solutions
+    // If it's not in the non-dominated set, then it is dominated.
     sols.filterNot(elem => nonDominatedSet.contains(elem))
   }
 }
