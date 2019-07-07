@@ -37,8 +37,8 @@ case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 3
       val objective = objectiveList(util.Random.nextInt(objectiveList.size))
 
       val ordering = objective match {
-        case (_, Minimize) => Ordering.Double.reverse
-        case (_, Maximize) => Ordering.Double
+        case (_, Minimize) => Ordering.Double.TotalOrdering.reverse
+        case (_, Maximize) => Ordering.Double.TotalOrdering
       }
 
       s.toVector.sortBy(_.score(objective))(ordering).take(s.size / 2)
@@ -54,7 +54,7 @@ case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 3
   */
 case class BitstringGenerator(length: Int, proportionOnes: Double = 0.5)
   extends CreatorFunction[Bitstring]("BitstringGenerator") {
-  override def create(): TraversableOnce[Seq[Boolean]] = {
+  override def create(): Iterable[Seq[Boolean]] = {
     Vector.fill(32)(Vector.fill(length)(util.Random.nextDouble() < proportionOnes))
   }
 }
