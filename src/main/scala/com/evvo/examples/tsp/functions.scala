@@ -8,7 +8,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
-case class Distance(override val name: String, distances: DistanceMatrix)
+case class CostObjective(override val name: String, distances: CostMatrix)
   extends Objective[TSPSolution](name, Minimize) {
   override protected def objective(sol: TSPSolution): Double = {
     sol.sliding(2).map { case Vector(u, v) => distances(u, v) }.sum + distances(sol.last, sol.head)
@@ -28,7 +28,7 @@ case class RandomTourCreator(numCities: Int, numSolutions: Int = 10)
   * @param distanceMatrix The matrix with the distances to be greedy about.
   * @param fromBestN The number to choose.
   */
-case class GreedyTourCreator(distanceMatrix: DistanceMatrix, fromBestN: Int)
+case class GreedyTourCreator(distanceMatrix: CostMatrix, fromBestN: Int)
   extends CreatorFunction[TSPSolution]("GreedyTourCreator") {
   override def create(): TraversableOnce[TSPSolution] = {
     val tour: mutable.ArrayBuffer[Int] = mutable.ArrayBuffer()

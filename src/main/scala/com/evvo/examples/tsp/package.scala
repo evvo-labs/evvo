@@ -1,16 +1,15 @@
 package com.evvo.examples
 
 package object tsp {
-
   /**
     * Represents an ordered sequence of visited cities by index.
     */
   type TSPSolution = IndexedSeq[Int]
 
   /**
-    * indexed by (from,to) gives distance from first index to second by both objectives
+    * When indexed by (from,to) gives cost from `from` to `to` by this objective.
     */
-  case class DistanceMatrix(matrix: IndexedSeq[IndexedSeq[Double]]) {
+  case class CostMatrix(matrix: IndexedSeq[IndexedSeq[Double]]) {
     /** For each city, each other city sorted by distance by A. */
     private val citiesByDistanceA: IndexedSeq[IndexedSeq[Int]] = {
       this.matrix.map(distances => distances.indices.sortBy(distances))
@@ -33,8 +32,9 @@ package object tsp {
       citiesByDistanceA(origin).tail.filterNot(ignore).take(n)
     }
 
-    def elementwisePlus(that: DistanceMatrix): DistanceMatrix = {
-      DistanceMatrix(matrix.zip(that.matrix).map {
+    /** @return The elementwise sum of each element of this matrix and that one. */
+    def elementwisePlus(that: CostMatrix): CostMatrix = {
+      CostMatrix(matrix.zip(that.matrix).map {
         case (thisRow, thatRow) => thisRow.zip(thatRow).map {
           case (thisElem, thatElem) => thisElem + thatElem
         }
