@@ -193,7 +193,7 @@ object LocalLogger extends LoggingAdapter {
 
   override def isInfoEnabled: Boolean = true
 
-  override def isDebugEnabled: Boolean = true
+  override def isDebugEnabled: Boolean = false
 
   override protected def notifyError(message: String): Unit = {
     logger.error(message)
@@ -212,7 +212,6 @@ object LocalLogger extends LoggingAdapter {
   }
 
   override protected def notifyDebug(message: String): Unit = {
-    logger.debug(message)
   }
 }
 

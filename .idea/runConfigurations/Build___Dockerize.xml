@@ -22,7 +22,7 @@
       </settings>
     </deployment>
     <method v="2">
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="evvo [clean,package]" run_configuration_type="MavenRunConfiguration" />
+      <option name="RunConfigurationTask" enabled="true" />
     </method>
   </configuration>
 </component>

@@ -265,7 +265,7 @@ TODO: Allow end users to override Akka configuration
 
 -------------------------------------------------------------------------------
 ### Downloads
-We plan to release Evvo so that it can be with Maven or sbt. The project is not yet stable enough for that to make sense.
+We plan to release Evvo so that it can be used with Maven or sbt. The project is not yet stable enough for that to make sense.
 
 -------------------------------------------------------------------------------
 ### Contributing

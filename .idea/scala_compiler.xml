@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalaCompilerConfiguration">
-    <profile name="Maven 1" modules="diatom">
-      <option name="postfixOps" value="true" />
-      <option name="implicitConversions" value="true" />
+    <profile name="Maven" modules="evvo">
       <parameters>
-        <parameter value="-dependencyfile" />
-        <parameter value="$PROJECT_DIR$/target/.scala_dependencies" />
-      </parameters>
-    </profile>
-    <profile name="Maven 2" modules="evvo">
-      <option name="deprecationWarnings" value="true" />
-      <parameters>
+          <option name="postfixOps" value="true" />
+          <option name="implicitConversions" value="true" />
         <parameter value="-dependencyfile" />
         <parameter value="$PROJECT_DIR$/target/.scala_dependencies" />
       </parameters>
