@@ -3,13 +3,13 @@ First of all, thanks for looking at this page and considering contributing! We'd
 
 ----------------------------------------------------------------------------------------------------
 ### Modules Overview
-#### [`agent`](./src/main/scala/com/evvo/agent/)
+#### [`agent`](./src/main/scala/io/evvo/agent/)
 This holds the agents (classes that extend `TAgent`), and supporting classes such as strategies. Each agent extends an abstract class ('`AAgent`'), which  implements common features of agents: logging, using a separate thread for work, and having that thread wait the amount of time that the strategies say to. New agent classes should extend 
 
-#### [`island`](./src/main/scala/com/evvo/island/)
+#### [`island`](./src/main/scala/io/evvo/island/)
 Implements islands and clusters of islands. The main point of this package are the classes that extend `TEvolutionaryProcess`. These classes are ready-to-use implementations of evolutionary processes, that only need to have creators, fitness functions, etc. plugged in to start solving problems. Each island has its own population.
 
-#### [`island/population`](src/main/scala/com/evvo/island/population/)
+#### [`island/population`](src/main/scala/io/evvo/island/population/)
 Holds `Population`, `StandardPopulation`, and the classes required to support them. The population is a set of scored ('`Scored`') solutions, where uniqueness and equality are (by default) measured by the score and not the solution itself. This is for speed (we can hash a smaller piece of data - the score mapping), and for speed (because we have fewer solutions in the population, and anything with duplicate scores should be just as good as a solution).
 
 

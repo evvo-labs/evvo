@@ -2,7 +2,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.evvo</groupId>
+    <groupId>io.evvo</groupId>
     <artifactId>evvo</artifactId>
     <version>0.0.0</version>
     <name>${project.artifactId}</name>
@@ -188,7 +188,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.evvo.remoting.RemoteActorSystem</mainClass>
+                            <mainClass>io.evvo.remoting.RemoteActorSystem</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -230,7 +230,7 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
-                                        <Main-Class>com.evvo.remoting.RemoteActorSystem</Main-Class>
+                                        <Main-Class>io.evvo.remoting.RemoteActorSystem</Main-Class>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>

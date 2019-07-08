@@ -5,9 +5,9 @@ Evvo is the Scala framework for distributed [multi-objective](https://en.wikiped
  
  Here's an example showing how simple it is to set up and solve a basic problem (on one machine) using Evvo. Let's say we want to maximize the number of ones in a `Bitstring`. To represent this objective, we'll need to write an `Objective` (who would have guessed?). Then we can use Evvo to search for `Bitstring`s that satisfy the `Objective`. After running for a second, we'll print the current [pareto frontier](https://en.wikipedia.org/wiki/Pareto_efficiency#Use_in_engineering). 
 ```scala
-import com.evvo.agent.defaults.{Bitstring, Bitflipper, BitstringGenerator, DeleteDominated}
-import com.evvo.island.{EvvoIsland, LocalIslandManager, StopAfter}
-import com.evvo.island.population.{Maximize, Objective}
+import io.evvo.agent.defaults.{Bitstring, Bitflipper, BitstringGenerator, DeleteDominated}
+import io.evvo.island.{EvvoIsland, LocalIslandManager, StopAfter}
+import io.evvo.island.population.{Maximize, Objective}
 import scala.concurrent.duration._
 
 object Maximize1Bits extends Objective[Bitstring]("1Bits", Maximize) {
@@ -36,7 +36,7 @@ ParetoFrontier(Map(1Bits -> 16.0))
 
 This means that there was one solution on the pareto frontier, which scored `16.0` according to the objective named `"1Bits"`. Since the generated `Bitstring`s only have 16 bits, the best possible score is `16.0` bits that are 1. Note that the pareto frontier doesn't print the actual solutions. The solutions are available within the `ParetoFrontier` class, but the `toString` method prints only the scores, because solutions to more complex problems are very large.
 
-If our [built-in](./src/main/scala/com/evvo/agent/defaults/defaults.scala) _Creators_, _Modifiers_, and _Deletors_ do not work for your problem, you can define your own as easily as we defined `Maximize1Bits`.
+If our [built-in](./src/main/scala/com/io/agent/defaults/defaults.scala) _Creators_, _Modifiers_, and _Deletors_ do not work for your problem, you can define your own as easily as we defined `Maximize1Bits`.
 
 -------------------------------------------------------------------------------
 ### Terminology
@@ -202,10 +202,10 @@ This is going to change in the future, eventually you'll be able to include Evvo
 You'll want to check out our getting started (coming soon) for an example of how to use Evvo locally and remotely.
 
 #### Keeping your Code Private
-While we would love some well groomed examples in our repo, if you want to keep your code private, either put your new code in the [`src/main/scala/com/evvo/ignored`](src/main/scala/com/evvo/ignored) directory **or** locally ignore your new package/files with `git update-index --assume-unchanged [<file>...]`.
+While we would love some well groomed examples in our repo, if you want to keep your code private, either put your new code in the [`src/main/scala/io/evvo/ignored`](src/main/scala/com/io/ignored) directory **or** locally ignore your new package/files with `git update-index --assume-unchanged [<file>...]`.
 
 ##### Best VCS Practices
-For now, you should create a git repo inside the [`src/main/scala/com/evvo/ignored`](src/main/scala/com/evvo/ignored) directory and use that to version your code.
+For now, you should create a git repo inside the [`src/main/scala/io/evvo/ignored`](src/main/scala/io/evvo/ignored) directory and use that to version your code.
 
 ###### Using Submodules (Advanced)
 Until Evvo is a Maven or sbt dependency, things may look a little tricky. If you need to freeze Evvo's version with the version of your optimization problem repository (`<YOUR_PROJECT>`), you could use 2 [`git submodules`](https://git-scm.com/book/en/v2/Git-Tools-Submodules): one for Evvo and one for your project. If you don't need to, please skip this section. Unfortunately, git doesn't support non-recursive nested submodules, so development would be difficult to do using the repo with the submodules.
@@ -243,7 +243,7 @@ git push
 Now, it is possible, but messy, to hard link the files to get around the lack of support for non-recursive nested submodules to make development possible (instead of just version pinning) using `my_new_project`. Note that it is not possible to hard link directories, so you would have to hard link every file indiviudally. I do not recommend this, but will leave the option open to you. For each file in `<YOUR_PROJECT>`, run:
 
 ```bash
-ln <YOUR_PROJECT_DIR>/<YOUR_FILE_PATH> ./evvo/src/main/scala/com/evvo/ignored/<HARD_LINK_NAME>
+ln <YOUR_PROJECT_DIR>/<YOUR_FILE_PATH> ./evvo/src/main/scala/io/evvo/ignored/<HARD_LINK_NAME>
 ```
 
 Note that since this is in the ignored directory, everybody who clones your repo will not have the hard links set up, so you probably want to include a setup script that creates the hard links in `my_new_project`.
