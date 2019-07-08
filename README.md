@@ -38,6 +38,8 @@ This means that there was one solution on the pareto frontier, which scored `16.
 
 If our [built-in](./src/main/scala/com/io/agent/defaults/defaults.scala) _Creators_, _Modifiers_, and _Deletors_ do not work for your problem, you can define your own as easily as we defined `Maximize1Bits`.
 
+If you want to jump directly into an example, check out the [quickstart guide](./QUICKSTART.md). It assumes some familiarity with evolutionary computing concepts, so you may need to cross reference the terminology and diagrams in this file while you are working through the example.
+
 -------------------------------------------------------------------------------
 ### Terminology
 
@@ -196,6 +198,11 @@ This diagram shows a simplified version of our network model:
                                                      and so on, until your server budget runs out
 ```
 
+-------------------------------------------------------------------------------
+### Quickstart
+The [quickstart guide](./QUICKSTART.md) will walk you through writing and running a problem using Evvo. It solves a variant on the traveling salesperson problem with two objectives. If you're interested in seeing more of the developer API or understanding how to use Evvo, check this out next. 
+
+-------------------------------------------------------------------------------
 ### Running a Custom Optimization Problem
 This is going to change in the future, eventually you'll be able to include Evvo as a [Maven or sbt](#downloads) dependency. If you want to use Evvo before then, all of your code has to be part of the same src directory as Evvo (this is in order to ensure that remote islands can be [deserialized](#serializability)).
 
@@ -257,11 +264,6 @@ Because we have to ship Islands to remote servers, Islands need to be [serializa
 See [the relevant section](https://www.oreilly.com/library/view/scala-cookbook/9781449340292/ch12s08.html) of the Scala cookbook on serialization. Note that serialized classes should also have referential transparency, that is, they should not reference variables from an external scope. A class defined within an object (or another class, or a code block) that references variablees defined in the outer object (or class, or code block) may cause serialization issues if those values are not present in the deserialization context. In general, extending `Creator`, `Modifier`, or `DeletorFunction`, with case classes, and ensuring that those case classes take all the data they need as arguments will be sufficient to ensure that there are no serialization issues.
 
 If you use a `LocalIslandManager` to create `LocalEvvoIsland`s, your data will still be serialized and deserialized, albeit on the same machine. This means that some of the most flagrant serialization exceptions can be caught early by testing with `LocalIslandManager`. 
-
--------------------------------------------------------------------------------
-### Configuration
-### Akka Configuration
-TODO: Allow end users to override Akka configuration
 
 -------------------------------------------------------------------------------
 ### Downloads
