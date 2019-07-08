@@ -1,4 +1,4 @@
-package com.evvo.examples.tsp
+package io.evvo.examples.tsp
 
 /**
   * An instance of travelling salesman problem with two objectives

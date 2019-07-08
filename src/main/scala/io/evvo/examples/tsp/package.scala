@@ -1,4 +1,4 @@
-package com.evvo.examples
+package io.evvo.examples
 
 package object tsp {
   /**

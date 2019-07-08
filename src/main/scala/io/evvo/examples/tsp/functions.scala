@@ -1,8 +1,8 @@
 
-package com.evvo.examples.tsp
+package io.evvo.examples.tsp
 
-import com.evvo.agent.{CreatorFunction, CrossoverFunction, ModifierFunction, MutatorFunction}
-import com.evvo.island.population.{Minimize, Objective, Scored}
+import io.evvo.agent.{CreatorFunction, CrossoverFunction, ModifierFunction, MutatorFunction}
+import io.evvo.island.population.{Minimize, Objective, Scored}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer

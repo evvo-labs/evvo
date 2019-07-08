@@ -1,7 +1,7 @@
-package com.evvo.examples.tsp
+package io.evvo.examples.tsp
 
-import com.evvo.agent.defaults.DeleteDominated
-import com.evvo.island.{EvvoIsland, EvvoIslandBuilder, IslandManager, LocalIslandManager, StopAfter}
+import io.evvo.agent.defaults.DeleteDominated
+import io.evvo.island.{EvvoIsland, EvvoIslandBuilder, IslandManager, LocalIslandManager, StopAfter}
 import scala.concurrent.duration._
 
 object TSPMain {

@@ -1,4 +1,4 @@
-package com.evvo.examples.tsp
+package io.evvo.examples.tsp
 
 import org.scalatest.{Matchers, WordSpec}
 
