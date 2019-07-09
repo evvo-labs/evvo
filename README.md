@@ -1,9 +1,21 @@
 # Evvo ![travis master status](https://travis-ci.org/evvo-labs/evvo.svg?branch=master) 
 
-
 Evvo is the Scala framework for distributed [multi-objective](https://en.wikipedia.org/wiki/Multi-objective_optimization) [evolutionary computing](https://en.wikipedia.org/wiki/Evolutionary_computation).
- 
- Here's an example showing how simple it is to set up and solve a basic problem (on one machine) using Evvo. Let's say we want to maximize the number of ones in a `Bitstring`. To represent this objective, we'll need to write an `Objective` (who would have guessed?). Then we can use Evvo to search for `Bitstring`s that satisfy the `Objective`. After running for a second, we'll print the current [pareto frontier](https://en.wikipedia.org/wiki/Pareto_efficiency#Use_in_engineering). 
+
+Evvo supports:
+ * Distributed evolutionary computing on heterogenous networks
+ * User-defined problem and solution types
+ * Sane, but overridable, defaults, almost everywhere
+ * Built-in problem types for common solution type representations, e.x. bitstrings
+ * (planned) Real-time visualization of the evolutionary process
+ * (planned) The ability for users to dynamically add solutions and contraints to the population
+
+####NOTE: This code is provided as a public beta
+Evvo is in beta. The API is not stable, and is guaranteed to change in the future. This is made clear by the version being `v0.*.*`. Once the major version is `1`, the API will be stable. Do not use this code in production. 
+
+-------------------------------------------------------------------------------
+
+Here's an example showing how simple it is to set up and solve a basic problem (on one machine) using Evvo. Let's say we want to maximize the number of ones in a `Bitstring`. To represent this objective, we'll need to write an `Objective` (who would have guessed?). Then we can use Evvo to search for `Bitstring`s that satisfy the `Objective`. After running for a second, we'll print the current [pareto frontier](https://en.wikipedia.org/wiki/Pareto_efficiency#Use_in_engineering). 
 ```scala
 import io.evvo.agent.defaults.{Bitstring, Bitflipper, BitstringGenerator, DeleteDominated}
 import io.evvo.island.{EvvoIsland, LocalIslandManager, StopAfter}
