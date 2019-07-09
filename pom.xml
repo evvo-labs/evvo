@@ -3,27 +3,42 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.evvo</groupId>
-    <artifactId>evvo</artifactId>
+    <artifactId>evvo_${scala.compat.version}</artifactId>
     <version>0.0.0</version>
-    <name>${project.artifactId}</name>
+    <name>${project.groupId}:${project.artifactId}</name>
     <description>The Scala evolutionary computing framework</description>
+    <url>https://evvo.io</url>
     <inceptionYear>2018</inceptionYear>
     <licenses>
         <license>
             <name>Apache License 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
         </license>
     </licenses>
+    <developers>
+        <developer>
+            <name>Julian Zucker</name>
+            <email>julian.zucker@gmail.com</email>
+            <organization>Evvo Labs</organization>
+            <organizationUrl>https://evvo.io</organizationUrl>
+        </developer>
+        <developer>
+            <name>Daniel Rassaby</name>
+            <email>drassaby@gmail.com</email>
+            <organization>Evvo Labs</organization>
+            <organizationUrl>https://evvo.io</organizationUrl>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/evvo-labs/evvo.git</connection>
+        <developerConnection>scm:git:ssh://github.com/evvo-labs/evvo.git</developerConnection>
+        <url>http://github.com/evvo-labs/evvo.git/tree/master</url>
+    </scm>
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
         <scala.compat.version>2.13</scala.compat.version>
         <scala.version>${scala.compat.version}.0</scala.version>
-        <spec2.version>4.2.0</spec2.version>
         <akka.version>2.5.23</akka.version>
-        <json4s.version>3.6.7</json4s.version>
     </properties>
 
     <dependencies>
@@ -39,38 +54,23 @@
         </dependency>
 
         <!-- Akka -->
-        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-cluster -->
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-cluster_${scala.compat.version}</artifactId>
-            <version>${akka.version}</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-actor -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_${scala.compat.version}</artifactId>
             <version>${akka.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-testkit -->
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-cluster -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-testkit_${scala.compat.version}</artifactId>
+            <artifactId>akka-cluster_${scala.compat.version}</artifactId>
             <version>${akka.version}</version>
-            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-slf4j -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-slf4j_${scala.compat.version}</artifactId>
             <version>${akka.version}</version>
-        </dependency>
-
-        <!-- Test -->
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scala.compat.version}</artifactId>
-            <version>3.0.8</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -79,16 +79,27 @@
         </dependency>
 
         <dependency>
-            <groupId>org.json4s</groupId>
-            <artifactId>json4s-native_${scala.compat.version}</artifactId>
-            <version>${json4s.version}</version>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.compat.version}</artifactId>
+            <version>3.0.8</version>
+            <scope>test</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-source-plugin -->
         <dependency>
-            <groupId>org.json4s</groupId>
-            <artifactId>json4s-jackson_${scala.compat.version}</artifactId>
-            <version>${json4s.version}</version>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.1.0</version>
         </dependency>
+
     </dependencies>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>
@@ -104,13 +115,14 @@
                             <goal>compile</goal>
                             <goal>testCompile</goal>
                         </goals>
-
                         <configuration>
                             <recompileMode>incremental</recompileMode>
                             <args>
                                 <arg>-dependencyfile</arg>
                                 <arg>${project.build.directory}/.scala_dependencies</arg>
                                 <arg>-deprecation</arg>
+                                <arg>-feature</arg>
+                                <arg>-language:implicitConversions</arg>
                             </args>
                         </configuration>
                     </execution>
@@ -158,8 +170,7 @@
                     </configLocation>
                     <sourceDirectories>
                         <sourceDirectory>${project.basedir}/src</sourceDirectory>
-                        <sourceDirectory>${project.basedir}/examples/</sourceDirectory>
-                    </sourceDirectories>
+                     </sourceDirectories>
                     <testSourceDirectories>
                         <testSourceDirectory>${project.basedir}/src/test</testSourceDirectory>
                     </testSourceDirectories>
@@ -238,6 +249,82 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <!-- Used for deploying with mvn clean deploy -P release -->
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>net.alchim31.maven</groupId>
+                        <artifactId>scala-maven-plugin</artifactId>
+                        <version>3.3.2</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>add-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sourceDir>src/main/scala</sourceDir>
+                                    <testSourceDir>src/test</testSourceDir>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>doc-jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

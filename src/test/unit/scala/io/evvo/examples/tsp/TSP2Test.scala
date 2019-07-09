@@ -1,5 +1,6 @@
-package io.evvo.examples.tsp
+package unit.scala.io.evvo.examples.tsp
 
+import io.evvo.examples.tsp.TSP2
 import org.scalatest.{Matchers, WordSpec}
 
 class TSP2Test extends WordSpec with Matchers {
