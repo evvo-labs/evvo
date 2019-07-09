@@ -279,7 +279,23 @@ If you use a `LocalIslandManager` to create `LocalEvvoIsland`s, your data will s
 
 -------------------------------------------------------------------------------
 ### Downloads
-We plan to release Evvo so that it can be used with Maven or sbt. The project is not yet stable enough for that to make sense.
+
+Evvo v0.0.0 has been released! Keep in mind, consistent with the warning above: the APIs used here are not stable, and this code is not production-ready. But we hope you have fun experimenting with this release!
+
+From maven:
+```
+<dependency>
+    <groupId>io.evvo</groupId>
+    <artifactId>evvo_2.13</artifactId>
+    <version>0.0.0</version>
+</dependency>
+```
+
+Or SBT:
+```
+resolvers += Resolver.sonatypeRepo("releases")
+libraryDependencies += "io.evvo" %% "evvo" % "0.0.0"
+```
 
 -------------------------------------------------------------------------------
 ### Contributing

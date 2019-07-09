@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.evvo</groupId>
-    <artifactId>evvo</artifactId>
+    <artifactId>evvo_${scala.compat.version}</artifactId>
     <version>0.0.0</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>The Scala evolutionary computing framework</description>
@@ -35,8 +35,6 @@
         <url>http://github.com/evvo-labs/evvo.git/tree/master</url>
     </scm>
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
         <scala.compat.version>2.13</scala.compat.version>
         <scala.version>${scala.compat.version}.0</scala.version>
@@ -86,6 +84,14 @@
             <version>3.0.8</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-source-plugin -->
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
     </dependencies>
 
     <distributionManagement>
@@ -119,22 +125,6 @@
                                 <arg>-language:implicitConversions</arg>
                             </args>
                         </configuration>
-                    </execution>
-                    <execution>
-                        <id>attach-sources</id>
-                        <!-- this is so we don't end with a compile error in maven-compiler-plugin -->
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>doc-jar</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -180,8 +170,7 @@
                     </configLocation>
                     <sourceDirectories>
                         <sourceDirectory>${project.basedir}/src</sourceDirectory>
-                        <sourceDirectory>${project.basedir}/examples/</sourceDirectory>
-                    </sourceDirectories>
+                     </sourceDirectories>
                     <testSourceDirectories>
                         <testSourceDirectory>${project.basedir}/src/test</testSourceDirectory>
                     </testSourceDirectories>
@@ -275,12 +264,50 @@
         </plugins>
     </build>
 
-    <!-- Use with mvn <build-phase> -P release -->
+    <!-- Used for deploying with mvn clean deploy -P release -->
     <profiles>
         <profile>
             <id>release</id>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>net.alchim31.maven</groupId>
+                        <artifactId>scala-maven-plugin</artifactId>
+                        <version>3.3.2</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>add-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sourceDir>src/main/scala</sourceDir>
+                                    <testSourceDir>src/test</testSourceDir>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>doc-jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
