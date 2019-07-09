@@ -12,6 +12,7 @@ package object tsp {
   case class CostMatrix(matrix: IndexedSeq[IndexedSeq[Double]]) {
     /** For each city, each other city sorted by distance by A. */
     private val citiesByDistanceA: IndexedSeq[IndexedSeq[Int]] = {
+      import Ordering.Double.TotalOrdering
       this.matrix.map(distances => distances.indices.sortBy(distances))
     }
 

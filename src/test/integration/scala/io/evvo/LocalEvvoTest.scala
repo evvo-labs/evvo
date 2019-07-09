@@ -1,10 +1,9 @@
-package io.evvo.integration
+package io.evvo
 
-import io.evvo.NullLogger
+import io.evvo.LocalEvvoTestFixtures._
 import io.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import io.evvo.agent.{CreatorFunction, MutatorFunction}
-import io.evvo.integration.LocalEvvoTestFixtures.{NumInversions, ReverseListCreator, Solution, SwapTwoElementsModifier}
-import io.evvo.island.population.{Maximize, Minimize, Objective, ParetoFrontier}
+import io.evvo.island.population.{Minimize, Objective, ParetoFrontier}
 import io.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import io.evvo.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}

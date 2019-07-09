@@ -1,4 +1,4 @@
-package io.evvo.integration
+package io.evvo
 
 import io.evvo.agent.defaults.DeleteDominated
 import io.evvo.agent.{CreatorFunction, MutatorFunction}
@@ -12,7 +12,6 @@ class LocalIslandManagerTest extends WordSpec with Matchers {
 
   "LocalIslandManager" should {
     "Be able to optimize problems" in {
-
       type Solution = String
 
       val startV = new Objective[Solution]("startV", Maximize) {

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalaCompilerConfiguration">
-    <profile name="Maven" modules="evvo">
+    <profile name="Maven 1" modules="evvo">
+      <option name="implicitConversions" value="true" />
+      <option name="deprecationWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
       <parameters>
-          <option name="postfixOps" value="true" />
-          <option name="implicitConversions" value="true" />
         <parameter value="-dependencyfile" />
         <parameter value="$PROJECT_DIR$/target/.scala_dependencies" />
       </parameters>
