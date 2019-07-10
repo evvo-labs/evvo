@@ -7,8 +7,7 @@ import io.evvo.island.population.{Minimize, Objective, Scored}
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-/**
-  * An objective in TSP2.
+/** An objective in TSP2.
   * @param name                  the name of this objective
   * @param cost The cost of getting from each city to each city.
   */
@@ -26,8 +25,7 @@ case class RandomTourCreator(numCities: Int, numSolutions: Int = 10)
   }
 }
 
-/**
-  * Creates a greedy tour, starting from a random city, picking at each step one of the closest N unvisited cities
+/** Creates a greedy tour, starting from a random city, picking at each step one of the closest N unvisited cities
   * as the next step.
   * @param distanceMatrix The matrix with the distances to be greedy about.
   * @param fromBestN The number to choose.

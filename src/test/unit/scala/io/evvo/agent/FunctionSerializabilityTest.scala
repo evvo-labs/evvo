@@ -8,8 +8,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 import scala.collection.Iterable
 
-/**
-  * Creator, Mutator, and Deletor Functions all have to be serializable for akka actor
+/** Creator, Mutator, and Deletor Functions all have to be serializable for akka actor
   * deployment to work.
   */
 class FunctionSerializabilityTest extends WordSpec with Matchers {

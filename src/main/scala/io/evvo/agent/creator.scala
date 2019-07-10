@@ -6,8 +6,7 @@ import io.evvo.island.population.Population
 import scala.concurrent.duration._
 
 
-/**
-  * An [[Agent]] that produces new solutions and adds them to the population.
+/** An [[Agent]] that produces new solutions and adds them to the population.
   *
   * @param create The function that creates new solutions.
   */

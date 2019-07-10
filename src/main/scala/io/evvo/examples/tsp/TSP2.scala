@@ -1,7 +1,6 @@
 package io.evvo.examples.tsp
 
-/**
-  * An instance of travelling salesman problem with two objectives
+/** An instance of travelling salesman problem with two objectives
   *
   *
   * @param cost1 The cost of getting from each city to each, by the first objective.
@@ -14,8 +13,7 @@ case class TSP2(cost1: CostMatrix, cost2: CostMatrix) {
 
 object TSP2 {
 
-  /**
-    * Derives instance of TSP2 from two sets of euclidean coordinates, each corresponding to one cost or distance
+  /** Derives instance of TSP2 from two sets of euclidean coordinates, each corresponding to one cost or distance
     * objective.
     */
   def fromEuclideanPoints(coordsA: IndexedSeq[(Double, Double)],

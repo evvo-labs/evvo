@@ -1,24 +1,18 @@
-/**
-  * Provides default functions that are useful across multiple different applications of Evvo.
+/** Provides default functions that are useful across multiple different applications of Evvo.
   * While it is possible to provide deletors that are useful for any problem type, because deletors
   * can work off of score alone, providing mutators and creators is harder. However, mutators
   * and creators for some common data representations of evocomp problems (bitstrings, vectors
   * of floats, etc) can also be provided.
-  *
   */
 package io.evvo.agent.defaults
 
-import io.evvo.agent.MutatorFunction
-import io.evvo.island.population
-import io.evvo.island.population.Scored
 import io.evvo.agent.{CreatorFunction, DeletorFunction, MutatorFunction}
 import io.evvo.island.population.{Maximize, Minimize, ParetoFrontier, Scored}
 
 
 // =================================================================================================
 // Generic Deletors
-/**
-  * A deletor that deletes the dominated set, in a group of size `groupSize`
+/** A deletor that deletes the dominated set, in a group of size `groupSize`
   *
   * @param numInputs the number of solutions to pull at a time
   */
@@ -32,11 +26,11 @@ case class DeleteDominated[Sol](override val numInputs: Int = 32)
   }
 }
 
-/**
-  * Picks a random objective, then grabs `numInputs` solutions and removes the worst half,
+/** Picks a random objective, then grabs `numInputs` solutions and removes the worst half,
   * as measured by that objective.
-  * @param numInputs                 The number of solutions to request in the contents of each
-  *                                  input set
+  *
+  * @param numInputs The number of solutions to request in the contents of each
+  *                  input set
   */
 case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 32)
   extends DeletorFunction[Sol]("DeleteWorstHalfByRandomObjective") {
@@ -61,8 +55,7 @@ case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 3
 // =================================================================================================
 // Bitstrings
 
-/**
-  * A creator that generates `Bitstring`s by filling them with random bits.
+/** A creator that generates `Bitstring`s by filling them with random bits.
   *
   * @param length         how long each `Bitstring` should be
   * @param proportionOnes the proportion of bits that start as 1
@@ -87,8 +80,7 @@ case class Bitswapper()
   }
 }
 
-/**
-  * A mutator for `Bitstring`s that flips a random bit in the bitstring.
+/** A mutator for `Bitstring`s that flips a random bit in the bitstring.
   *
   * @param numInputs The number of solutions to request in the contents of each
   *                  input set

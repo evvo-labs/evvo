@@ -5,8 +5,7 @@ import io.evvo.island.population.Population
 
 import scala.concurrent.duration._
 
-/**
-  * Grabs some solutions from the population, creates new solutions based on the old ones, and
+/** Grabs some solutions from the population, creates new solutions based on the old ones, and
   * adds the new ones to the population.
   * @param modifier The function that generates new solutions from existing ones.
   */

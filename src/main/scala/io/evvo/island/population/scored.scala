@@ -2,8 +2,7 @@ package io.evvo.island.population
 
 import io.evvo.island.population.HashingStrategy.HashingStrategy
 
-/**
-  * A solution, which has been scored by multiple fitness functions.
+/** A solution, which has been scored by multiple fitness functions.
   *
   * @param score        Maps the name of fitness functions to the score of the solution with respect to them.
   * @param solution     The solution that has been scored.

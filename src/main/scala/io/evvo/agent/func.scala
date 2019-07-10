@@ -3,17 +3,14 @@ package io.evvo.agent
 import io.evvo.island.population.Scored
 
 
-/**
-  * A named function. Common class for all functions that go in agents, so that utilities and
+/** A named function. Common class for all functions that go in agents, so that utilities and
   * tests can be more abstract.
   *
   * @param name The name of the function
   */
 abstract class NamedFunction(val name: String) extends Serializable
 
-/**
-  * A function that creates a new set of solutions.
-  *
+/** A function that creates a new set of solutions.
   * @param name the name of this function
   */
 abstract class CreatorFunction[Sol](name: String) extends NamedFunction(name) {
@@ -21,9 +18,7 @@ abstract class CreatorFunction[Sol](name: String) extends NamedFunction(name) {
   def create(): Iterable[Sol]
 }
 
-/**
-  * A function that derives a new set of solutions from some input set of solutions.
-  *
+/** A function that derives a new set of solutions from some input set of solutions.
   * @param name                      This function's name
   * @param numInputs                 The number of solutions to request in the contents of each
   *                                  input set
@@ -34,14 +29,12 @@ abstract class ModifierFunction[Sol](name: String,
                                      val numInputs: Int = 32,
                                      val shouldRunWithPartialInput: Boolean = true)
   extends NamedFunction(name) {
-  /**
-    * @return The function to call to produce new solutions
+  /** @return The function to call to produce new solutions
     */
   def modify(sols: IndexedSeq[Scored[Sol]]): Iterable[Sol]
 }
 
-/**
-  * A function that uses a one-to-one mapping to derive a new set of solutions from some
+/** A function that uses a one-to-one mapping to derive a new set of solutions from some
   * input set of solutions.
   */
 abstract class MutatorFunction[Sol](name: String,
@@ -56,8 +49,7 @@ abstract class MutatorFunction[Sol](name: String,
     sols.map(_.solution).map(mutate)
   }
 
-  /**
-    * The method to apply to create new solutions.
+  /** The method to apply to create new solutions.
     *
     * @param sol The solution to base the new solution on.
     * @return The new solution, to be added to the population.
@@ -65,8 +57,7 @@ abstract class MutatorFunction[Sol](name: String,
   protected def mutate(sol: Sol): Sol
 }
 
-/**
-  * A function that uses a two-to-one mapping to derive a new set of solutions from some
+/** A function that uses a two-to-one mapping to derive a new set of solutions from some
   * input set of solutions.
   */
 abstract class CrossoverFunction[Sol](name: String,
@@ -88,9 +79,7 @@ abstract class CrossoverFunction[Sol](name: String,
     }.toVector
   }
 
-  /**
-    * Combines two solutions to produce a new one.
-    *
+  /** Combines two solutions to produce a new one.
     * @param sol1 One solution. Order is random, and has no meaning.
     * @param sol2 Another solution. Order is random, and has no meaning.
     * @return The new solution, to be added to the population.
@@ -99,10 +88,8 @@ abstract class CrossoverFunction[Sol](name: String,
 }
 
 
-/**
-  * A function that, given a subset of a population, determines which solutions in that subset
+/** A function that, given a subset of a population, determines which solutions in that subset
   * ought to be deleted.
-  *
   * @param name                      This function's name
   * @param numInputs                 The number of solutions to request in the contents of each
   *                                  input set

@@ -10,16 +10,14 @@ import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
 
-/**
-  * Tests a single island cluster.
+/** Tests a single island cluster.
   *
   * The behavior under test is that an Island can sort a list given the proper modifier and fitness
   * function, and terminate successfully returning a set of lists.
   */
 class LocalEvvoTest extends WordSpec with Matchers {
 
-  /**
-    * Creates a test Evvo instance running locally, that will use basic swapping
+  /** Creates a test Evvo instance running locally, that will use basic swapping
     * to mutate lists, starting in reverse order, scoring them on the number of inversions.
     *
     * @param listLength the length of the lists to sort.
