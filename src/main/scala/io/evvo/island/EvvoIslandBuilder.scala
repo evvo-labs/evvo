@@ -5,8 +5,7 @@ import io.evvo.agent.{CreatorFunction, DeletorFunction, ModifierFunction}
 import io.evvo.island.EvvoIslandBuilder.HAS_SOME
 import io.evvo.island.population.Objective
 
-/**
-  * <p>
+/** <p>
   * A builder for `Local` and `RemoteEvvoIsland`s. See
   * [[http://blog.rafaelferreira.net/2008/07/type-safe-builder-pattern-in-scala.html]]
   * for an explanation of the type parameters. Users should never interact with this class directly,
@@ -65,8 +64,7 @@ case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeleto
   }
 }
 
-/**
-  * A finished EvvoIslandBuilder can build an actual island. See
+/** A finished EvvoIslandBuilder can build an actual island. See
   * [[io.evvo.island.UnfinishedEvvoIslandBuilder]] for more information.
   */
 case class FinishedEvvoIslandBuilder[Sol]
@@ -105,15 +103,12 @@ case class FinishedEvvoIslandBuilder[Sol]
 }
 
 object EvvoIslandBuilder {
-  /**
-    * @return a new, unfinished EvvoIslandBuilder.
-    */
+  /** @return a new, unfinished EvvoIslandBuilder. */
   def apply[Sol](): UnfinishedEvvoIslandBuilder[Sol, HAS_NONE, HAS_NONE, HAS_NONE, HAS_NONE] = {
     UnfinishedEvvoIslandBuilder()
   }
 
-  /**
-    * Implicitly converts a builder with all required fields into a Finished builder.
+  /** Implicitly converts a builder with all required fields into a Finished builder.
     *
     * @param builder the builder to convert
     * @return A FinishedEvvoIslandBuilder with the same data as `builder`

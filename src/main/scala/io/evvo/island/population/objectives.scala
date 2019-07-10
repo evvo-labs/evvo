@@ -1,8 +1,6 @@
 package io.evvo.island.population
 
-/**
-  * An objective is a goal to be maximized (or minimized) by the evolutionary process.
-  *
+/** An objective is a goal to be maximized (or minimized) by the evolutionary process.
   * @param name                  the name of this objective
   * @param optimizationDirection one of `Minimize` or `Maximize`
   * @param precision             how many decimal points to round to. For example, if given 1,

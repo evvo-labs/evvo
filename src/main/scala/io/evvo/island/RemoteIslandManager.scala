@@ -12,9 +12,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.jdk.CollectionConverters._
 
-/**
-  * Common component implementing management of islands.
-  *
+/** Common component implementing management of islands.
   * @param islands the islands to manage
   */
 class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]])
@@ -69,10 +67,7 @@ class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]])
 
 // =================================================================================================
 // Remote manager
-
-/**
-  * Launches and manages multiple `EvvoIslandActor`s.
-  */
+/** Launches and manages multiple `EvvoIslandActor`s. */
 class RemoteIslandManager[Sol](val numIslands: Int,
                                islandBuilder: FinishedEvvoIslandBuilder[Sol],
                                val actorSystemName: String = "EvvoNode",
@@ -130,10 +125,7 @@ class RemoteIslandManager[Sol](val numIslands: Int,
 
 // =================================================================================================
 // Local manager
-
-/**
-  * Launches and manages multiple `LocalEvvoIsland`s.
-  */
+/** Launches and manages multiple `LocalEvvoIsland`s. */
 class LocalIslandManager[Sol](val numIslands: Int,
                               islandBuilder: FinishedEvvoIslandBuilder[Sol])
   extends EvolutionaryProcess[Sol] {

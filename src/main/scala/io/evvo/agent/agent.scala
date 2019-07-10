@@ -5,9 +5,7 @@ import io.evvo.island.population.Population
 
 import scala.concurrent.duration._
 
-/**
-  * The parent trait for all types of evolutionary agents.
-  */
+/** The parent trait for all types of evolutionary agents. */
 trait Agent[Sol] {
   def start(): Unit
 
@@ -16,8 +14,7 @@ trait Agent[Sol] {
   def numInvocations: Int
 }
 
-/**
-  * Common behavior for all agents. Orchestrates the main loop, decides how often to run, etc.
+/** Common behavior for all agents. Orchestrates the main loop, decides how often to run, etc.
   * All that is left to the subclasses is the actual content of the main loop.
   * @param population The population to add solutions to.
   * @param strategy Tells the CreatorAgent how often to run.
@@ -105,8 +102,7 @@ abstract class AAgent[Sol](private val strategy: AgentStrategy,
     }
   }
 
-  /**
-    * Performs one operation on the population. Once the agent is started, this method will be
+  /** Performs one operation on the population. Once the agent is started, this method will be
     * called repeatedly until the agent is stopped.
     */
   protected def step(): Unit

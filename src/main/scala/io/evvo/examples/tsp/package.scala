@@ -1,13 +1,11 @@
 package io.evvo.examples
 
 package object tsp {
-  /**
-    * Represents an ordered sequence of visited cities by index.
+  /** Represents an ordered sequence of visited cities by index.
     */
   type Tour = IndexedSeq[Int]
 
-  /**
-    * When indexed by (from,to) gives cost from `from` to `to` by this objective.
+  /** When indexed by (from,to) gives cost from `from` to `to` by this objective.
     */
   case class CostMatrix(matrix: IndexedSeq[IndexedSeq[Double]]) {
     /** For each city, each other city sorted by distance by A. */
@@ -26,8 +24,7 @@ package object tsp {
       */
     def closestNCities(origin: Int, n: Int): IndexedSeq[Int] = citiesByDistanceA(origin).tail.take(n)
 
-    /**
-      * Same as above, but it only returns the closest N that don't pass the filter.
+    /** Same as above, but it only returns the closest N that don't pass the filter.
       */
     def closesNCitiesOtherThan(origin: Int, n: Int, ignore: Int => Boolean): IndexedSeq[Int] = {
       citiesByDistanceA(origin).tail.filterNot(ignore).take(n)

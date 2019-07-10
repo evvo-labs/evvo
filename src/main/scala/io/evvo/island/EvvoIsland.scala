@@ -8,15 +8,14 @@ import akka.event.{LoggingAdapter, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
 import io.evvo.agent._
-import io.evvo.island.population.{Objective, ParetoFrontier, Population, Scored, StandardPopulation}
+import io.evvo.island.population._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, _}
 import scala.concurrent.{Await, Future}
 
-/**
-  * This component is used to do all the actual work of managing the island, without managing
+/** This component is used to do all the actual work of managing the island, without managing
   * or being tied to where the island is deployed to.
   */
 private class EvvoIsland[Sol]
@@ -30,8 +29,7 @@ private class EvvoIsland[Sol]
 (implicit log: LoggingAdapter)
   extends EvolutionaryProcess[Sol] {
 
-  /**
-    * Serialize and deserialize the given value, returning the deserialized data.
+  /** Serialize and deserialize the given value, returning the deserialized data.
     * Roundtripping like this allows all Islands to catch (some) serialization bugs before
     * deploying remotely.
     *
@@ -125,8 +123,7 @@ private class EvvoIsland[Sol]
 }
 
 object EvvoIsland {
-  /**
-    * @tparam Sol the type of solutions processeed by this island.
+  /** @tparam Sol the type of solutions processed by this island.
     * @return A builder for an EvvoIsland.
     */
   def builder[Sol](): UnfinishedEvvoIslandBuilder[Sol, _, _, _, _] = EvvoIslandBuilder[Sol]()
@@ -136,8 +133,7 @@ object EvvoIsland {
 // =================================================================================================
 // Local EvvoIsland wrapper
 
-/**
-  * An island that can be run locally. Does not connect to any other networked island, but is good
+/** An island that can be run locally. Does not connect to any other networked island, but is good
   * for testing agent functions without having to spin up a cluster.
   */
 class LocalEvvoIsland[Sol]
@@ -218,8 +214,7 @@ object LocalLogger extends LoggingAdapter {
 // =================================================================================================
 // Remote EvvoIsland
 
-/**
-  * A single-island evolutionary system, which will run on one computer (although on multiple
+/** A single-island evolutionary system, which will run on one computer (although on multiple
   * threads). Because it is an Akka actor, generally people will use SingleIslandEvvo.Wrapped
   * to use it in a type-safe way, instead of throwing messages.
   */
@@ -280,8 +275,7 @@ class RemoteEvvoIsland[Sol]
 }
 
 object RemoteEvvoIsland {
-  /**
-    * This is a wrapper for ActorRefs of SingleIslandEvvo actors, serving as an
+  /** This is a wrapper for ActorRefs of SingleIslandEvvo actors, serving as an
     * adapter to the EvolutionaryProcess interface. This allows strongly-typed code to
     * still use Akka for async message passing.
     *
