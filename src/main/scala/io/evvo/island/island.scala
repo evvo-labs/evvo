@@ -60,8 +60,7 @@ private class EvvoIsland[Sol]
   /** The index of the current "target" that will receive the next emigration. */
   private var currentEmigrationTargetIndex: Int = 0
 
-  override def runAsync(stopAfter: StopAfter)
-  : Future[Unit] = {
+  override def runAsync(stopAfter: StopAfter): Future[Unit] = {
     Future {
       log.info(s"Island running with stopAfter=${stopAfter}")
 
