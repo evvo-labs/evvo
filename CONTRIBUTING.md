@@ -2,20 +2,6 @@
 First of all, thanks for looking at this page and considering contributing! We'd love to have you, and if you have any questions or this document is unclear, please let us know! Open an issue with your question, or email any contributor or admin at the emails found in our GitHub profiles.
 
 ----------------------------------------------------------------------------------------------------
-### Modules Overview
-#### [`agent`](./src/main/scala/io/evvo/agent/)
-This holds the agents (classes that extend `TAgent`), and supporting classes such as strategies. Each agent extends an abstract class ('`AAgent`'), which  implements common features of agents: logging, using a separate thread for work, and having that thread wait the amount of time that the strategies say to. New agent classes should extend 
-
-#### [`island`](./src/main/scala/io/evvo/island/)
-Implements islands and clusters of islands. The main point of this package are the classes that extend `TEvolutionaryProcess`. These classes are ready-to-use implementations of evolutionary processes, that only need to have creators, fitness functions, etc. plugged in to start solving problems. Each island has its own population.
-
-#### [`island/population`](src/main/scala/io/evvo/island/population/)
-Holds `Population`, `StandardPopulation`, and the classes required to support them. The population is a set of scored ('`Scored`') solutions, where uniqueness and equality are (by default) measured by the score and not the solution itself. This is for speed (we can hash a smaller piece of data - the score mapping), and for speed (because we have fewer solutions in the population, and anything with duplicate scores should be just as good as a solution).
-
-
-
-
-----------------------------------------------------------------------------------------------------
 ### Git Workflow
 We are using tagged releases on master to indicate milestones. There is no develop branch, so if you are used to git flow, things will be a little different. Every feature to be released starts on a branch named `feature/…`, is merged into `master` after a pull request, and then is considered "released" only once we have a tagged release after that commit.
 
@@ -96,6 +82,40 @@ Running commit-msg hooks
 ### IntelliJ
 We all use IntelliJ as our primary editor for this project. If you prefer to use a different editor, let us know - there are probably things we failed to describe in this file because IntelliJ set them up for us. To set up IntelliJ for this project, you can simply clone it from Github using the "Import from VCS" dialogue, or clone it from the command line and then use the "Open project" dialogue.
 
+
+----------------------------------------------------------------------------------------------------
+### Locally Installing Evvo
+If you are developing Evvo, for example patching it with changes you want for a project, you may want to use a local maven repository, so that your changes to Evvo can be seen by your project. Following the guide [here](https://sookocheff.com/post/java/local-maven-repository/):
+
+Create a directory named `maven-repo` in your project, then deploy your current version of evvo to that repository by running the following command from the root  of `evvo`.
+```
+mvn deploy:deploy-file \
+  -Durl=file:///<path to your project>/maven-repo \
+  -Dfile=target/evvo_2.13-0.0.0.jar \
+  -DgroupId=io.evvo \
+  -DartifactId=evvo-dev \
+  -Dpackaging=jar \
+  -Dversion=0.0.0
+```
+Add the directory as a repository by changing your project's POM:
+```
+<repositories>
+  <repository>
+    <id>project.local</id>
+    <name>project</name>
+    <url>file:${project.basedir}/repo</url>
+  </repository>
+</repositories>
+```
+Add this new version of evvo, called evvo-dev, to your project's pom:
+```
+<dependency>
+  <groupId>com.sookocheff</groupId>
+  <artifactId>devlib</artifactId>
+  <version>0.1</version>
+</dependency>
+```
+And you should be good to go. 
 
 ----------------------------------------------------------------------------------------------------
 #### Next Steps
