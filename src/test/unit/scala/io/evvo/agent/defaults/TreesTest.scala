@@ -63,14 +63,18 @@ class TreesTest extends WordSpec with Matchers {
       leftSkewedNode.getSubtree(leftSkewedNode.pathToRandomLeaf()).get shouldBe BTLeaf(0)
     }
 
-
     "return each leaf with equal probability" in {
       val paths = Vector.fill(1000)(leftSkewedNode.pathToRandomLeaf())
+      // There are five leaves, so expect 1000 / 5 = 200, use 150 for confidence interval
+      assert(paths.distinct.length == 5)
       assert(paths.groupBy(x => x).view.mapValues(_.length).values.forall(_ > 150))
     }
 
     "return each subtree with equal probability" in {
-      leftSkewedNode.pathToRandomLeaf()
+      val paths = Vector.fill(1000)(leftSkewedNode.pathToRandomSubtree())
+      // There are nine subtrees, so expect 1000 / 9
+      assert(paths.distinct.length == 9)
+      assert(paths.groupBy(x => x).view.mapValues(_.length).values.forall(_ > 80))
     }
 
 
