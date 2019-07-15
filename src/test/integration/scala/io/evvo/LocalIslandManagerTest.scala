@@ -44,7 +44,7 @@ class LocalIslandManagerTest extends WordSpec with Matchers {
         .addModifier(mutator)
         .addDeletor(DeleteDominated[Solution]())
 
-      val manager = new LocalIslandManager(4, builder)
+      val manager = new LocalIslandManager(10, builder)
 
       manager.runBlocking(StopAfter(1000.millis))
 

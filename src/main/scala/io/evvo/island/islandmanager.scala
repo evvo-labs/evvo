@@ -26,8 +26,11 @@ class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]])
   override def runAsync(stopAfter: StopAfter)
   : Future[Unit] = {
     Future {
-      val runIslands = this.islands.map(_.runAsync(stopAfter))
-      runIslands.foreach(Await.result(_, Duration.Inf))
+      // Represents all islands having completed their runs.
+      val allIslandsRun = Future.sequence(this.islands.map(_.runAsync(stopAfter)))
+      // Wait for that to happen
+      Await.result(allIslandsRun, Duration.Inf)
+      // Then perform cleanup
       this.finalParetoFrontier = Some(this.currentParetoFrontier())
       this.islands.foreach(_.poisonPill())
     }
