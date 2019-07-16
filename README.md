@@ -10,7 +10,8 @@ Evvo supports:
  * (planned) Real-time visualization of the evolutionary process
  * (planned) The ability for users to dynamically add solutions and contraints to the population
 
-####NOTE: This code is provided as a public beta
+#### NOTE: This code is provided as a public beta
+
 Evvo is in beta. The API is not stable, and is guaranteed to change in the future. This is made clear by the version being `v0.*.*`. Once the major version is `1`, the API will be stable. Do not use this code in production. 
 
 -------------------------------------------------------------------------------
