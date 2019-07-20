@@ -12,6 +12,18 @@ import io.evvo.island.population.HashingStrategy.HashingStrategy
 case class Scored[Sol](score: Map[(String, OptimizationDirection), Double],
                        solution: Sol,
                        hashStrategy: HashingStrategy = HashingStrategy.ON_SCORES) {
+  /** @return This Scored's score on the given objective.
+    * @throws IllegalArgumentException if the given strategy isn't in this Scored.
+    */
+  def scoreOn(objective: String): Double = {
+    for (((name, direction), value) <- score) {
+      if (name == objective)  {
+        return value
+      }
+    }
+    throw new IllegalArgumentException(f"No score  for $objective in $this")
+  }
+
   /** @return Whether this solution dominates that one. */
   def dominates(other: Scored[Sol]): Boolean = {
     // There's likely more work to be done here, as zipping together two
