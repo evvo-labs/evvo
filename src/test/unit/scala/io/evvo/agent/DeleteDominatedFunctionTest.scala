@@ -1,7 +1,7 @@
 package io.evvo.agent
 
 import org.scalatest.{Matchers, WordSpec}
-import io.evvo.agent.defaults.DeleteDominated
+import io.evvo.builtin.deletors.DeleteDominated
 import io.evvo.island.population
 import io.evvo.island.population.{Maximize, Minimize, Scored}
 
