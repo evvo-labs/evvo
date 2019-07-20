@@ -6,16 +6,15 @@ import io.evvo.island.population.Population
 import scala.concurrent.duration._
 
 
-/** An [[Agent]] that produces new solutions and adds them to the population.
+/** An [[io.evvo.agent.Agent]] that produces new solutions and adds them to the population.
   *
   * @param create The function that creates new solutions.
   */
-case class CreatorAgent[Sol](create: CreatorFunction[Sol],
-                             population: Population[Sol],
-                             strategy: AgentStrategy = CreatorAgentDefaultStrategy())
-                            (implicit val logger: LoggingAdapter)
+class CreatorAgent[Sol](create: CreatorFunction[Sol],
+                        population: Population[Sol],
+                        strategy: AgentStrategy = CreatorAgentDefaultStrategy())
+                       (implicit logger: LoggingAdapter)
   extends AAgent[Sol](strategy, population, create.name)(logger) {
-
   override protected def step(): Unit = {
     val toAdd = create.create()
     logger.debug(s"Created solutions, $toAdd , $this")
@@ -23,6 +22,15 @@ case class CreatorAgent[Sol](create: CreatorFunction[Sol],
   }
 
   override def toString: String = s"CreatorAgent[$name]"
+}
+
+object CreatorAgent {
+  /** @return A new [[io.evvo.agent.CreatorAgent]]. */
+  def apply[Sol](create: CreatorFunction[Sol],
+                 population: Population[Sol],
+                 strategy: AgentStrategy = CreatorAgentDefaultStrategy())
+                (implicit logger: LoggingAdapter): CreatorAgent[Sol] =
+    new CreatorAgent(create, population, strategy)
 }
 
 case class CreatorAgentDefaultStrategy() extends AgentStrategy {

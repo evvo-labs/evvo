@@ -23,10 +23,10 @@ trait Agent[Sol] {
   *               or slf4s interface.
   * @param name The name of this agent. Used for logging.
   */
-abstract class AAgent[Sol](private val strategy: AgentStrategy,
-                           private val population: Population[Sol],
+abstract class AAgent[Sol](protected val strategy: AgentStrategy,
+                           protected val population: Population[Sol],
                            protected val name: String)
-                          (private implicit val logger: LoggingAdapter)
+                          (implicit protected val logger: LoggingAdapter)
   extends Agent[Sol] {
 
   /** The number of  times this agent has run its function. */
