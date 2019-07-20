@@ -1,11 +1,12 @@
 package io.evvo.island.population
 
-import scala.collection.mutable
+import scala.util.chaining._
 
 /** A set of solutions, none of which dominate each other.
+  *
   * @param solutions A non-dominated set.
   */
-case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
+case class ParetoFrontier[Sol] private(solutions: Set[Scored[Sol]]) {
   if (!ParetoFrontier.isParetoFrontier(solutions)) {
     throw new IllegalArgumentException(
       s"""
@@ -19,6 +20,32 @@ case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
       case ((name, dir), score) => name -> score
     }.toMap).mkString("\n  ")
     f"ParetoFrontier(\n  ${contents})"
+  }
+
+  /** @param sortByObjective The objective to sort by.
+    * @return A table-formatted string of the scores in the Pareto frontier.
+    */
+  def toTable(sortByObjective: String = ""): String = {
+    val objectives = solutions.head.score.keys.map(_._1).toVector
+    // This is the index in objectives to use as the sort key, either the index of the
+    // provided objective or the first objective
+    val sortByKey = objectives
+      .indexOf(sortByObjective)
+      .pipe((x: Int) => if (x != -1) {x} else {0})
+
+    val stringifiedSolutions = solutions.toIndexedSeq
+      // Sort by the first objective, for some semblance of order
+      .map(s => objectives.map(s.scoreOn))
+      .sortBy(_(sortByKey))(Ordering.Double.TotalOrdering)
+      .map(_.mkString("\t"))
+      .mkString("\n")
+
+    s"""
+       |Pareto Frontier:
+       |------------------------------------------------------------
+       |${objectives.mkString("\t")}
+       |$stringifiedSolutions
+      """.stripMargin
   }
 
   /** @return Whether this Pareto frontier contains a point that dominates the given solution. */
