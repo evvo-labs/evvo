@@ -70,5 +70,19 @@ class ParetoFrontierTest extends WordSpec with Matchers {
       assert(!pf3.dominates(sol3))
       assert(!pf3.dominatedBy(sol3))
     }
+
+    "Sort its output by a specified objective in toTable" in {
+      val s02 = Scored[Int](Map(("a", Minimize) -> 0, ("b", Minimize) -> 2), 1)
+      val s11 = Scored[Int](Map(("a", Minimize) -> 1, ("b", Minimize) -> 1), 2)
+      val s20 = Scored[Int](Map(("a", Minimize) -> 3, ("b", Minimize) -> 0), 3)
+      val pf = ParetoFrontier(Set[Scored[Int]](s02, s11, s20))
+
+      val str1 = pf.toTable("a")
+      str1.indexOf("2") should be < str1.indexOf("3")
+
+      val str2 = pf.toTable("b")
+      // 3,0 should be before 0,2 if sorting by b
+      str2.indexOf("3") should be < str2.indexOf("2")
+    }
   }
 }
