@@ -1,8 +1,8 @@
 package io.evvo
 
 import io.evvo.LocalEvvoTestFixtures._
-import io.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
 import io.evvo.agent.{CreatorFunction, MutatorFunction}
+import io.evvo.builtin.deletors.DeleteWorstHalfByRandomObjective
 import io.evvo.island.population.{Minimize, Objective, ParetoFrontier}
 import io.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import io.evvo.tags.{Performance, Slow}

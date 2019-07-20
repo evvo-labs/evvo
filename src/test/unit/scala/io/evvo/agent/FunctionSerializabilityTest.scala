@@ -2,7 +2,7 @@ package io.evvo.agent
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
 
-import io.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
+import io.evvo.builtin.deletors.DeleteWorstHalfByRandomObjective
 import io.evvo.island.population.Scored
 import org.scalatest.{Matchers, WordSpec}
 

@@ -1,7 +1,8 @@
 package io.evvo.island
 
-import io.evvo.agent.defaults.{Bitflipper, Bitstring, BitstringGenerator, DeleteDominated}
-import io.evvo.island.population.{Maximize, Objective, ParetoFrontier, Scored}
+import io.evvo.builtin.bitstrings.{Bitflipper, Bitstring, BitstringGenerator}
+import io.evvo.builtin.deletors.DeleteDominated
+import io.evvo.island.population.{Maximize, Objective}
 import org.scalatest.{Matchers, WordSpec}
 
 class EvvoIslandBuilderTest extends WordSpec with Matchers {
@@ -10,7 +11,7 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
       .addObjective(new Objective[Bitstring]("Three", Maximize) {
         override protected def objective(sol: Bitstring): Double = 3d
       })
-      .addCreator(BitstringGenerator(length=16))
+      .addCreator(BitstringGenerator(length = 16))
       .addModifier(Bitflipper())
       .addDeletor(DeleteDominated())
       .withImmigrationStrategy(ElitistImmigrationStrategy)
@@ -22,7 +23,7 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
     "allow adding items in any order" in {
       val builder = EvvoIsland.builder[Bitstring]()
         .addDeletor(DeleteDominated())
-        .addCreator(BitstringGenerator(length=16))
+        .addCreator(BitstringGenerator(length = 16))
         .addObjective(new Objective[Bitstring]("Three", Maximize) {
           override protected def objective(sol: Bitstring): Double = 3d
         })
@@ -36,7 +37,7 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
         .addObjective(new Objective[Bitstring]("Three", Maximize) {
           override protected def objective(sol: Bitstring): Double = 3d
         })
-        .addCreator(BitstringGenerator(length=16))
+        .addCreator(BitstringGenerator(length = 16))
         .addModifier(Bitflipper())
         .addDeletor(DeleteDominated())
         .buildLocalEvvo()
@@ -45,8 +46,7 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
     "require at least one Objective, Creator, Mutator, Deletor" in {
       // Leaving this commented out: it's a compile time error. But I'm leaving it here
       // to inform people in the future.
-//       val builder = EvvoIsland.builder[Bitstring]().buildLocalEvvo()
+      // val builder = EvvoIsland.builder[Bitstring]().buildLocalEvvo()
     }
   }
-
 }

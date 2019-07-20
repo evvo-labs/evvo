@@ -1,4 +1,4 @@
-package io.evvo.agent.defaults
+package io.evvo.builtin
 
 import io.evvo.agent.{CreatorFunction, CrossoverFunction, MutatorFunction}
 

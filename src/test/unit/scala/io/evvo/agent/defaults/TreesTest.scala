@@ -1,6 +1,6 @@
 package io.evvo.agent.defaults
 
-import io.evvo.agent.defaults.trees._
+import io.evvo.builtin.trees._
 import org.scalatest.{Matchers, WordSpec}
 
 class TreesTest extends WordSpec with Matchers {

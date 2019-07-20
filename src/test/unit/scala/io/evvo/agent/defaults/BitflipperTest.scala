@@ -1,5 +1,6 @@
 package io.evvo.agent.defaults
 
+import io.evvo.builtin.bitstrings.{Bitflipper, Bitstring}
 import org.scalatest.WordSpec
 
 class BitflipperTest extends WordSpec {

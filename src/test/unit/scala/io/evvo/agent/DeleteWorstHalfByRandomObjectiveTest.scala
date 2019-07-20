@@ -1,6 +1,6 @@
 package io.evvo.agent
 
-import io.evvo.agent.defaults.DeleteWorstHalfByRandomObjective
+import io.evvo.builtin.deletors.DeleteWorstHalfByRandomObjective
 import io.evvo.island.population.{Maximize, Minimize, Scored}
 import org.scalatest.{Matchers, WordSpec}
 
