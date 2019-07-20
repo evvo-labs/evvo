@@ -65,12 +65,8 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
     deletorAgent = DeletorAgent(deletorFunc, pop, strategy)
     agents = Vector(creatorAgent, modifierAgent, deletorAgent)
 
-    agentFunctionCalled = mutable.Map(
-      "create" -> false,
-      "modify" -> false,
-      "delete" -> false)
+    agentFunctionCalled = mutable.Map("create" -> false, "modify" -> false, "delete" -> false)
   }
-
 
   "All agents" should {
     "step when told to start, stop stepping when told to stop" taggedAs Slow in {

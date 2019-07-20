@@ -1,6 +1,5 @@
 # Changes relative to https://github.com/sds/overcommit/blob/master/config/default.yml
 PreCommit:
-
   ForbiddenBranches:
     enabled: true
     description: Don't commit to master
@@ -9,6 +8,11 @@ PreCommit:
   Scalastyle:
     enabled: true
     flags: ['-w', 'true', '-c', './project/scalastyle_config.xml', 'src']
+
+  # brew install --HEAD olafurpg/scalafmt/scalafmt
+  CustomScript:
+    enabled: true
+    required_executable: 'scalafmt'
 
   JsonSyntax:
     enabled: true

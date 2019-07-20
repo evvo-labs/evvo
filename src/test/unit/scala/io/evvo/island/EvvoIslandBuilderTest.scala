@@ -7,7 +7,8 @@ import org.scalatest.{Matchers, WordSpec}
 
 class EvvoIslandBuilderTest extends WordSpec with Matchers {
   "EvvoIslandBuilders" should {
-    val completeBuilder = EvvoIsland.builder[Bitstring]()
+    val completeBuilder = EvvoIsland
+      .builder[Bitstring]()
       .addObjective(new Objective[Bitstring]("Three", Maximize) {
         override protected def objective(sol: Bitstring): Double = 3d
       })
@@ -21,7 +22,8 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
     }
 
     "allow adding items in any order" in {
-      val builder = EvvoIsland.builder[Bitstring]()
+      val builder = EvvoIsland
+        .builder[Bitstring]()
         .addDeletor(DeleteDominated())
         .addCreator(BitstringGenerator(length = 16))
         .addObjective(new Objective[Bitstring]("Three", Maximize) {
@@ -33,7 +35,8 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
     }
 
     "allow building without immigration strategy" in {
-      EvvoIsland.builder[Bitstring]()
+      EvvoIsland
+        .builder[Bitstring]()
         .addObjective(new Objective[Bitstring]("Three", Maximize) {
           override protected def objective(sol: Bitstring): Double = 3d
         })

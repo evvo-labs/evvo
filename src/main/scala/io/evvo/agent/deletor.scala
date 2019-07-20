@@ -9,11 +9,12 @@ import scala.concurrent.duration._
   *
   * @param delete A function that, given a set of solutions, tells you which to delete.
   */
-class DeletorAgent[Sol](delete: DeletorFunction[Sol],
-                        population: Population[Sol],
-                        strategy: AgentStrategy = DeletorAgentDefaultStrategy())
-                       (implicit logger: LoggingAdapter)
-  extends AAgent[Sol](strategy, population, delete.name)(logger) {
+class DeletorAgent[Sol](
+    delete: DeletorFunction[Sol],
+    population: Population[Sol],
+    strategy: AgentStrategy = DeletorAgentDefaultStrategy()
+)(implicit logger: LoggingAdapter)
+    extends AAgent[Sol](strategy, population, delete.name)(logger) {
 
   override protected def step(): Unit = {
     val in = population.getSolutions(delete.numInputs)
@@ -22,8 +23,10 @@ class DeletorAgent[Sol](delete: DeletorFunction[Sol],
       logger.debug(f"Deleted ${toDelete.iterator.size} solutions out of ${in.size}")
       population.deleteSolutions(toDelete)
     } else {
-      logger.debug(s"${this}: not enough solutions in population: " +
-        s"got ${in.length}, wanted ${delete.numInputs}")
+      logger.debug(
+        s"${this}: not enough solutions in population: " +
+          s"got ${in.length}, wanted ${delete.numInputs}"
+      )
     }
   }
 
@@ -31,14 +34,15 @@ class DeletorAgent[Sol](delete: DeletorFunction[Sol],
 }
 
 object DeletorAgent {
+
   /** @return a new [[io.evvo.agent.DeletorAgent]] */
-  def apply[Sol](delete: DeletorFunction[Sol],
-                 population: Population[Sol],
-                 strategy: AgentStrategy = DeletorAgentDefaultStrategy())
-                (implicit logger: LoggingAdapter): DeletorAgent[Sol] =
+  def apply[Sol](
+      delete: DeletorFunction[Sol],
+      population: Population[Sol],
+      strategy: AgentStrategy = DeletorAgentDefaultStrategy()
+  )(implicit logger: LoggingAdapter): DeletorAgent[Sol] =
     new DeletorAgent(delete, population, strategy)
 }
-
 
 case class DeletorAgentDefaultStrategy() extends AgentStrategy {
   override def waitTime(populationInformation: PopulationInformation): Duration = {

@@ -4,6 +4,7 @@ import io.evvo.island.population.{Population, Scored}
 
 /** Determines which solutions in a population are chosen for emigration. */
 trait EmigrationStrategy {
+
   /** Determines which solutions in a population are chosen for emigration.
     * @param population The population to choose from.
     * @tparam Sol The type of the solutions in the population and return type. This method, not

@@ -24,8 +24,8 @@ class DeleteDominatedFunctionTest extends WordSpec with Matchers {
     "keep non-dominated set, if there are multiple" in {
       val toDelete = deleteDominated(Vector(scored1, scored3, scored2))
       toDelete should have length 2
-      toDelete should contain (scored1)
-      toDelete should contain (scored2)
+      toDelete should contain(scored1)
+      toDelete should contain(scored2)
       toDelete should not contain (scored3)
     }
   }

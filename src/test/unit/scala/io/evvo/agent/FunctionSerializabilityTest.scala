@@ -122,7 +122,6 @@ class FunctionSerializabilityTest extends WordSpec with Matchers {
         }
       }
 
-
       serializationRoundtrip(new C())
       serializationRoundtrip(new M())
       serializationRoundtrip(new D())

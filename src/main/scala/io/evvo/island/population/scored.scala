@@ -9,15 +9,18 @@ import io.evvo.island.population.HashingStrategy.HashingStrategy
   * @param hashStrategy How to hash this scored solution - on the score, or on the solution?
   * @tparam Sol The type of the solution that has been scored.
   */
-case class Scored[Sol](score: Map[(String, OptimizationDirection), Double],
-                       solution: Sol,
-                       hashStrategy: HashingStrategy = HashingStrategy.ON_SCORES) {
+case class Scored[Sol](
+    score: Map[(String, OptimizationDirection), Double],
+    solution: Sol,
+    hashStrategy: HashingStrategy = HashingStrategy.ON_SCORES
+) {
+
   /** @return This Scored's score on the given objective.
     * @throws IllegalArgumentException if the given strategy isn't in this Scored.
     */
   def scoreOn(objective: String): Double = {
     for (((name, direction), value) <- score) {
-      if (name == objective)  {
+      if (name == objective) {
         return value
       }
     }
@@ -38,16 +41,18 @@ case class Scored[Sol](score: Map[(String, OptimizationDirection), Double],
     // that solutions that are equal don't dominate each other.
     val zippedScores = this.score.zip(other.score)
     zippedScores.forall({
-      case (((name1, direction), score1), ((name2, _), score2)) => direction match {
-        case Minimize => score1 <= score2
-        case Maximize => score1 >= score2
-      }
+      case (((name1, direction), score1), ((name2, _), score2)) =>
+        direction match {
+          case Minimize => score1 <= score2
+          case Maximize => score1 >= score2
+        }
     }) &&
     zippedScores.exists({
-      case (((name1, direction), score1), ((name2, _), score2)) => direction match {
-        case Minimize => score1 != score2
-        case Maximize => score1 != score2
-      }
+      case (((name1, direction), score1), ((name2, _), score2)) =>
+        direction match {
+          case Minimize => score1 != score2
+          case Maximize => score1 != score2
+        }
     })
 
   }
@@ -66,7 +71,6 @@ case class Scored[Sol](score: Map[(String, OptimizationDirection), Double],
     case _ => false
   }
 }
-
 
 object HashingStrategy extends Enumeration {
   type HashingStrategy = Value

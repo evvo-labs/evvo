@@ -29,20 +29,19 @@ class ParetoFrontierTest extends WordSpec with Matchers {
 
     "Respect the direction objectives want to be optimized in" in {
       val lowMinSolution = Scored[Double](Map(("a", Minimize) -> 1d), 2)
-      val highMinSolution =  Scored[Double](Map(("a", Minimize) -> 3d), 4)
+      val highMinSolution = Scored[Double](Map(("a", Minimize) -> 3d), 4)
       val minPop = Set[Scored[Double]](lowMinSolution, highMinSolution)
       val minParetoFrontier = ParetoFrontier(minPop).solutions
 
       minParetoFrontier should contain(lowMinSolution)
-      minParetoFrontier should not contain(highMinSolution)
-
+      minParetoFrontier should not contain (highMinSolution)
 
       val lowMaxSolution = Scored[Double](Map(("a", Maximize) -> 1d), 2)
-      val highMaxSolution =  Scored[Double](Map(("a", Maximize) -> 3d), 4)
+      val highMaxSolution = Scored[Double](Map(("a", Maximize) -> 3d), 4)
       val maxPop = Set[Scored[Double]](lowMaxSolution, highMaxSolution)
       val maxParetoFrontier = ParetoFrontier(maxPop).solutions
 
-      maxParetoFrontier should not contain(lowMaxSolution)
+      maxParetoFrontier should not contain (lowMaxSolution)
       maxParetoFrontier should contain(highMaxSolution)
     }
 

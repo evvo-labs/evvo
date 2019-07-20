@@ -3,7 +3,7 @@ package io.evvo.agent
 import io.evvo.island.population.Scored
 import org.scalatest.WordSpec
 
-class ModifierFunctionTest extends WordSpec{
+class ModifierFunctionTest extends WordSpec {
   "ModifierFunction" should {
     "call its function on the input set" in {
 

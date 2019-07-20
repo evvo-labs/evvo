@@ -16,7 +16,6 @@ class TreesTest extends WordSpec with Matchers {
       leaf.pathToRandomSubtree() should be(empty)
     }
 
-
     "always return an empty path when searching for a subtree" in {
       leaf.pathToRandomSubtree() should be(empty)
     }
@@ -42,21 +41,17 @@ class TreesTest extends WordSpec with Matchers {
     val node34: BTNode[String, Int] = BTNode("hi", BTLeaf(3), BTLeaf(4))
     val node3434: BTNode[String, Int] = BTNode("hi2", node34, node34)
     val leftSkewedNode: BTNode[String, Int] =
-      BTNode("",
-        BTNode("",
-          BTNode("",
-            BTNode("",
-              BTLeaf(0), BTLeaf(0)),
-            BTLeaf(0)),
-          BTLeaf(0)),
-        BTLeaf(0))
+      BTNode(
+        "",
+        BTNode("", BTNode("", BTNode("", BTLeaf(0), BTLeaf(0)), BTLeaf(0)), BTLeaf(0)),
+        BTLeaf(0)
+      )
 
     "have the correct number of leaves" in {
       node34.numLeaves shouldBe 2
       node3434.numLeaves shouldBe 4
       leftSkewedNode.numLeaves shouldBe 5
     }
-
 
     "return a possible path when searching for a leaf" in {
       node34.getSubtree(node34.pathToRandomLeaf()) should not be None
@@ -77,7 +72,6 @@ class TreesTest extends WordSpec with Matchers {
       assert(paths.groupBy(x => x).view.mapValues(_.length).values.forall(_ > 80))
     }
 
-
     "allow getting a subtree with an empty path" in {
       node34.getSubtree(Seq()).get shouldBe node34
       node3434.getSubtree(Seq()).get shouldBe node3434
@@ -95,7 +89,7 @@ class TreesTest extends WordSpec with Matchers {
     }
 
     "allow setting subtrees at non-empty paths" in {
-      node34.setSubtree(Seq(GoLeft), node34) shouldBe Some(node34.copy(left=node34))
+      node34.setSubtree(Seq(GoLeft), node34) shouldBe Some(node34.copy(left = node34))
     }
 
   }

@@ -6,6 +6,7 @@ import io.evvo.island.population.{ParetoFrontier, Scored}
 
 /** `EvolutionaryProcess` is a generic interface for evolutionary problem solvers. */
 trait EvolutionaryProcess[Sol] {
+
   /** Run this island, until the specified termination criteria is met. This call will block
     * until the termination criteria is completed.
     *

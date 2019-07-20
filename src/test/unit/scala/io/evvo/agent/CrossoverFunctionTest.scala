@@ -16,8 +16,7 @@ class CrossoverFunctionTest extends WordSpec with Matchers {
     }
 
     "apply the function to pairs" in {
-      val results = crossoverFunction.modify(
-        Vector(Scored(Map(), 1d), Scored(Map(), 3d))).toVector
+      val results = crossoverFunction.modify(Vector(Scored(Map(), 1d), Scored(Map(), 3d))).toVector
 
       results should have length 1
       results should contain(4d)

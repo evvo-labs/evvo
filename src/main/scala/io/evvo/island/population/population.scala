@@ -5,7 +5,6 @@ import io.evvo.agent.PopulationInformation
 
 import scala.collection.parallel.mutable
 
-
 /** A population is the set of all solutions current in an evolutionary process. Currently,
   * the only extending class is StandardPopulation, but other classes may have different behavior,
   * such as only ever keeping the non-dominated set, or only keeping points that are dominated
@@ -14,6 +13,7 @@ import scala.collection.parallel.mutable
   * @tparam Sol the type of the solutions in the population
   */
 trait Population[Sol] {
+
   /** Adds the given solutions, if they are unique, subject to any additional constraints
     * imposed on the solutions by the population.
     * @param solutions the solutions to add
@@ -41,28 +41,30 @@ trait Population[Sol] {
   def getInformation(): PopulationInformation
 }
 
-
 /** A population, as a set of scored solutions. Will contain no duplicates by score, unless
   * hashing is `HashingStrategy.ON_SOLUTIONS`.
   *
   * @tparam Sol the type of the solutions in the population
   */
-case class StandardPopulation[Sol](objectivesIter: Iterable[Objective[Sol]],
-                                   hashing: HashingStrategy.Value = HashingStrategy.ON_SCORES)
-                                  (implicit val logger: LoggingAdapter)
-  extends Population[Sol] {
+case class StandardPopulation[Sol](
+    objectivesIter: Iterable[Objective[Sol]],
+    hashing: HashingStrategy.Value = HashingStrategy.ON_SCORES
+)(implicit val logger: LoggingAdapter)
+    extends Population[Sol] {
   private val objectives = objectivesIter.iterator.toSet
   private var population = Set[Scored[Sol]]()
 
   override def addSolutions(solutions: Iterable[Sol]): Unit = {
     population ++= solutions.iterator.map(score)
-    logger.debug(f"Added ${solutions.iterator.size} solutions, new population size ${population.size}")
+    logger.debug(
+      f"Added ${solutions.iterator.size} solutions, new population size ${population.size}"
+    )
   }
 
   private def score(solution: Sol): Scored[Sol] = {
-    val scores = this.objectives.map(func =>
-      (func.name, func.optimizationDirection) -> func.score(solution)
-    ).toMap
+    val scores = this.objectives
+      .map(func => (func.name, func.optimizationDirection) -> func.score(solution))
+      .toMap
     val out = Scored(scores, solution, hashing)
     logger.debug(s"StandardPopulation: created $out")
     out
@@ -86,4 +88,3 @@ case class StandardPopulation[Sol](objectivesIter: Iterable[Objective[Sol]],
     out
   }
 }
-

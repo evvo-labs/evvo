@@ -10,11 +10,12 @@ import scala.concurrent.duration._
   *
   * @param modifier The function that generates new solutions from existing ones.
   */
-class ModifierAgent[Sol](modifier: ModifierFunction[Sol],
-                         population: Population[Sol],
-                         strategy: AgentStrategy = ModifierAgentDefaultStrategy())
-                        (implicit logger: LoggingAdapter)
-  extends AAgent[Sol](strategy, population, modifier.name)(logger) {
+class ModifierAgent[Sol](
+    modifier: ModifierFunction[Sol],
+    population: Population[Sol],
+    strategy: AgentStrategy = ModifierAgentDefaultStrategy()
+)(implicit logger: LoggingAdapter)
+    extends AAgent[Sol](strategy, population, modifier.name)(logger) {
 
   override protected def step(): Unit = {
     val in = population.getSolutions(modifier.numInputs)
@@ -22,8 +23,10 @@ class ModifierAgent[Sol](modifier: ModifierFunction[Sol],
       val newSolutions = modifier.modify(in)
       population.addSolutions(newSolutions)
     } else {
-      logger.debug(s"${this}: not enough solutions in population: " +
-        s"got ${in.length}, wanted ${modifier.numInputs}")
+      logger.debug(
+        s"${this}: not enough solutions in population: " +
+          s"got ${in.length}, wanted ${modifier.numInputs}"
+      )
     }
   }
 
@@ -31,11 +34,13 @@ class ModifierAgent[Sol](modifier: ModifierFunction[Sol],
 }
 
 object ModifierAgent {
+
   /** @return A new [[io.evvo.agent.ModifierAgent]]. */
-  def apply[Sol](modifier: ModifierFunction[Sol],
-                 population: Population[Sol],
-                 strategy: AgentStrategy = ModifierAgentDefaultStrategy())
-                (implicit logger: LoggingAdapter): ModifierAgent[Sol] =
+  def apply[Sol](
+      modifier: ModifierFunction[Sol],
+      population: Population[Sol],
+      strategy: AgentStrategy = ModifierAgentDefaultStrategy()
+  )(implicit logger: LoggingAdapter): ModifierAgent[Sol] =
     new ModifierAgent[Sol](modifier, population, strategy)
 }
 

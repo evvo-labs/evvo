@@ -6,10 +6,12 @@ package io.evvo.island.population
   * @param precision             how many decimal points to round to. For example, if given 1,
   *                              .015 and .018 will be considered equal.
   */
-abstract class Objective[Sol](val name: String,
-                              val optimizationDirection: OptimizationDirection,
-                              precision: Int = 3)
-  extends Serializable {
+abstract class Objective[Sol](
+    val name: String,
+    val optimizationDirection: OptimizationDirection,
+    precision: Int = 3
+) extends Serializable {
+
   /** The underlying function: takes a `Sol` and scores it. Protected because external callers
     * should be using `score` instead.
     *

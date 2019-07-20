@@ -28,38 +28,42 @@ import io.evvo.island.population.Objective
   * @tparam HasDeletors   same as HasCreators
   * @tparam HasObjectives same as HasCreators
   */
-case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives]
-(
-  creators: Set[CreatorFunction[Sol]] = Set[CreatorFunction[Sol]](),
-  modifiers: Set[ModifierFunction[Sol]] = Set[ModifierFunction[Sol]](),
-  deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
-  objectives: Set[Objective[Sol]] = Set[Objective[Sol]](),
-  immigrationStrategy: ImmigrationStrategy = AllowAllImmigrationStrategy,
-  emigrationStrategy: EmigrationStrategy = RandomSampleEmigrationStrategy(4)
+case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives](
+    creators: Set[CreatorFunction[Sol]] = Set[CreatorFunction[Sol]](),
+    modifiers: Set[ModifierFunction[Sol]] = Set[ModifierFunction[Sol]](),
+    deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
+    objectives: Set[Objective[Sol]] = Set[Objective[Sol]](),
+    immigrationStrategy: ImmigrationStrategy = AllowAllImmigrationStrategy,
+    emigrationStrategy: EmigrationStrategy = RandomSampleEmigrationStrategy(4)
 ) {
 
-  def addCreator(creatorFunc: CreatorFunction[Sol]):
-  UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HasModifiers, HasDeletors, HasObjectives] = {
+  def addCreator(
+      creatorFunc: CreatorFunction[Sol]
+  ): UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(creators = creators + creatorFunc)
   }
 
-  def addModifier(modifierFunc: ModifierFunction[Sol]):
-  UnfinishedEvvoIslandBuilder[Sol, HasCreators, HAS_SOME, HasDeletors, HasObjectives] = {
+  def addModifier(
+      modifierFunc: ModifierFunction[Sol]
+  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HAS_SOME, HasDeletors, HasObjectives] = {
     this.copy(modifiers = modifiers + modifierFunc)
   }
 
-  def addDeletor(deletorFunc: DeletorFunction[Sol]):
-  UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HAS_SOME, HasObjectives] = {
+  def addDeletor(
+      deletorFunc: DeletorFunction[Sol]
+  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HAS_SOME, HasObjectives] = {
     this.copy(deletors = deletors + deletorFunc)
   }
 
-  def addObjective(objective: Objective[Sol]):
-  UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HAS_SOME] = {
+  def addObjective(
+      objective: Objective[Sol]
+  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HAS_SOME] = {
     this.copy(objectives = objectives + objective)
   }
 
-  def withImmigrationStrategy(immigrationStrategy: ImmigrationStrategy)
-  : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+  def withImmigrationStrategy(
+      immigrationStrategy: ImmigrationStrategy
+  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(immigrationStrategy = immigrationStrategy)
   }
 }
@@ -67,14 +71,13 @@ case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeleto
 /** A finished EvvoIslandBuilder can build an actual island. See
   * [[io.evvo.island.UnfinishedEvvoIslandBuilder]] for more information.
   */
-case class FinishedEvvoIslandBuilder[Sol]
-(
-  creators: Set[CreatorFunction[Sol]],
-  modifiers: Set[ModifierFunction[Sol]],
-  deletors: Set[DeletorFunction[Sol]],
-  objectives: Set[Objective[Sol]],
-  immigrationStrategy: ImmigrationStrategy,
-  emigrationStrategy: EmigrationStrategy
+case class FinishedEvvoIslandBuilder[Sol](
+    creators: Set[CreatorFunction[Sol]],
+    modifiers: Set[ModifierFunction[Sol]],
+    deletors: Set[DeletorFunction[Sol]],
+    objectives: Set[Objective[Sol]],
+    immigrationStrategy: ImmigrationStrategy,
+    emigrationStrategy: EmigrationStrategy
 ) {
   assert(creators.nonEmpty)
   assert(modifiers.nonEmpty)
@@ -82,13 +85,16 @@ case class FinishedEvvoIslandBuilder[Sol]
   assert(objectives.nonEmpty)
 
   def toProps()(implicit system: ActorSystem): Props = {
-    Props(new RemoteEvvoIsland[Sol](
-      creators.toVector,
-      modifiers.toVector,
-      deletors.toVector,
-      objectives.toVector,
-      immigrationStrategy,
-      emigrationStrategy))
+    Props(
+      new RemoteEvvoIsland[Sol](
+        creators.toVector,
+        modifiers.toVector,
+        deletors.toVector,
+        objectives.toVector,
+        immigrationStrategy,
+        emigrationStrategy
+      )
+    )
   }
 
   def buildLocalEvvo(): EvolutionaryProcess[Sol] = {
@@ -98,11 +104,13 @@ case class FinishedEvvoIslandBuilder[Sol]
       deletors.toVector,
       objectives.toVector,
       immigrationStrategy,
-      emigrationStrategy)
+      emigrationStrategy
+    )
   }
 }
 
 object EvvoIslandBuilder {
+
   /** @return a new, unfinished EvvoIslandBuilder. */
   def apply[Sol](): UnfinishedEvvoIslandBuilder[Sol, HAS_NONE, HAS_NONE, HAS_NONE, HAS_NONE] = {
     UnfinishedEvvoIslandBuilder()
@@ -113,9 +121,8 @@ object EvvoIslandBuilder {
     * @param builder the builder to convert
     * @return A FinishedEvvoIslandBuilder with the same data as `builder`
     */
-  implicit def finishBuilder[Sol]
-  (
-    builder: UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HAS_SOME, HAS_SOME, HAS_SOME]
+  implicit def finishBuilder[Sol](
+      builder: UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HAS_SOME, HAS_SOME, HAS_SOME]
   ): FinishedEvvoIslandBuilder[Sol] = {
     FinishedEvvoIslandBuilder(
       builder.creators,
@@ -123,7 +130,8 @@ object EvvoIslandBuilder {
       builder.deletors,
       builder.objectives,
       builder.immigrationStrategy,
-      builder.emigrationStrategy)
+      builder.emigrationStrategy
+    )
   }
 
   // Whether the builder has something or not, used in type parameters.
