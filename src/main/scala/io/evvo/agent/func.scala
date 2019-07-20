@@ -19,6 +19,9 @@ abstract class CreatorFunction[Sol](name: String) extends NamedFunction(name) {
 }
 
 /** A function that derives a new set of solutions from some input set of solutions.
+  * See also [[io.evvo.agent.MutatorFunction]] and [[io.evvo.agent.CrossoverFunction]] for
+  * convenience classes that allow you to create functions for common tasks.
+  *
   * @param name                      This function's name
   * @param numInputs                 The number of solutions to request in the contents of each
   *                                  input set
