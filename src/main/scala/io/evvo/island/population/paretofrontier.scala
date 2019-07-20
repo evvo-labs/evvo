@@ -38,7 +38,7 @@ case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
             x
           } else {
             0
-          }
+        }
       )
 
     val stringifiedSolutions = solutions.toIndexedSeq

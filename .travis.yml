@@ -1,24 +1,18 @@
 language: scala
 scala:
-  - 2.12.6
+  - 2.13.0
 
 install:
-  - gem install overcommit
   - gem install travis
 
 before_script:
-  - git config --global user.email "travis@travis.ci"
-  - git config --global user.name "Travis CI"
+#  - git config --global user.email "travis@travis.ci"
+#  - git config --global user.name "Travis CI"
   - sh travis/travis_setup.sh
 
 script:
   # Allow changes to overcommit
-  - overcommit --sign
-  - overcommit --sign pre-commit
-  # And then actually run it
-  - overcommit --install
-  - overcommit --run
-  - mvn clean scalastyle:check package
+  - mvn clean package
 
 
 notifications:
