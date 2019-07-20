@@ -1,14 +1,21 @@
 package io.evvo.agent.defaults
 
-import io.evvo.builtin.trees.{BTLeaf, BTNode, BinaryTree, ChangeLeafDataModifier, ChangeNodeDataModifier, LeafCreator, SwapSubtreeModifier}
+import io.evvo.builtin.trees.{
+  BTLeaf,
+  BTNode,
+  BinaryTree,
+  ChangeLeafDataModifier,
+  ChangeNodeDataModifier,
+  LeafCreator,
+  SwapSubtreeModifier
+}
 import io.evvo.island.population.Scored
 import org.scalatest.{Matchers, WordSpec}
 
 class TreesAgentsTest extends WordSpec with Matchers {
 
-  val node:  BTNode[Boolean, Int] = BTNode(false,
-    BTNode(true, BTLeaf(1), BTLeaf(2)),
-    BTNode(true, BTLeaf(3), BTLeaf(4)))
+  val node: BTNode[Boolean, Int] =
+    BTNode(false, BTNode(true, BTLeaf(1), BTLeaf(2)), BTNode(true, BTLeaf(3), BTLeaf(4)))
   val scoredNode: Scored[BinaryTree[Boolean, Int]] = Scored(Map(), node)
 
   "Leaf Creator" should {
@@ -45,10 +52,11 @@ class TreesAgentsTest extends WordSpec with Matchers {
 
   "SwapSubtreeModifier" should {
     "do something" in {
-      val scoredNode2: Scored[BinaryTree[Boolean, Int]] = Scored(Map(),
-        BTNode(false,
-        BTNode(true, BTLeaf(5), BTLeaf(6)),
-        BTNode(true, BTLeaf(7), BTLeaf(8))))
+      val scoredNode2: Scored[BinaryTree[Boolean, Int]] =
+        Scored(
+          Map(),
+          BTNode(false, BTNode(true, BTLeaf(5), BTLeaf(6)), BTNode(true, BTLeaf(7), BTLeaf(8)))
+        )
 
       val modified = SwapSubtreeModifier[Boolean, Int]()
         .modify(IndexedSeq.fill(1000)(Seq(scoredNode, scoredNode2)).flatten)

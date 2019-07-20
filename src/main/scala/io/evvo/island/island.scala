@@ -20,16 +20,15 @@ import scala.util.Try
 /** This component is used to do all the actual work of managing the island, without managing
   * or being tied to where the island is deployed to.
   */
-private class EvvoIsland[Sol]
-(
-  creators: Vector[CreatorFunction[Sol]],
-  mutators: Vector[ModifierFunction[Sol]],
-  deletors: Vector[DeletorFunction[Sol]],
-  fitnesses: Vector[Objective[Sol]],
-  immigrationStrategy: ImmigrationStrategy,
-  emigrationStrategy: EmigrationStrategy)
-(implicit log: LoggingAdapter)
-  extends EvolutionaryProcess[Sol] {
+private class EvvoIsland[Sol](
+    creators: Vector[CreatorFunction[Sol]],
+    mutators: Vector[ModifierFunction[Sol]],
+    deletors: Vector[DeletorFunction[Sol]],
+    fitnesses: Vector[Objective[Sol]],
+    immigrationStrategy: ImmigrationStrategy,
+    emigrationStrategy: EmigrationStrategy
+)(implicit log: LoggingAdapter)
+    extends EvolutionaryProcess[Sol] {
 
   /** Serialize and deserialize the given value, returning the deserialized data.
     * Roundtripping like this allows all Islands to catch (some) serialization bugs before
@@ -59,6 +58,7 @@ private class EvvoIsland[Sol]
 
   /** The list of all other islands, to send emigrating solutions to. */
   private var emigrationTargets: Seq[EvolutionaryProcess[Sol]] = Seq()
+
   /** The index of the current "target" that will receive the next emigration. */
   private var currentEmigrationTargetIndex: Int = 0
 
@@ -79,20 +79,29 @@ private class EvvoIsland[Sol]
     // Note: It's an option because scalastyle really, really hates null.
     val executor = Executors.newSingleThreadScheduledExecutor()
     var future: Option[ScheduledFuture[_]] = None
-    future = Some(executor.scheduleAtFixedRate(() => {
-      // If we ought to end this loop, we run stop and cancel the future, meaning the Future
-      // returned at the bottom is now completable.
-      if (deadline < Calendar.getInstance().toInstant.toEpochMilli) {
-        log.info(f"started at=${startTime}, now=${Calendar.getInstance().toInstant.toEpochMilli}")
-        this.stop()
-        future.foreach(_.cancel(true))
-      }
+    future = Some(
+      executor.scheduleAtFixedRate(
+        () => {
+          // If we ought to end this loop, we run stop and cancel the future, meaning the Future
+          // returned at the bottom is now completable.
+          if (deadline < Calendar.getInstance().toInstant.toEpochMilli) {
+            log.info(
+              f"started at=${startTime}, now=${Calendar.getInstance().toInstant.toEpochMilli}"
+            )
+            this.stop()
+            future.foreach(_.cancel(true))
+          }
 
-      // Otherwise, run emigration and print the pareto frontier
-      val pareto = pop.getParetoFrontier()
-      log.info(f"pareto = ${pareto}")
-      this.emigrate()
-    }, 0, 500, TimeUnit.MILLISECONDS))
+          // Otherwise, run emigration and print the pareto frontier
+          val pareto = pop.getParetoFrontier()
+          log.info(f"pareto = ${pareto}")
+          this.emigrate()
+        },
+        0,
+        500,
+        TimeUnit.MILLISECONDS
+      )
+    )
 
     // Convert from java ScheduledFuture to Future, to conform to the resply type.
     Future {
@@ -143,12 +152,12 @@ private class EvvoIsland[Sol]
 }
 
 object EvvoIsland {
+
   /** @tparam Sol the type of solutions processed by this island.
     * @return A builder for an EvvoIsland.
     */
   def builder[Sol](): UnfinishedEvvoIslandBuilder[Sol, _, _, _, _] = EvvoIslandBuilder[Sol]()
 }
-
 
 // =================================================================================================
 // Local EvvoIsland wrapper
@@ -156,16 +165,15 @@ object EvvoIsland {
 /** An island that can be run locally. Does not connect to any other networked island, but is good
   * for testing agent functions without having to spin up a cluster.
   */
-class LocalEvvoIsland[Sol]
-(
-  creators: Vector[CreatorFunction[Sol]],
-  mutators: Vector[ModifierFunction[Sol]],
-  deletors: Vector[DeletorFunction[Sol]],
-  objectives: Vector[Objective[Sol]],
-  immigrationStrategy: ImmigrationStrategy,
-  emigrationStrategy: EmigrationStrategy
+class LocalEvvoIsland[Sol](
+    creators: Vector[CreatorFunction[Sol]],
+    mutators: Vector[ModifierFunction[Sol]],
+    deletors: Vector[DeletorFunction[Sol]],
+    objectives: Vector[Objective[Sol]],
+    immigrationStrategy: ImmigrationStrategy,
+    emigrationStrategy: EmigrationStrategy
 )(
-  implicit val log: LoggingAdapter = LocalLogger
+    implicit val log: LoggingAdapter = LocalLogger
 ) extends EvolutionaryProcess[Sol] {
   private val island = new EvvoIsland(
     creators,
@@ -173,7 +181,8 @@ class LocalEvvoIsland[Sol]
     deletors,
     objectives,
     immigrationStrategy,
-    emigrationStrategy)
+    emigrationStrategy
+  )
 
   override def runBlocking(stopAfter: StopAfter): Unit = {
     island.runBlocking(stopAfter)
@@ -227,8 +236,7 @@ object LocalLogger extends LoggingAdapter {
     logger.info(message)
   }
 
-  override protected def notifyDebug(message: String): Unit = {
-  }
+  override protected def notifyDebug(message: String): Unit = {}
 }
 
 // =================================================================================================
@@ -238,16 +246,16 @@ object LocalLogger extends LoggingAdapter {
   * threads). Because it is an Akka actor, generally people will use SingleIslandEvvo.Wrapped
   * to use it in a type-safe way, instead of throwing messages.
   */
-class RemoteEvvoIsland[Sol]
-(
-  creators: Vector[CreatorFunction[Sol]],
-  mutators: Vector[ModifierFunction[Sol]],
-  deletors: Vector[DeletorFunction[Sol]],
-  objectives: Vector[Objective[Sol]],
-  immigrationStrategy: ImmigrationStrategy,
-  emigrationStrategy: EmigrationStrategy
-)
-  extends Actor with EvolutionaryProcess[Sol] with ActorLogging {
+class RemoteEvvoIsland[Sol](
+    creators: Vector[CreatorFunction[Sol]],
+    mutators: Vector[ModifierFunction[Sol]],
+    deletors: Vector[DeletorFunction[Sol]],
+    objectives: Vector[Objective[Sol]],
+    immigrationStrategy: ImmigrationStrategy,
+    emigrationStrategy: EmigrationStrategy
+) extends Actor
+    with EvolutionaryProcess[Sol]
+    with ActorLogging {
   // for messages, which are case classes defined within RemoteEvvoIsland's companion objeect
   import io.evvo.island.RemoteEvvoIsland._ // scalastyle:ignore import.grouping
 
@@ -259,15 +267,16 @@ class RemoteEvvoIsland[Sol]
     deletors,
     objectives,
     immigrationStrategy,
-    emigrationStrategy)
+    emigrationStrategy
+  )
 
-  override def receive: Receive = LoggingReceive({
-    case Run(t) => sender ! this.runBlocking(t)
-    case GetParetoFrontier => sender ! this.currentParetoFrontier()
-    case Immigrate(solutions: Seq[Scored[Sol]]) => this.immigrate(solutions)
-    case RegisterIslands(islands: Seq[EvolutionaryProcess[Sol]]) => this.registerIslands(islands)
-  })
-
+  override def receive: Receive =
+    LoggingReceive({
+      case Run(t) => sender ! this.runBlocking(t)
+      case GetParetoFrontier => sender ! this.currentParetoFrontier()
+      case Immigrate(solutions: Seq[Scored[Sol]]) => this.immigrate(solutions)
+      case RegisterIslands(islands: Seq[EvolutionaryProcess[Sol]]) => this.registerIslands(islands)
+    })
 
   override def runBlocking(stopAfter: StopAfter): Unit = {
     island.runBlocking(stopAfter)
@@ -295,6 +304,7 @@ class RemoteEvvoIsland[Sol]
 }
 
 object RemoteEvvoIsland {
+
   /** This is a wrapper for ActorRefs of SingleIslandEvvo actors, serving as an
     * adapter to the EvolutionaryProcess interface. This allows strongly-typed code to
     * still use Akka for async message passing.
@@ -328,7 +338,6 @@ object RemoteEvvoIsland {
       ref ! RegisterIslands[Sol](islands)
     }
   }
-
 
   // All of these are meant to be used as Akka messages.
   private case class Run(stopAfter: StopAfter)

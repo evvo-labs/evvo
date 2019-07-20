@@ -5,12 +5,13 @@ import io.evvo.island.population.{Maximize, Minimize, ParetoFrontier, Scored}
 
 /** Provides default functions that are useful for any datatype. */
 object deletors {
+
   /** A deletor that deletes the dominated set, in a group of size `groupSize`
     *
     * @param numInputs the number of solutions to pull at a time
     */
   case class DeleteDominated[Sol](override val numInputs: Int = 32)
-    extends DeletorFunction[Sol]("DeleteDominated") {
+      extends DeletorFunction[Sol]("DeleteDominated") {
 
     override def delete(sols: IndexedSeq[Scored[Sol]]): IndexedSeq[Scored[Sol]] = {
       // If it's not in the non-dominated set, then it is dominated.
@@ -26,7 +27,7 @@ object deletors {
     *                  input set
     */
   case class DeleteWorstHalfByRandomObjective[Sol](override val numInputs: Int = 32)
-    extends DeletorFunction[Sol]("DeleteWorstHalfByRandomObjective") {
+      extends DeletorFunction[Sol]("DeleteWorstHalfByRandomObjective") {
 
     override def delete(s: IndexedSeq[Scored[Sol]]): IndexedSeq[Scored[Sol]] = {
       if (s.isEmpty) {

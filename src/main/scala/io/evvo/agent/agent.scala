@@ -23,11 +23,12 @@ trait Agent[Sol] {
   *               or slf4s interface.
   * @param name The name of this agent. Used for logging.
   */
-abstract class AAgent[Sol](protected val strategy: AgentStrategy,
-                           protected val population: Population[Sol],
-                           protected val name: String)
-                          (implicit protected val logger: LoggingAdapter)
-  extends Agent[Sol] {
+abstract class AAgent[Sol](
+    protected val strategy: AgentStrategy,
+    protected val population: Population[Sol],
+    protected val name: String
+)(implicit protected val logger: LoggingAdapter)
+    extends Agent[Sol] {
 
   /** The number of  times this agent has run its function. */
   var numInvocations: Int = 0
@@ -54,7 +55,8 @@ abstract class AAgent[Sol](protected val strategy: AgentStrategy,
             case e: Exception => {
               logger.warning(
                 f"${this}: Agent ${name} encountered an exception during a step, " +
-                  f"stack trace: ${e.getStackTrace.mkString("\n")}")
+                  f"stack trace: ${e.getStackTrace.mkString("\n")}"
+              )
             }
           }
           Thread.sleep(waitTime.toMillis)
@@ -76,8 +78,10 @@ abstract class AAgent[Sol](protected val strategy: AgentStrategy,
         case e: InterruptedException =>
           logger.info(f"${this}-${name}: Interrupted during sleep, terminating gracefully.")
         case e: Exception =>
-          logger.error(f"${this}-${name}: Unexpected exception ${e}, stopping thread. " +
-            f"Stack trace: ${e.getStackTrace.mkString("\n")}")
+          logger.error(
+            f"${this}-${name}: Unexpected exception ${e}, stopping thread. " +
+              f"Stack trace: ${e.getStackTrace.mkString("\n")}"
+          )
       }
       logger.info(f"${this}-${name}: finished running")
     }
@@ -97,8 +101,10 @@ abstract class AAgent[Sol](protected val strategy: AgentStrategy,
       logger.info(s"${this}-${name}: stopping after ${numInvocations} invocations")
       thread.interrupt()
     } else {
-      logger.warning(s"${this}-${name}: trying to stop already stopped agent, " +
-        s"with ${numInvocations} invocations")
+      logger.warning(
+        s"${this}-${name}: trying to stop already stopped agent, " +
+          s"with ${numInvocations} invocations"
+      )
     }
   }
 

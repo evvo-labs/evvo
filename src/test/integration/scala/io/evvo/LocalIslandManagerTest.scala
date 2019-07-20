@@ -51,8 +51,10 @@ class LocalIslandManagerTest extends WordSpec with Matchers {
       val pareto = manager.currentParetoFrontier()
 
       // The Pareto Frontier must have a solution with startV > 4 and endV > 4
-      assert(pareto.solutions.exists(s =>
-        s.score(("startV", Maximize)) > 4 && s.score(("endV", Maximize)) > 4))
+      assert(
+        pareto.solutions
+          .exists(s => s.score(("startV", Maximize)) > 4 && s.score(("endV", Maximize)) > 4)
+      )
     }
   }
 

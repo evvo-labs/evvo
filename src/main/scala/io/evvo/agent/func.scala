@@ -2,7 +2,6 @@ package io.evvo.agent
 
 import io.evvo.island.population.Scored
 
-
 /** A named function. Common class for all functions that go in agents, so that utilities and
   * tests can be more abstract.
   *
@@ -14,6 +13,7 @@ abstract class NamedFunction(val name: String) extends Serializable
   * @param name the name of this function
   */
 abstract class CreatorFunction[Sol](name: String) extends NamedFunction(name) {
+
   /** @return The function to call to produce new solutions */
   def create(): Iterable[Sol]
 }
@@ -28,10 +28,12 @@ abstract class CreatorFunction[Sol](name: String) extends NamedFunction(name) {
   * @param shouldRunWithPartialInput Whether this function should run if the number of solutions
   *                                  in the input is less than `numInputs`
   */
-abstract class ModifierFunction[Sol](name: String,
-                                     val numInputs: Int = 32,
-                                     val shouldRunWithPartialInput: Boolean = true)
-  extends NamedFunction(name) {
+abstract class ModifierFunction[Sol](
+    name: String,
+    val numInputs: Int = 32,
+    val shouldRunWithPartialInput: Boolean = true
+) extends NamedFunction(name) {
+
   /** @return The function to call to produce new solutions
     */
   def modify(sols: IndexedSeq[Scored[Sol]]): Iterable[Sol]
@@ -40,9 +42,8 @@ abstract class ModifierFunction[Sol](name: String,
 /** A function that uses a one-to-one mapping to derive a new set of solutions from some
   * input set of solutions.
   */
-abstract class MutatorFunction[Sol](name: String,
-                                    numInputs: Int = 32)
-  extends ModifierFunction[Sol](name, numInputs, shouldRunWithPartialInput = true) {
+abstract class MutatorFunction[Sol](name: String, numInputs: Int = 32)
+    extends ModifierFunction[Sol](name, numInputs, shouldRunWithPartialInput = true) {
   // Pass shouldRunWithPartialInput as true always - we know there is no requirement for more
   // than 1 solution at a time, so safe to run on any number of solutions.
 
@@ -63,9 +64,8 @@ abstract class MutatorFunction[Sol](name: String,
 /** A function that uses a two-to-one mapping to derive a new set of solutions from some
   * input set of solutions.
   */
-abstract class CrossoverFunction[Sol](name: String,
-                                      numInputs: Int = 32)
-  extends ModifierFunction[Sol](name, numInputs, shouldRunWithPartialInput = true) {
+abstract class CrossoverFunction[Sol](name: String, numInputs: Int = 32)
+    extends ModifierFunction[Sol](name, numInputs, shouldRunWithPartialInput = true) {
   // Pass shouldRunWithPartialInput as true always - we know there is no requirement for more
   // than 2 solutions at a time, so safe to run on, say, 16 or 23 solutions. We will have to be
   // careful about odd numbers of solutions.
@@ -90,7 +90,6 @@ abstract class CrossoverFunction[Sol](name: String,
   protected def crossover(sol1: Sol, sol2: Sol): Sol
 }
 
-
 /** A function that, given a subset of a population, determines which solutions in that subset
   * ought to be deleted.
   * @param name                      This function's name
@@ -99,10 +98,12 @@ abstract class CrossoverFunction[Sol](name: String,
   * @param shouldRunWithPartialInput Whether this function should run if the number of solutions
   *                                  in the input is less than `numInputs`
   */
-abstract class DeletorFunction[Sol](name: String,
-                                    val numInputs: Int = 32,
-                                    val shouldRunWithPartialInput: Boolean = true)
-  extends NamedFunction(name) {
+abstract class DeletorFunction[Sol](
+    name: String,
+    val numInputs: Int = 32,
+    val shouldRunWithPartialInput: Boolean = true
+) extends NamedFunction(name) {
+
   /** @return The function to call to identify which solutions to delete */
   def delete(sols: IndexedSeq[Scored[Sol]]): Iterable[Scored[Sol]]
 }

@@ -40,9 +40,12 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
 
   "EvvoIsland" should {
     "use immigration strategy to filter incoming solutions" in {
-      island1.immigrate(Seq(
-        Scored[Int](Map(("Test", Maximize) -> 10), 10),
-        Scored[Int](Map(("Test", Maximize) -> 3), 3)))
+      island1.immigrate(
+        Seq(
+          Scored[Int](Map(("Test", Maximize) -> 10), 10),
+          Scored[Int](Map(("Test", Maximize) -> 3), 3)
+        )
+      )
 
       // The three shouldn't be added, because Elitist will prevent anything < 10 from being added
       island1.currentParetoFrontier().solutions should have size 1
@@ -53,7 +56,7 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       island1.currentParetoFrontier().solutions should be(Set(solution11))
     }
 
-    "emigrate strategies to other islands" in(Slow, {
+    "emigrate strategies to other islands" in (Slow, {
       island1.registerIslands(Seq(island2))
 
       island1.immigrate(Seq(Scored[Int](Map(("Test", Maximize) -> 10), 10)))
@@ -64,7 +67,7 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       island2.currentParetoFrontier().solutions.size shouldBe 1
     })
 
-    "use the emigration strategy to choose which solutions to emigrate" in(Slow, {
+    "use the emigration strategy to choose which solutions to emigrate" in (Slow, {
       val noEmigrationIsland = new EvvoIsland[Int](
         Vector(),
         Vector(),

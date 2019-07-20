@@ -15,16 +15,14 @@ import scala.jdk.CollectionConverters._
 /** Common component implementing management of islands.
   * @param islands the islands to manage
   */
-class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]])
-  extends EvolutionaryProcess[Sol] {
+class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]]) extends EvolutionaryProcess[Sol] {
 
   this.registerIslands(islands)
 
   /** The final pareto frontier after the island manager shuts down, or None until then. */
   private var finalParetoFrontier: Option[ParetoFrontier[Sol]] = None
 
-  override def runAsync(stopAfter: StopAfter)
-  : Future[Unit] = {
+  override def runAsync(stopAfter: StopAfter): Future[Unit] = {
     Future {
       // Represents all islands having completed their runs.
       val allIslandsRun = Future.sequence(this.islands.map(_.runAsync(stopAfter)))
@@ -67,36 +65,43 @@ class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]])
   }
 }
 
-
 // =================================================================================================
 // Remote manager
 /** Launches and manages multiple `EvvoIslandActor`s. */
-class RemoteIslandManager[Sol](val numIslands: Int,
-                               islandBuilder: FinishedEvvoIslandBuilder[Sol],
-                               val actorSystemName: String = "EvvoNode",
-                               val userConfig: String = "src/main/resources/application.conf")
-  extends EvolutionaryProcess[Sol] {
+class RemoteIslandManager[Sol](
+    val numIslands: Int,
+    islandBuilder: FinishedEvvoIslandBuilder[Sol],
+    val actorSystemName: String = "EvvoNode",
+    val userConfig: String = "src/main/resources/application.conf"
+) extends EvolutionaryProcess[Sol] {
 
   private val configFile = ConfigFactory.parseFile(new File("src/main/resources/application.conf"))
-  private val config = configFile.getConfig("IslandManager")
+  private val config = configFile
+    .getConfig("IslandManager")
     .withFallback(configFile)
     .resolve()
   println(config)
 
-  private val addresses: Vector[Address] = config.getList("nodes.locations")
+  private val addresses: Vector[Address] = config
+    .getList("nodes.locations")
     .unwrapped()
-    .asScala.toVector
+    .asScala
+    .toVector
     .map(x => AddressFromURIString(x.toString))
 
   implicit val system: ActorSystem = ActorSystem(actorSystemName, config)
 
   // Round robin deploy new islands to the remote addresses
-  private val islands: IndexedSeq[EvolutionaryProcess[Sol]] = (0 until numIslands).map(i => {
-    val remoteChoice = i % addresses.length // pick round robin
-    val address = addresses(remoteChoice)
-    system.actorOf(islandBuilder.toProps.withDeploy(Deploy(scope = RemoteScope(address))),
-      s"EvvoIsland${i}")
-  }).map(RemoteEvvoIsland.Wrapper[Sol])
+  private val islands: IndexedSeq[EvolutionaryProcess[Sol]] = (0 until numIslands)
+    .map(i => {
+      val remoteChoice = i % addresses.length // pick round robin
+      val address = addresses(remoteChoice)
+      system.actorOf(
+        islandBuilder.toProps.withDeploy(Deploy(scope = RemoteScope(address))),
+        s"EvvoIsland${i}"
+      )
+    })
+    .map(RemoteEvvoIsland.Wrapper[Sol])
 
   val islandManager = new IslandManager[Sol](islands)
 
@@ -125,13 +130,11 @@ class RemoteIslandManager[Sol](val numIslands: Int,
   }
 }
 
-
 // =================================================================================================
 // Local manager
 /** Launches and manages multiple `LocalEvvoIsland`s. */
-class LocalIslandManager[Sol](val numIslands: Int,
-                              islandBuilder: FinishedEvvoIslandBuilder[Sol])
-  extends EvolutionaryProcess[Sol] {
+class LocalIslandManager[Sol](val numIslands: Int, islandBuilder: FinishedEvvoIslandBuilder[Sol])
+    extends EvolutionaryProcess[Sol] {
 
   private val islands: IndexedSeq[EvolutionaryProcess[Sol]] =
     Vector.fill(numIslands)(islandBuilder.buildLocalEvvo())

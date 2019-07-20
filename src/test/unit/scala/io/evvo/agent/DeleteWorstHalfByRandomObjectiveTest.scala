@@ -20,8 +20,8 @@ class DeleteWorstHalfByRandomObjectiveTest extends WordSpec with Matchers {
     "delete the worst half" in {
       val toDelete = deletor(Vector(scored1, scored2, scored3, scored4))
       toDelete should have length 2
-      toDelete should contain (scored1)
-      toDelete should contain (scored2)
+      toDelete should contain(scored1)
+      toDelete should contain(scored2)
     }
 
     "sometimes pick different objectives" in {

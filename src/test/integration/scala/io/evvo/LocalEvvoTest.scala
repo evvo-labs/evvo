@@ -39,7 +39,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
   "Local Evvo" should {
     val timeout = 1
     val listLength = 6
-    f"be able to sort a list of length $listLength within $timeout seconds" taggedAs(Performance, Slow) in {
+    f"be able to sort a list of length $listLength within $timeout seconds" taggedAs (Performance, Slow) in {
       val terminate = StopAfter(timeout.seconds)
 
       val evvo = getEvvo(listLength)
@@ -50,12 +50,10 @@ class LocalEvvoTest extends WordSpec with Matchers {
   }
 }
 
-
 object LocalEvvoTestFixtures {
   type Solution = List[Int]
 
-  class ReverseListCreator(listLength: Int)
-    extends CreatorFunction[Solution]("ReverseCreator") {
+  class ReverseListCreator(listLength: Int) extends CreatorFunction[Solution]("ReverseCreator") {
     override def create(): Iterable[Solution] = {
       Vector((listLength to 1 by -1).toList)
     }

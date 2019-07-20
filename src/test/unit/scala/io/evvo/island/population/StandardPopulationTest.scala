@@ -1,6 +1,5 @@
 package io.evvo.island.population
 
-
 import akka.event.LoggingAdapter
 import io.evvo.NullLogger
 import io.evvo.island.population
@@ -13,7 +12,6 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
     override protected def objective(sol: Double): Double = sol
   }
   val fitnesses = Set(identityFitness)
-
 
   "An empty population" should {
     val emptyPop = StandardPopulation(fitnesses)

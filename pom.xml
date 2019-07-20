@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.evvo</groupId>
-    <artifactId>evvo_${scala.compat.version}</artifactId>
+    <artifactId>evvo_2.13</artifactId>
     <version>0.0.0</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>The Scala evolutionary computing framework</description>
@@ -170,7 +170,7 @@
                     </configLocation>
                     <sourceDirectories>
                         <sourceDirectory>${project.basedir}/src</sourceDirectory>
-                     </sourceDirectories>
+                    </sourceDirectories>
                     <testSourceDirectories>
                         <testSourceDirectory>${project.basedir}/src/test</testSourceDirectory>
                     </testSourceDirectories>
@@ -183,6 +183,34 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.antipathy</groupId>
+                <artifactId>mvn-scalafmt_2.12</artifactId>
+                <version>1.0.0-RC3</version>
+                <configuration>
+                    <!-- Only run in src directory, on files different from master. -->
+                    <parameters>src</parameters>
+                    <parameters>--diff</parameters>
+                    <configLocation>${project.basedir}/.scalafmt.conf</configLocation>
+                    <configRequired>false</configRequired>
+                    <sourceDirectories>
+                        <param>${project.basedir}/src/main/scala</param>
+                    </sourceDirectories>
+                    <testSourceDirectories>
+                        <param>${project.basedir}/src/test/</param>
+                    </testSourceDirectories>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

@@ -6,19 +6,20 @@ import scala.util.chaining._
   *
   * @param solutions A non-dominated set.
   */
-case class ParetoFrontier[Sol] private(solutions: Set[Scored[Sol]]) {
+case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
   if (!ParetoFrontier.isParetoFrontier(solutions)) {
-    throw new IllegalArgumentException(
-      s"""
+    throw new IllegalArgumentException(s"""
          |`solutions` must be valid pareto frontier, was ${solutions}
          |Likely, you used new `ParetoFrontier(…)` instead of `ParetoFrontier(…)`
        """.stripMargin)
   }
 
   override def toString: String = {
-    val contents = solutions.map(_.score.toVector.map {
-      case ((name, dir), score) => name -> score
-    }.toMap).mkString("\n  ")
+    val contents = solutions
+      .map(_.score.toVector.map {
+        case ((name, dir), score) => name -> score
+      }.toMap)
+      .mkString("\n  ")
     f"ParetoFrontier(\n  ${contents})"
   }
 
@@ -31,10 +32,17 @@ case class ParetoFrontier[Sol] private(solutions: Set[Scored[Sol]]) {
     // provided objective or the first objective
     val sortByKey = objectives
       .indexOf(sortByObjective)
-      .pipe((x: Int) => if (x != -1) {x} else {0})
+      .pipe(
+        (x: Int) =>
+          if (x != -1) {
+            x
+          } else {
+            0
+        }
+      )
 
     val stringifiedSolutions = solutions.toIndexedSeq
-      // Sort by the first objective, for some semblance of order
+    // Sort by the first objective, for some semblance of order
       .map(s => objectives.map(s.scoreOn))
       .sortBy(_(sortByKey))(Ordering.Double.TotalOrdering)
       .map(_.mkString("\t"))
@@ -60,6 +68,7 @@ case class ParetoFrontier[Sol] private(solutions: Set[Scored[Sol]]) {
 }
 
 object ParetoFrontier {
+
   /** @param solutions The solutions set to create the pareto frontier from.
     * @return A ParetoFrontier with the non-dominated solutions from the given set.
     */

@@ -3,12 +3,14 @@ package io.evvo.builtin
 import io.evvo.agent.{CreatorFunction, CrossoverFunction, MutatorFunction}
 
 object trees {
+
   /** Represents a tree. Generic over the type of data in its nodes and its leaves.
     *
     * @tparam N The type of data in each node.
     * @tparam L The type of data in each leaf.
     */
   sealed trait BinaryTree[N, L] {
+
     /** @return the path to a random leaf in this tree. Each leaf is given equal weight. */
     def pathToRandomLeaf(): TreePath
 
@@ -27,8 +29,10 @@ object trees {
     def setSubtree(path: TreePath, newValue: BinaryTree[N, L]): Option[BinaryTree[N, L]]
 
     /** Updates the subtree at the given path. */
-    def updateSubtree(path: TreePath, update: BinaryTree[N, L] => BinaryTree[N, L])
-    : Option[BinaryTree[N, L]]
+    def updateSubtree(
+        path: TreePath,
+        update: BinaryTree[N, L] => BinaryTree[N, L]
+    ): Option[BinaryTree[N, L]]
 
     /** @return the leaves in this tree. */
     def leaves: Seq[BTLeaf[N, L]]
@@ -38,7 +42,7 @@ object trees {
   }
 
   case class BTNode[N, L](data: N, left: BinaryTree[N, L], right: BinaryTree[N, L])
-    extends BinaryTree[N, L] {
+      extends BinaryTree[N, L] {
     override val numLeaves: Int = left.numLeaves + right.numLeaves
 
     override def pathToRandomLeaf(): TreePath = {
@@ -85,19 +89,24 @@ object trees {
       }
     }
 
-    override def setSubtree(path: TreePath, newValue: BinaryTree[N, L])
-    : Option[BinaryTree[N, L]] = {
+    override def setSubtree(
+        path: TreePath,
+        newValue: BinaryTree[N, L]
+    ): Option[BinaryTree[N, L]] = {
       path match {
         case Nil => Some(newValue)
-        case next :: pathRest => next match {
-          case GoLeft => left.setSubtree(pathRest, newValue).map(t => BTNode(data, t, right))
-          case GoRight => right.setSubtree(pathRest, newValue).map(t => BTNode(data, left, t))
-        }
+        case next :: pathRest =>
+          next match {
+            case GoLeft => left.setSubtree(pathRest, newValue).map(t => BTNode(data, t, right))
+            case GoRight => right.setSubtree(pathRest, newValue).map(t => BTNode(data, left, t))
+          }
       }
     }
 
-    override def updateSubtree(path: TreePath, update: BinaryTree[N, L] => BinaryTree[N, L])
-    : Option[BinaryTree[N, L]] = {
+    override def updateSubtree(
+        path: TreePath,
+        update: BinaryTree[N, L] => BinaryTree[N, L]
+    ): Option[BinaryTree[N, L]] = {
       // Could be done in one pass through the tree instead of two, but this is clearer, revisit
       // this is it is a performance bottleneck.
       this.getSubtree(path).flatMap(subtree => this.setSubtree(path, update(subtree)))
@@ -105,7 +114,6 @@ object trees {
 
     override def leaves: Seq[BTLeaf[N, L]] = this.left.leaves ++ this.right.leaves
   }
-
 
   case class BTLeaf[N, L](data: L) extends BinaryTree[N, L] {
     override def pathToRandomLeaf(): TreePath = Seq()
@@ -121,16 +129,20 @@ object trees {
       }
     }
 
-    override def setSubtree(path: TreePath, newValue: BinaryTree[N, L])
-      : Option[BinaryTree[N, L]] = {
+    override def setSubtree(
+        path: TreePath,
+        newValue: BinaryTree[N, L]
+    ): Option[BinaryTree[N, L]] = {
       path match {
         case Nil => Some(newValue)
         case _ => None
       }
     }
 
-    override def updateSubtree(path: TreePath, update: BinaryTree[N, L] => BinaryTree[N, L])
-      : Option[BinaryTree[N, L]] = {
+    override def updateSubtree(
+        path: TreePath,
+        update: BinaryTree[N, L] => BinaryTree[N, L]
+    ): Option[BinaryTree[N, L]] = {
       path match {
         case Nil => Some(update(this))
         case _ => None
@@ -149,17 +161,16 @@ object trees {
   case object GoLeft extends TreePathElement
   case object GoRight extends TreePathElement
 
-
   // ===============================================================================================
   // AGENTS
   case class LeafCreator[N, L](leafValues: Seq[() => L])
-    extends CreatorFunction[BinaryTree[N, L]]("LeafCreator") {
+      extends CreatorFunction[BinaryTree[N, L]]("LeafCreator") {
     override def create(): Iterable[BTLeaf[N, L]] =
       Vector.fill(16)(BTLeaf(leafValues(util.Random.nextInt(leafValues.length))()))
   }
 
   case class ChangeLeafDataModifier[N, L](modifier: (L => L))
-    extends MutatorFunction[BinaryTree[N, L]]("ChangeLeafValue") {
+      extends MutatorFunction[BinaryTree[N, L]]("ChangeLeafValue") {
     override protected def mutate(sol: BinaryTree[N, L]): BinaryTree[N, L] = {
       def update(subtree: BinaryTree[N, L]): BinaryTree[N, L] = {
         subtree match {
@@ -173,7 +184,7 @@ object trees {
   }
 
   case class ChangeNodeDataModifier[N, L](modifier: (N => N))
-    extends MutatorFunction[BinaryTree[N, L]]("ChangeNodeData") {
+      extends MutatorFunction[BinaryTree[N, L]]("ChangeNodeData") {
     override protected def mutate(sol: BinaryTree[N, L]): BinaryTree[N, L] = {
       def update(subtree: BinaryTree[N, L]): BinaryTree[N, L] = {
         subtree match {
@@ -182,14 +193,15 @@ object trees {
         }
       }
 
-      sol.pathToRandomNode()
+      sol
+        .pathToRandomNode()
         .flatMap(p => sol.updateSubtree(p, update))
         .getOrElse(sol)
     }
   }
 
   case class ReplaceLeafWithNodeModifier[N, L](nodeGenerator: () => BTNode[N, L])
-    extends MutatorFunction[BinaryTree[N, L]]("ReplaceLeafWithNode") {
+      extends MutatorFunction[BinaryTree[N, L]]("ReplaceLeafWithNode") {
     override protected def mutate(sol: BinaryTree[N, L]): BinaryTree[N, L] = {
       val path = sol.pathToRandomLeaf()
       sol.setSubtree(path, nodeGenerator()).getOrElse(sol)
@@ -197,10 +209,13 @@ object trees {
   }
 
   case class SwapSubtreeModifier[N, L]()
-    extends CrossoverFunction[BinaryTree[N, L]]("SwapSubtree") {
-    override protected def crossover(sol1: BinaryTree[N, L], sol2: BinaryTree[N, L])
-    : BinaryTree[N, L] = {
-      sol1.getSubtree(sol1.pathToRandomSubtree())
+      extends CrossoverFunction[BinaryTree[N, L]]("SwapSubtree") {
+    override protected def crossover(
+        sol1: BinaryTree[N, L],
+        sol2: BinaryTree[N, L]
+    ): BinaryTree[N, L] = {
+      sol1
+        .getSubtree(sol1.pathToRandomSubtree())
         .flatMap(tree => sol2.setSubtree(sol2.pathToRandomSubtree(), tree))
         .getOrElse(sol1)
     }
