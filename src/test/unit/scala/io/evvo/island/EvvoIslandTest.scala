@@ -9,14 +9,12 @@ import scala.concurrent.duration._
 
 class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
   implicit val log = NullLogger
-
-  object MaximizeInt extends Objective[Int]("Test", Maximize) {
-    override protected def objective(sol: Int): Double = sol
-  }
-
   // private because EvvoIsland is private, required to compile.
   private var island1: EvvoIsland[Int] = _
   private var island2: EvvoIsland[Int] = _
+  object MaximizeInt extends Objective[Int]("Test", Maximize) {
+    override protected def objective(sol: Int): Double = sol
+  }
 
   before {
     island1 = new EvvoIsland(

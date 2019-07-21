@@ -1,7 +1,7 @@
 package io.evvo
 
-import io.evvo.builtin.deletors.DeleteDominated
 import io.evvo.agent.{CreatorFunction, MutatorFunction}
+import io.evvo.builtin.deletors.DeleteDominated
 import io.evvo.island.population.{Maximize, Objective}
 import io.evvo.island.{EvvoIslandBuilder, LocalIslandManager, StopAfter}
 import org.scalatest.{Matchers, WordSpec}

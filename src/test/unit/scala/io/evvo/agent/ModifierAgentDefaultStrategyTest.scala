@@ -1,6 +1,7 @@
 package io.evvo.agent
 
 import org.scalatest.{Matchers, WordSpec}
+
 import scala.concurrent.duration._
 
 class ModifierAgentDefaultStrategyTest extends WordSpec with Matchers {

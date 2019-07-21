@@ -45,9 +45,10 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
       info.numSolutions shouldBe 0
     }
   }
-
-  var pop: StandardPopulation[Double] = _
   val popSize = 10
+  val returnOne: Objective[Double] = new Objective[Double]("one", Maximize) {
+    override protected def objective(sol: Double): Double = 1
+  }
   "A non-empty population hashing on solutions" should {
     before {
       pop = population.StandardPopulation(fitnesses, HashingStrategy.ON_SOLUTIONS)
@@ -91,11 +92,6 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
       info.numSolutions shouldBe 10
     }
   }
-
-  val returnOne: Objective[Double] = new Objective[Double]("one", Maximize) {
-    override protected def objective(sol: Double): Double = 1
-  }
-
   val uniqueScore: Objective[Double] = new Objective[Double]("one", Maximize) {
     var counter = 0
 
@@ -104,6 +100,7 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
       counter
     }
   }
+  var pop: StandardPopulation[Double] = _
 
   "A population hashing on solutions" should {
 

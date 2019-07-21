@@ -1,9 +1,9 @@
 package io.evvo.agent
 
-import org.scalatest.{Matchers, WordSpec}
 import io.evvo.builtin.deletors.DeleteDominated
 import io.evvo.island.population
-import io.evvo.island.population.{Maximize, Minimize, Scored}
+import io.evvo.island.population.Maximize
+import org.scalatest.{Matchers, WordSpec}
 
 class DeleteDominatedFunctionTest extends WordSpec with Matchers {
   val scored1 = population.Scored(Map(("a", Maximize) -> 1), 12)

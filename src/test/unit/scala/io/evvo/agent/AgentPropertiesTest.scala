@@ -16,47 +16,37 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   // TODO reimplement this using http://doc.scalatest.org/3.0.1/#org.scalatest.PropSpec@testMatrix
 
   type S = Int
-
-  var pop: StandardPopulation[S] = _
-
-  // a mapping from each function to whether it has been called yet
-  var agentFunctionCalled: mutable.Map[Any, Boolean] = _
-
   val creatorFunc = new CreatorFunction[S]("creator") {
     override def create(): Iterable[S] = {
       agentFunctionCalled("create") = true
       Vector(1)
     }
   }
-
-  var creatorAgent: Agent[S] = _
-
   val mutatorFunc = new ModifierFunction[S]("modifier") {
     def modify(seq: IndexedSeq[Scored[S]]): IndexedSeq[S] = {
       agentFunctionCalled("modify") = true
       seq.map(_.solution + 1)
     }
   }
-
-  var modifierAgent: Agent[S] = _
   val modifierInput: Set[Scored[S]] = Set[Scored[S]](Scored(Map(("Score1", Minimize) -> 3), 2))
-
   val deletorFunc = new DeletorFunction[S]("deletor") {
     override def delete(sols: IndexedSeq[Scored[S]]): Iterable[Scored[S]] = {
       agentFunctionCalled("delete") = true
       sols
     }
   }
-
-  var deletorAgent: Agent[S] = _
   val deletorInput: Set[Scored[S]] = modifierInput
-
-  var agents: Vector[Agent[S]] = _
   val strategy: AgentStrategy = _ => 70.millis
-
   val fitnessFunc: Objective[S] = new Objective[S]("Double", Minimize) {
     override protected def objective(sol: S): Double = sol.toDouble
   }
+  var pop: StandardPopulation[S] = _
+  // a mapping from each function to whether it has been called yet
+  var agentFunctionCalled: mutable.Map[Any, Boolean] = _
+  var creatorAgent: Agent[S] = _
+  var modifierAgent: Agent[S] = _
+  var deletorAgent: Agent[S] = _
+  var agents: Vector[Agent[S]] = _
 
   before {
     pop = StandardPopulation[S](Vector(fitnessFunc))

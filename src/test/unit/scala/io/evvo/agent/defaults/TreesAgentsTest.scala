@@ -1,14 +1,6 @@
 package io.evvo.agent.defaults
 
-import io.evvo.builtin.trees.{
-  BTLeaf,
-  BTNode,
-  BinaryTree,
-  ChangeLeafDataModifier,
-  ChangeNodeDataModifier,
-  LeafCreator,
-  SwapSubtreeModifier
-}
+import io.evvo.builtin.trees._
 import io.evvo.island.population.Scored
 import org.scalatest.{Matchers, WordSpec}
 

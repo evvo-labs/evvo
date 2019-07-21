@@ -1,8 +1,9 @@
 package io.evvo.island
 
+import io.evvo.island.population.{ParetoFrontier, Scored}
+
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
-import io.evvo.island.population.{ParetoFrontier, Scored}
 
 /** `EvolutionaryProcess` is a generic interface for evolutionary problem solvers. */
 trait EvolutionaryProcess[Sol] {
@@ -15,6 +16,7 @@ trait EvolutionaryProcess[Sol] {
   def runBlocking(stopAfter: StopAfter): Unit
 
   /** Starts this island running, then immediately returns.
+    *
     * @param stopAfter Specifies when to stop running the island.
     * @return A future that resolves after the island is done running.
     */

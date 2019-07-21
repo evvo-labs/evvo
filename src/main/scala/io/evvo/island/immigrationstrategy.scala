@@ -2,11 +2,11 @@ package io.evvo.island
 
 import io.evvo.island.population.{Population, Scored}
 
-/** Decides which immigrants should be allowed into an island.
-  */
+/** Decides which immigrants should be allowed into an island. */
 trait ImmigrationStrategy {
 
   /** Decides which of the immigrants to admit into the population.
+    *
     * @param immigrants The set of solutions being sent over to the new population, and their
     *                   scores on each objective.
     * @param population The current population.
@@ -15,8 +15,7 @@ trait ImmigrationStrategy {
   def filter[Sol](immigrants: Seq[Scored[Sol]], population: Population[Sol]): Seq[Scored[Sol]]
 }
 
-/** Only allows new immigrants if they would advance the Pareto frontier on the island.
-  */
+/** Only allows new immigrants if they would advance the Pareto frontier on the island. */
 object ElitistImmigrationStrategy extends ImmigrationStrategy {
   override def filter[Sol](
       immigrants: Seq[Scored[Sol]],
