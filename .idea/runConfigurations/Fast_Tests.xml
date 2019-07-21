@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Fast Tests" type="ScalaTestRunConfiguration" factoryName="ScalaTest">
+    <module name="evvo" />
+    <setting name="path" value="" />
+    <setting name="vmparams" value="" />
+    <setting name="params" value="-l io.evvo.tags.Slow" />
+    <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <setting name="searchForTest" value="In whole project" />
+    <setting name="showProgressMessages" value="true" />
+    <setting name="useSbt" value="false" />
+    <setting name="useUiWithSbt" value="false" />
+    <setting name="jrePath" value="" />
+    <envs />
+    <setting name="testKind" value="All in package" />
+    <setting name="package" value="" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
