@@ -1,8 +1,8 @@
 package io.evvo.island
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
-import java.util.Calendar
-import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
+import java.util.TimerTask
+import java.util.concurrent.{Executors, TimeUnit}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill}
 import akka.event.{LoggingAdapter, LoggingReceive}
@@ -12,9 +12,8 @@ import io.evvo.agent._
 import io.evvo.island.population._
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, _}
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, Future, Promise}
 import scala.util.Try
 
 /** This component is used to do all the actual work of managing the island, without managing
@@ -69,47 +68,34 @@ private class EvvoIsland[Sol](
     mutatorAgents.foreach(_.start())
     deletorAgents.foreach(_.start())
 
-    val startTime = Calendar.getInstance().toInstant.toEpochMilli
-    val deadline = startTime + stopAfter.time.toMillis
+    // Schedule logging and emigration on different threads
+    val loggingExecutor = Executors.newSingleThreadScheduledExecutor()
+    val emigrationExecutor = Executors.newSingleThreadScheduledExecutor()
 
-    // Here's where things get zany. To run a loop every N milliseconds, we want to use
-    // a java Executor. The future value is assigned the result of the scheduling.
-    // We use this "future" value to block, and tell the executor to cancel the future when it's
-    // done. The Future (scala Future) at the bottom will wait for this future to resolve.
-    // Note: It's an option because scalastyle really, really hates null.
-    val executor = Executors.newSingleThreadScheduledExecutor()
-    var future: Option[ScheduledFuture[_]] = None
-    future = Some(
-      executor.scheduleAtFixedRate(
-        () => {
-          // If we ought to end this loop, we run stop and cancel the future, meaning the Future
-          // returned at the bottom is now completable.
-          if (deadline < Calendar.getInstance().toInstant.toEpochMilli) {
-            log.info(
-              f"started at=${startTime}, now=${Calendar.getInstance().toInstant.toEpochMilli}"
-            )
-            this.stop()
-            future.foreach(_.cancel(true))
-          }
-
-          // Otherwise, run emigration and print the pareto frontier
-          val pareto = pop.getParetoFrontier()
-          log.info(f"pareto = ${pareto}")
-          this.emigrate()
-        },
-        0,
-        500,
-        TimeUnit.MILLISECONDS
-      )
+    loggingExecutor.scheduleAtFixedRate(
+      () => log.info(f"pareto = ${pop.getParetoFrontier()}"),
+      0,
+      500,
+      TimeUnit.MILLISECONDS
     )
 
-    // Convert from java ScheduledFuture to Future, to conform to the resply type.
-    Future {
-      assert(Try {
-        future.foreach(_.get())
-      }.isFailure)
-      executor.shutdown()
-    }
+    emigrationExecutor.scheduleAtFixedRate(
+      () => this.emigrate(),
+      emigrationStrategy.durationBetweenRuns.toMillis,
+      emigrationStrategy.durationBetweenRuns.toMillis,
+      TimeUnit.MILLISECONDS)
+
+    val done = Promise[Unit]()
+    val timer = new java.util.Timer()
+    timer.schedule(new TimerTask {
+      override def run(): Unit = {
+        done.complete(Try { () })
+        loggingExecutor.shutdown()
+        emigrationExecutor.shutdown()
+      }
+    }, stopAfter.time.toMillis)
+
+    done.future
   }
 
   def runBlocking(stopAfter: StopAfter): Unit = {
