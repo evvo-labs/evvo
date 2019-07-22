@@ -1,8 +1,8 @@
 package io.evvo.island
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
-import java.util.Calendar
-import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
+import java.util.TimerTask
+import java.util.concurrent.{Executors, TimeUnit}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill}
 import akka.event.{LoggingAdapter, LoggingReceive}
@@ -12,10 +12,8 @@ import io.evvo.agent._
 import io.evvo.island.population._
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, _}
-import scala.concurrent.{Await, Future}
-import scala.util.Try
+import scala.concurrent.{Await, Future, Promise}
 
 /** This component is used to do all the actual work of managing the island, without managing
   * or being tied to where the island is deployed to.
@@ -26,7 +24,8 @@ private class EvvoIsland[Sol](
     deletors: Vector[DeletorFunction[Sol]],
     fitnesses: Vector[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
-    emigrationStrategy: EmigrationStrategy
+    emigrationStrategy: EmigrationStrategy,
+    loggingStrategy: LoggingStrategy
 )(implicit log: LoggingAdapter)
     extends EvolutionaryProcess[Sol] {
 
@@ -69,47 +68,34 @@ private class EvvoIsland[Sol](
     mutatorAgents.foreach(_.start())
     deletorAgents.foreach(_.start())
 
-    val startTime = Calendar.getInstance().toInstant.toEpochMilli
-    val deadline = startTime + stopAfter.time.toMillis
+    // Schedule logging and emigration on different threads
+    val loggingExecutor = Executors.newSingleThreadScheduledExecutor()
+    val emigrationExecutor = Executors.newSingleThreadScheduledExecutor()
 
-    // Here's where things get zany. To run a loop every N milliseconds, we want to use
-    // a java Executor. The future value is assigned the result of the scheduling.
-    // We use this "future" value to block, and tell the executor to cancel the future when it's
-    // done. The Future (scala Future) at the bottom will wait for this future to resolve.
-    // Note: It's an option because scalastyle really, really hates null.
-    val executor = Executors.newSingleThreadScheduledExecutor()
-    var future: Option[ScheduledFuture[_]] = None
-    future = Some(
-      executor.scheduleAtFixedRate(
-        () => {
-          // If we ought to end this loop, we run stop and cancel the future, meaning the Future
-          // returned at the bottom is now completable.
-          if (deadline < Calendar.getInstance().toInstant.toEpochMilli) {
-            log.info(
-              f"started at=${startTime}, now=${Calendar.getInstance().toInstant.toEpochMilli}"
-            )
-            this.stop()
-            future.foreach(_.cancel(true))
-          }
-
-          // Otherwise, run emigration and print the pareto frontier
-          val pareto = pop.getParetoFrontier()
-          log.info(f"pareto = ${pareto}")
-          this.emigrate()
-        },
-        0,
-        500,
-        TimeUnit.MILLISECONDS
-      )
+    loggingExecutor.scheduleAtFixedRate(
+      () => log.info(loggingStrategy.logPopulation(this.pop)),
+      loggingStrategy.durationBetweenLogs.toMillis,
+      loggingStrategy.durationBetweenLogs.toMillis,
+      TimeUnit.MILLISECONDS
     )
 
-    // Convert from java ScheduledFuture to Future, to conform to the resply type.
-    Future {
-      assert(Try {
-        future.foreach(_.get())
-      }.isFailure)
-      executor.shutdown()
-    }
+    emigrationExecutor.scheduleAtFixedRate(
+      () => this.emigrate(),
+      emigrationStrategy.durationBetweenRuns.toMillis,
+      emigrationStrategy.durationBetweenRuns.toMillis,
+      TimeUnit.MILLISECONDS)
+
+    val done = Promise[Unit]()
+    val timer = new java.util.Timer()
+    timer.schedule(new TimerTask {
+      override def run(): Unit = {
+        loggingExecutor.shutdown()
+        emigrationExecutor.shutdown()
+        done.success(())
+      }
+    }, stopAfter.time.toMillis)
+
+    done.future
   }
 
   def runBlocking(stopAfter: StopAfter): Unit = {
@@ -171,7 +157,8 @@ class LocalEvvoIsland[Sol](
     deletors: Vector[DeletorFunction[Sol]],
     objectives: Vector[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
-    emigrationStrategy: EmigrationStrategy
+    emigrationStrategy: EmigrationStrategy,
+    loggingStrategy: LoggingStrategy
 )(
     implicit val log: LoggingAdapter = LocalLogger
 ) extends EvolutionaryProcess[Sol] {
@@ -181,7 +168,8 @@ class LocalEvvoIsland[Sol](
     deletors,
     objectives,
     immigrationStrategy,
-    emigrationStrategy
+    emigrationStrategy,
+    loggingStrategy
   )
 
   override def runBlocking(stopAfter: StopAfter): Unit = {
@@ -209,6 +197,7 @@ class LocalEvvoIsland[Sol](
   }
 }
 
+/** A logger that prints info and above. */
 object LocalLogger extends LoggingAdapter {
   private val logger = LoggerFactory.getLogger("LocalEvvoIsland")
 
@@ -252,12 +241,13 @@ class RemoteEvvoIsland[Sol](
     deletors: Vector[DeletorFunction[Sol]],
     objectives: Vector[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
-    emigrationStrategy: EmigrationStrategy
+    emigrationStrategy: EmigrationStrategy,
+    loggingStrategy: LoggingStrategy
 ) extends Actor
     with EvolutionaryProcess[Sol]
     with ActorLogging {
-  // for messages, which are case classes defined within RemoteEvvoIsland's companion objeect
-  import io.evvo.island.RemoteEvvoIsland._ // scalastyle:ignore import.grouping
+  // for messages, which are case classes defined within RemoteEvvoIsland's companion object
+  import io.evvo.island.RemoteEvvoIsland._
 
   implicit val logger: LoggingAdapter = log
 
@@ -267,7 +257,8 @@ class RemoteEvvoIsland[Sol](
     deletors,
     objectives,
     immigrationStrategy,
-    emigrationStrategy
+    emigrationStrategy,
+    loggingStrategy
   )
 
   override def receive: Receive =

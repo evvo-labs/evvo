@@ -13,6 +13,7 @@ PreCommit:
   CustomScript:
     enabled: true
     required_executable: 'scalafmt'
+    flags: ['-c', '.scalafmt.conf', 'src'] 
 
   JsonSyntax:
     enabled: true

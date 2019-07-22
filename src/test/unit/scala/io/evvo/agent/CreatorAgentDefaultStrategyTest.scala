@@ -1,6 +1,5 @@
 package io.evvo.agent
 
-import io.evvo.agent.{CreatorAgentDefaultStrategy, PopulationInformation}
 import org.scalatest.WordSpec
 
 class CreatorAgentDefaultStrategyTest extends WordSpec {

@@ -1,9 +1,10 @@
 package io.evvo
 
-import io.evvo.builtin.deletors.DeleteDominated
 import io.evvo.agent.{CreatorFunction, MutatorFunction}
+import io.evvo.builtin.deletors.DeleteDominated
 import io.evvo.island.population.{Maximize, Objective}
 import io.evvo.island.{EvvoIslandBuilder, LocalIslandManager, StopAfter}
+import io.evvo.tags.Slow
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
@@ -11,7 +12,7 @@ import scala.concurrent.duration._
 class LocalIslandManagerTest extends WordSpec with Matchers {
 
   "LocalIslandManager" should {
-    "Be able to optimize problems" in {
+    "Be able to optimize problems" taggedAs Slow in {
       type Solution = String
 
       val startV = new Objective[Solution]("startV", Maximize) {

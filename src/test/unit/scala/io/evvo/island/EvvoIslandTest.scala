@@ -9,14 +9,12 @@ import scala.concurrent.duration._
 
 class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
   implicit val log = NullLogger
-
-  object MaximizeInt extends Objective[Int]("Test", Maximize) {
-    override protected def objective(sol: Int): Double = sol
-  }
-
   // private because EvvoIsland is private, required to compile.
   private var island1: EvvoIsland[Int] = _
   private var island2: EvvoIsland[Int] = _
+  object MaximizeInt extends Objective[Int]("Test", Maximize) {
+    override protected def objective(sol: Int): Double = sol
+  }
 
   before {
     island1 = new EvvoIsland(
@@ -25,7 +23,8 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       Vector(),
       Vector(MaximizeInt),
       ElitistImmigrationStrategy,
-      RandomSampleEmigrationStrategy(4)
+      RandomSampleEmigrationStrategy(4),
+      LogPopulation()
     )
 
     island2 = new EvvoIsland(
@@ -34,7 +33,8 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       Vector(),
       Vector(MaximizeInt),
       ElitistImmigrationStrategy,
-      RandomSampleEmigrationStrategy(4)
+      RandomSampleEmigrationStrategy(4),
+      LogPopulation()
     )
   }
 
@@ -56,7 +56,7 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       island1.currentParetoFrontier().solutions should be(Set(solution11))
     }
 
-    "emigrate strategies to other islands" in (Slow, {
+    "emigrate strategies to other islands" taggedAs Slow in {
       island1.registerIslands(Seq(island2))
 
       island1.immigrate(Seq(Scored[Int](Map(("Test", Maximize) -> 10), 10)))
@@ -65,18 +65,18 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       island2.currentParetoFrontier().solutions.size shouldBe 0
       island1.runBlocking(StopAfter(1.second))
       island2.currentParetoFrontier().solutions.size shouldBe 1
-    })
+    }
 
-    "use the emigration strategy to choose which solutions to emigrate" in (Slow, {
+    "use the emigration strategy to choose which solutions to emigrate" taggedAs Slow in {
       val noEmigrationIsland = new EvvoIsland[Int](
         Vector(),
         Vector(),
         Vector(),
         Vector(MaximizeInt),
         ElitistImmigrationStrategy,
-        NoEmigrationEmigrationStrategy
+        NoEmigrationEmigrationStrategy,
+        LogPopulation()
       )
-
       noEmigrationIsland.registerIslands(Seq(island2))
 
       // Because island2 wasn't changed, in conjunction with the above test, the change in
@@ -85,7 +85,7 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       noEmigrationIsland.runBlocking(StopAfter(1.second))
       island2.currentParetoFrontier().solutions.size shouldBe 0
 
-    })
+    }
   }
 
 }

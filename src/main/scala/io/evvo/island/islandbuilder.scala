@@ -34,7 +34,8 @@ case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeleto
     deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
     objectives: Set[Objective[Sol]] = Set[Objective[Sol]](),
     immigrationStrategy: ImmigrationStrategy = AllowAllImmigrationStrategy,
-    emigrationStrategy: EmigrationStrategy = RandomSampleEmigrationStrategy(4)
+    emigrationStrategy: EmigrationStrategy = RandomSampleEmigrationStrategy(4),
+    loggingStrategy: LoggingStrategy = LogPopulation()
 ) {
 
   def addCreator(
@@ -66,6 +67,18 @@ case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeleto
   ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(immigrationStrategy = immigrationStrategy)
   }
+
+  def withEmigrationStrategy(
+      emigrationStrategy: EmigrationStrategy
+  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+    this.copy(emigrationStrategy = emigrationStrategy)
+  }
+
+  def withLoggingStrategy(
+      loggingStrategy: LoggingStrategy
+  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+    this.copy(loggingStrategy = loggingStrategy)
+  }
 }
 
 /** A finished EvvoIslandBuilder can build an actual island. See
@@ -77,7 +90,8 @@ case class FinishedEvvoIslandBuilder[Sol](
     deletors: Set[DeletorFunction[Sol]],
     objectives: Set[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
-    emigrationStrategy: EmigrationStrategy
+    emigrationStrategy: EmigrationStrategy,
+    loggingStrategy: LoggingStrategy
 ) {
   assert(creators.nonEmpty)
   assert(modifiers.nonEmpty)
@@ -92,7 +106,8 @@ case class FinishedEvvoIslandBuilder[Sol](
         deletors.toVector,
         objectives.toVector,
         immigrationStrategy,
-        emigrationStrategy
+        emigrationStrategy,
+        loggingStrategy
       )
     )
   }
@@ -104,7 +119,8 @@ case class FinishedEvvoIslandBuilder[Sol](
       deletors.toVector,
       objectives.toVector,
       immigrationStrategy,
-      emigrationStrategy
+      emigrationStrategy,
+      loggingStrategy
     )
   }
 }
@@ -130,7 +146,8 @@ object EvvoIslandBuilder {
       builder.deletors,
       builder.objectives,
       builder.immigrationStrategy,
-      builder.emigrationStrategy
+      builder.emigrationStrategy,
+      builder.loggingStrategy
     )
   }
 
