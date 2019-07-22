@@ -23,7 +23,8 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       Vector(),
       Vector(MaximizeInt),
       ElitistImmigrationStrategy,
-      RandomSampleEmigrationStrategy(4)
+      RandomSampleEmigrationStrategy(4),
+      LogPopulation()
     )
 
     island2 = new EvvoIsland(
@@ -32,7 +33,8 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       Vector(),
       Vector(MaximizeInt),
       ElitistImmigrationStrategy,
-      RandomSampleEmigrationStrategy(4)
+      RandomSampleEmigrationStrategy(4),
+      LogPopulation()
     )
   }
 
@@ -72,9 +74,9 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
         Vector(),
         Vector(MaximizeInt),
         ElitistImmigrationStrategy,
-        NoEmigrationEmigrationStrategy
+        NoEmigrationEmigrationStrategy,
+        LogPopulation()
       )
-
       noEmigrationIsland.registerIslands(Seq(island2))
 
       // Because island2 wasn't changed, in conjunction with the above test, the change in

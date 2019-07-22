@@ -12,9 +12,6 @@ trait EmigrationStrategy {
   /** Determines which solutions in a population are chosen for emigration.
     *
     * @param population The population to choose from.
-    * @tparam Sol The type of the solutions in the population and return type. This method, not
-    *             the trait, is type-generic, because all implementations of this type should
-    *             only operate on the scores, not the solutions themselves.
     * @return The solutions in a population which were chosen for emigration
     */
   def chooseSolutions[Sol](population: Population[Sol]): Seq[Scored[Sol]]
@@ -24,7 +21,7 @@ trait EmigrationStrategy {
   def durationBetweenRuns: FiniteDuration
 }
 
-/** Chooses a random sample of `n` solutions to emigrate */
+/** Chooses a random sample of `n` solutions to emigrate. */
 case class RandomSampleEmigrationStrategy(n: Int, durationBetweenRuns: FiniteDuration = 500.millis)
     extends EmigrationStrategy {
   override def chooseSolutions[Sol](population: Population[Sol]): Seq[Scored[Sol]] = {

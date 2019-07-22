@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.{Duration, _}
 import scala.concurrent.{Await, Future, Promise}
-import scala.util.Try
 
 /** This component is used to do all the actual work of managing the island, without managing
   * or being tied to where the island is deployed to.
@@ -25,7 +24,8 @@ private class EvvoIsland[Sol](
     deletors: Vector[DeletorFunction[Sol]],
     fitnesses: Vector[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
-    emigrationStrategy: EmigrationStrategy
+    emigrationStrategy: EmigrationStrategy,
+    loggingStrategy: LoggingStrategy
 )(implicit log: LoggingAdapter)
     extends EvolutionaryProcess[Sol] {
 
@@ -73,9 +73,9 @@ private class EvvoIsland[Sol](
     val emigrationExecutor = Executors.newSingleThreadScheduledExecutor()
 
     loggingExecutor.scheduleAtFixedRate(
-      () => log.info(f"pareto = ${pop.getParetoFrontier()}"),
-      0,
-      500,
+      () => log.info(loggingStrategy.logPopulation(this.pop)),
+      loggingStrategy.durationBetweenLogs.toMillis,
+      loggingStrategy.durationBetweenLogs.toMillis,
       TimeUnit.MILLISECONDS
     )
 
@@ -89,9 +89,9 @@ private class EvvoIsland[Sol](
     val timer = new java.util.Timer()
     timer.schedule(new TimerTask {
       override def run(): Unit = {
-        done.complete(Try { () })
         loggingExecutor.shutdown()
         emigrationExecutor.shutdown()
+        done.success(())
       }
     }, stopAfter.time.toMillis)
 
@@ -157,7 +157,8 @@ class LocalEvvoIsland[Sol](
     deletors: Vector[DeletorFunction[Sol]],
     objectives: Vector[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
-    emigrationStrategy: EmigrationStrategy
+    emigrationStrategy: EmigrationStrategy,
+    loggingStrategy: LoggingStrategy
 )(
     implicit val log: LoggingAdapter = LocalLogger
 ) extends EvolutionaryProcess[Sol] {
@@ -167,7 +168,8 @@ class LocalEvvoIsland[Sol](
     deletors,
     objectives,
     immigrationStrategy,
-    emigrationStrategy
+    emigrationStrategy,
+    loggingStrategy
   )
 
   override def runBlocking(stopAfter: StopAfter): Unit = {
@@ -195,6 +197,7 @@ class LocalEvvoIsland[Sol](
   }
 }
 
+/** A logger that prints info and above. */
 object LocalLogger extends LoggingAdapter {
   private val logger = LoggerFactory.getLogger("LocalEvvoIsland")
 
@@ -238,12 +241,13 @@ class RemoteEvvoIsland[Sol](
     deletors: Vector[DeletorFunction[Sol]],
     objectives: Vector[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
-    emigrationStrategy: EmigrationStrategy
+    emigrationStrategy: EmigrationStrategy,
+    loggingStrategy: LoggingStrategy
 ) extends Actor
     with EvolutionaryProcess[Sol]
     with ActorLogging {
-  // for messages, which are case classes defined within RemoteEvvoIsland's companion objeect
-  import io.evvo.island.RemoteEvvoIsland._ // scalastyle:ignore import.grouping
+  // for messages, which are case classes defined within RemoteEvvoIsland's companion object
+  import io.evvo.island.RemoteEvvoIsland._
 
   implicit val logger: LoggingAdapter = log
 
@@ -253,7 +257,8 @@ class RemoteEvvoIsland[Sol](
     deletors,
     objectives,
     immigrationStrategy,
-    emigrationStrategy
+    emigrationStrategy,
+    loggingStrategy
   )
 
   override def receive: Receive =
