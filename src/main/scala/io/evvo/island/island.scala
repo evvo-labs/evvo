@@ -251,7 +251,7 @@ class RemoteEvvoIsland[Sol](
     with EvolutionaryProcess[Sol]
     with ActorLogging {
   // for messages, which are case classes defined within RemoteEvvoIsland's companion object
-  import io.evvo.island.RemoteEvvoIsland._
+  import io.evvo.island.RemoteEvvoIsland._ // scalastyle:ignore import.grouping
 
   implicit val logger: LoggingAdapter = log
 
