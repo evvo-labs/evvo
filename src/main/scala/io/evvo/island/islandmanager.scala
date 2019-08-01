@@ -90,7 +90,6 @@ class RemoteIslandManager[Sol](
     .getConfig("IslandManager")
     .withFallback(configFile)
     .resolve()
-  println(config)
 
   private val addresses: Vector[Address] = config
     .getList("nodes.locations")

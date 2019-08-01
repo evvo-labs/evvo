@@ -63,6 +63,8 @@
     <buffered bufClass="io.evvo.island.population.NetworkTopologyTest" />
     <buffered bufClass="io.evvo.island.population.StandardPopulationTest" />
     <buffered bufClass="io.evvo.island.population.StandardPopulationTest" />
+    <buffered bufClass="unit.io.evvo.island.EmigrationTargetStrategyTest" />
+    <buffered bufClass="unit.io.evvo.island.EmigrationTargetStrategyTest" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
