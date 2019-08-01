@@ -51,5 +51,21 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
       // to inform people in the future.
       // val builder = EvvoIsland.builder[Bitstring]().buildLocalEvvo()
     }
+
+    "allow modification of strategies" in {
+      EvvoIsland
+        .builder[Bitstring]()
+        .addObjective(new Objective[Bitstring]("Three", Maximize) {
+          override protected def objective(sol: Bitstring): Double = 3d
+        })
+        .addCreator(BitstringGenerator(length = 16))
+        .addModifier(Bitflipper())
+        .addDeletor(DeleteDominated())
+        .withEmigrationStrategy(RandomSampleEmigrationStrategy(3))
+        .withEmigrationTargetStrategy(RoundRobinEmigrationTargetStrategy())
+        .withImmigrationStrategy(AllowAllImmigrationStrategy)
+        .withLoggingStrategy(NullLoggingStrategy())
+        .buildLocalEvvo()
+    }
   }
 }

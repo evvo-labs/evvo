@@ -24,7 +24,8 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       Vector(MaximizeInt),
       ElitistImmigrationStrategy,
       RandomSampleEmigrationStrategy(4),
-      LogPopulation()
+      SendToAllEmigrationTargetStrategy(),
+      LogPopulationLoggingStrategy()
     )
 
     island2 = new EvvoIsland(
@@ -34,7 +35,8 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       Vector(MaximizeInt),
       ElitistImmigrationStrategy,
       RandomSampleEmigrationStrategy(4),
-      LogPopulation()
+      SendToAllEmigrationTargetStrategy(),
+      LogPopulationLoggingStrategy()
     )
   }
 
@@ -75,7 +77,8 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
         Vector(MaximizeInt),
         ElitistImmigrationStrategy,
         NoEmigrationEmigrationStrategy,
-        LogPopulation()
+        SendToAllEmigrationTargetStrategy(),
+        LogPopulationLoggingStrategy()
       )
       noEmigrationIsland.registerIslands(Seq(island2))
 
@@ -84,8 +87,6 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       island2.currentParetoFrontier().solutions.size shouldBe 0
       noEmigrationIsland.runBlocking(StopAfter(1.second))
       island2.currentParetoFrontier().solutions.size shouldBe 0
-
     }
   }
-
 }

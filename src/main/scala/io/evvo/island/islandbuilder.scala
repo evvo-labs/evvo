@@ -35,48 +35,46 @@ case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeleto
     objectives: Set[Objective[Sol]] = Set[Objective[Sol]](),
     immigrationStrategy: ImmigrationStrategy = AllowAllImmigrationStrategy,
     emigrationStrategy: EmigrationStrategy = RandomSampleEmigrationStrategy(4),
-    loggingStrategy: LoggingStrategy = LogPopulation()
+    emigrationTargetStrategy: EmigrationTargetStrategy = RoundRobinEmigrationTargetStrategy(),
+    loggingStrategy: LoggingStrategy = LogPopulationLoggingStrategy()
 ) {
-
-  def addCreator(
-      creatorFunc: CreatorFunction[Sol]
-  ): UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HasModifiers, HasDeletors, HasObjectives] = {
+  def addCreator(creatorFunc: CreatorFunction[Sol])
+    : UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(creators = creators + creatorFunc)
   }
 
-  def addModifier(
-      modifierFunc: ModifierFunction[Sol]
-  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HAS_SOME, HasDeletors, HasObjectives] = {
+  def addModifier(modifierFunc: ModifierFunction[Sol])
+    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HAS_SOME, HasDeletors, HasObjectives] = {
     this.copy(modifiers = modifiers + modifierFunc)
   }
 
-  def addDeletor(
-      deletorFunc: DeletorFunction[Sol]
-  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HAS_SOME, HasObjectives] = {
+  def addDeletor(deletorFunc: DeletorFunction[Sol])
+    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HAS_SOME, HasObjectives] = {
     this.copy(deletors = deletors + deletorFunc)
   }
 
-  def addObjective(
-      objective: Objective[Sol]
-  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HAS_SOME] = {
+  def addObjective(objective: Objective[Sol])
+    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HAS_SOME] = {
     this.copy(objectives = objectives + objective)
   }
 
-  def withImmigrationStrategy(
-      immigrationStrategy: ImmigrationStrategy
-  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+  def withImmigrationStrategy(immigrationStrategy: ImmigrationStrategy)
+    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(immigrationStrategy = immigrationStrategy)
   }
 
-  def withEmigrationStrategy(
-      emigrationStrategy: EmigrationStrategy
-  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+  def withEmigrationStrategy(emigrationStrategy: EmigrationStrategy)
+    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(emigrationStrategy = emigrationStrategy)
   }
 
-  def withLoggingStrategy(
-      loggingStrategy: LoggingStrategy
-  ): UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+  def withEmigrationTargetStrategy(emigrationTargetStrategy: EmigrationTargetStrategy)
+    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+    this.copy(emigrationTargetStrategy = emigrationTargetStrategy)
+  }
+
+  def withLoggingStrategy(loggingStrategy: LoggingStrategy)
+    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(loggingStrategy = loggingStrategy)
   }
 }
@@ -91,6 +89,7 @@ case class FinishedEvvoIslandBuilder[Sol](
     objectives: Set[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
     emigrationStrategy: EmigrationStrategy,
+    emigrationTargetStrategy: EmigrationTargetStrategy,
     loggingStrategy: LoggingStrategy
 ) {
   assert(creators.nonEmpty)
@@ -107,6 +106,7 @@ case class FinishedEvvoIslandBuilder[Sol](
         objectives.toVector,
         immigrationStrategy,
         emigrationStrategy,
+        emigrationTargetStrategy,
         loggingStrategy
       )
     )
@@ -120,6 +120,7 @@ case class FinishedEvvoIslandBuilder[Sol](
       objectives.toVector,
       immigrationStrategy,
       emigrationStrategy,
+      emigrationTargetStrategy,
       loggingStrategy
     )
   }
@@ -147,6 +148,7 @@ object EvvoIslandBuilder {
       builder.objectives,
       builder.immigrationStrategy,
       builder.emigrationStrategy,
+      builder.emigrationTargetStrategy,
       builder.loggingStrategy
     )
   }

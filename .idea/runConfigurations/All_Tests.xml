@@ -14,24 +14,57 @@
     <setting name="testKind" value="All in package" />
     <setting name="package" value="" />
     <buffered bufClass="io.evvo.LocalEvvoTest" />
+    <buffered bufClass="io.evvo.LocalEvvoTest" />
+    <buffered bufClass="io.evvo.LocalIslandManagerTest" />
     <buffered bufClass="io.evvo.LocalIslandManagerTest" />
     <buffered bufClass="io.evvo.ParetoFrontierTest" />
+    <buffered bufClass="io.evvo.ParetoFrontierTest" />
+    <buffered bufClass="io.evvo.ScoredTest" />
     <buffered bufClass="io.evvo.ScoredTest" />
     <buffered bufClass="io.evvo.agent.AgentPropertiesTest" />
+    <buffered bufClass="io.evvo.agent.AgentPropertiesTest" />
+    <buffered bufClass="io.evvo.agent.CreatorAgentDefaultStrategyTest" />
     <buffered bufClass="io.evvo.agent.CreatorAgentDefaultStrategyTest" />
     <buffered bufClass="io.evvo.agent.CrossoverFunctionTest" />
+    <buffered bufClass="io.evvo.agent.CrossoverFunctionTest" />
+    <buffered bufClass="io.evvo.agent.DeleteDominatedFunctionTest" />
     <buffered bufClass="io.evvo.agent.DeleteDominatedFunctionTest" />
     <buffered bufClass="io.evvo.agent.DeleteWorstHalfByRandomObjectiveTest" />
+    <buffered bufClass="io.evvo.agent.DeleteWorstHalfByRandomObjectiveTest" />
+    <buffered bufClass="io.evvo.agent.DeletorAgentDefaultStrategyTest" />
     <buffered bufClass="io.evvo.agent.DeletorAgentDefaultStrategyTest" />
     <buffered bufClass="io.evvo.agent.FunctionSerializabilityTest" />
+    <buffered bufClass="io.evvo.agent.FunctionSerializabilityTest" />
+    <buffered bufClass="io.evvo.agent.ModifierAgentDefaultStrategyTest" />
     <buffered bufClass="io.evvo.agent.ModifierAgentDefaultStrategyTest" />
     <buffered bufClass="io.evvo.agent.ModifierFunctionTest" />
+    <buffered bufClass="io.evvo.agent.ModifierFunctionTest" />
     <buffered bufClass="io.evvo.agent.MutatorFunctionTest" />
+    <buffered bufClass="io.evvo.agent.MutatorFunctionTest" />
+    <buffered bufClass="io.evvo.agent.defaults.BitflipperTest" />
+    <buffered bufClass="io.evvo.agent.defaults.BitflipperTest" />
+    <buffered bufClass="io.evvo.agent.defaults.DeleteDominatedTest" />
+    <buffered bufClass="io.evvo.agent.defaults.DeleteDominatedTest" />
+    <buffered bufClass="io.evvo.agent.defaults.TreesAgentsTest" />
+    <buffered bufClass="io.evvo.agent.defaults.TreesAgentsTest" />
+    <buffered bufClass="io.evvo.agent.defaults.TreesTest" />
+    <buffered bufClass="io.evvo.agent.defaults.TreesTest" />
+    <buffered bufClass="io.evvo.island.AllowAllImmigrationStrategyTest" />
     <buffered bufClass="io.evvo.island.AllowAllImmigrationStrategyTest" />
     <buffered bufClass="io.evvo.island.ElitistImmigrationStrategyTest" />
+    <buffered bufClass="io.evvo.island.ElitistImmigrationStrategyTest" />
+    <buffered bufClass="io.evvo.island.EvvoIslandBuilderTest" />
     <buffered bufClass="io.evvo.island.EvvoIslandBuilderTest" />
     <buffered bufClass="io.evvo.island.EvvoIslandTest" />
+    <buffered bufClass="io.evvo.island.EvvoIslandTest" />
+    <buffered bufClass="io.evvo.island.IslandManagerTest" />
+    <buffered bufClass="io.evvo.island.IslandManagerTest" />
+    <buffered bufClass="io.evvo.island.population.NetworkTopologyTest" />
+    <buffered bufClass="io.evvo.island.population.NetworkTopologyTest" />
     <buffered bufClass="io.evvo.island.population.StandardPopulationTest" />
+    <buffered bufClass="io.evvo.island.population.StandardPopulationTest" />
+    <buffered bufClass="unit.io.evvo.island.EmigrationTargetStrategyTest" />
+    <buffered bufClass="unit.io.evvo.island.EmigrationTargetStrategyTest" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

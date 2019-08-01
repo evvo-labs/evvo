@@ -44,3 +44,28 @@ case class WholeParetoFrontierEmigrationStrategy(durationBetweenRuns: FiniteDura
     population.getParetoFrontier().solutions.toSeq
   }
 }
+
+/** Determines which island to send emigrants to. */
+trait EmigrationTargetStrategy {
+
+  /** Given the number of islands, produce the indices of the islands to send emigrants to. */
+  def chooseTargets(numIslands: Int): Seq[Int]
+}
+
+class RoundRobinEmigrationTargetStrategy() extends EmigrationTargetStrategy {
+  var index = 0
+
+  override def chooseTargets(numIslands: Int): Seq[Int] = {
+    val out = Seq(index)
+    index = (index + 1) % numIslands
+    out
+  }
+}
+
+object RoundRobinEmigrationTargetStrategy {
+  def apply(): RoundRobinEmigrationTargetStrategy = new RoundRobinEmigrationTargetStrategy()
+}
+
+case class SendToAllEmigrationTargetStrategy() extends EmigrationTargetStrategy {
+  override def chooseTargets(numIslands: Int): Seq[Int] = Vector.range(0, numIslands)
+}

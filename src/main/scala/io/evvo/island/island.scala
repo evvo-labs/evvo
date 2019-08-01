@@ -25,6 +25,7 @@ private class EvvoIsland[Sol](
     fitnesses: Vector[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
     emigrationStrategy: EmigrationStrategy,
+    emigrationTargetStrategy: EmigrationTargetStrategy,
     loggingStrategy: LoggingStrategy
 )(implicit log: LoggingAdapter)
     extends EvolutionaryProcess[Sol] {
@@ -56,7 +57,7 @@ private class EvvoIsland[Sol](
   private val deletorAgents = deletors.map(d => DeletorAgent(serializationRoundtrip(d), pop))
 
   /** The list of all other islands, to send emigrating solutions to. */
-  private var emigrationTargets: Seq[EvolutionaryProcess[Sol]] = Seq()
+  private var emigrationTargets: IndexedSeq[EvolutionaryProcess[Sol]] = IndexedSeq()
 
   /** The index of the current "target" that will receive the next emigration. */
   private var currentEmigrationTargetIndex: Int = 0
@@ -129,10 +130,10 @@ private class EvvoIsland[Sol](
       log.info("Trying to emigrate without any emigration targets")
     } else {
       val emigrants = emigrationStrategy.chooseSolutions(this.pop)
-
-      // Hardcoded to round robin for now - will be updated when we add network topology.
-      this.emigrationTargets(currentEmigrationTargetIndex).immigrate(emigrants)
-      currentEmigrationTargetIndex = (currentEmigrationTargetIndex + 1) % emigrationTargets.length
+      val emigrationTargets = emigrationTargetStrategy.chooseTargets(this.emigrationTargets.length)
+      emigrationTargets.foreach(target => {
+        this.emigrationTargets(target).immigrate(emigrants)
+      })
     }
   }
 }
@@ -158,6 +159,7 @@ class LocalEvvoIsland[Sol](
     objectives: Vector[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
     emigrationStrategy: EmigrationStrategy,
+    emigrationTargetStrategy: EmigrationTargetStrategy,
     loggingStrategy: LoggingStrategy
 )(
     implicit val log: LoggingAdapter = LocalLogger
@@ -169,6 +171,7 @@ class LocalEvvoIsland[Sol](
     objectives,
     immigrationStrategy,
     emigrationStrategy,
+    emigrationTargetStrategy,
     loggingStrategy
   )
 
@@ -242,12 +245,13 @@ class RemoteEvvoIsland[Sol](
     objectives: Vector[Objective[Sol]],
     immigrationStrategy: ImmigrationStrategy,
     emigrationStrategy: EmigrationStrategy,
+    emigrationTargetStrategy: EmigrationTargetStrategy,
     loggingStrategy: LoggingStrategy
 ) extends Actor
     with EvolutionaryProcess[Sol]
     with ActorLogging {
   // for messages, which are case classes defined within RemoteEvvoIsland's companion object
-  import io.evvo.island.RemoteEvvoIsland._
+  import io.evvo.island.RemoteEvvoIsland._ // scalastyle:ignore import.grouping
 
   implicit val logger: LoggingAdapter = log
 
@@ -258,6 +262,7 @@ class RemoteEvvoIsland[Sol](
     objectives,
     immigrationStrategy,
     emigrationStrategy,
+    emigrationTargetStrategy,
     loggingStrategy
   )
 
