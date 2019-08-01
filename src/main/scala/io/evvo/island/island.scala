@@ -130,7 +130,6 @@ private class EvvoIsland[Sol](
     } else {
       val emigrants = emigrationStrategy.chooseSolutions(this.pop)
 
-      // Hardcoded to round robin for now - will be updated when we add network topology.
       this.emigrationTargets(currentEmigrationTargetIndex).immigrate(emigrants)
       currentEmigrationTargetIndex = (currentEmigrationTargetIndex + 1) % emigrationTargets.length
     }

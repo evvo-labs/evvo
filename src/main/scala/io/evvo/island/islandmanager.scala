@@ -5,7 +5,7 @@ import java.io.File
 import akka.actor.{ActorSystem, Address, AddressFromURIString, Deploy}
 import akka.remote.RemoteScope
 import com.typesafe.config.ConfigFactory
-import io.evvo.island.population.{ParetoFrontier, Scored}
+import io.evvo.island.population.{NetworkTopology, ParetoFrontier, Scored}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -13,11 +13,13 @@ import scala.concurrent.{Await, Future}
 import scala.jdk.CollectionConverters._
 
 /** Common component implementing management of islands.
+  *
   * @param islands the islands to manage
   */
-class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]]) extends EvolutionaryProcess[Sol] {
+class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]], networkTopology: NetworkTopology)
+    extends EvolutionaryProcess[Sol] {
 
-  this.registerIslands(islands)
+  connectNetwork()
 
   /** The final pareto frontier after the island manager shuts down, or None until then. */
   private var finalParetoFrontier: Option[ParetoFrontier[Sol]] = None
@@ -63,6 +65,13 @@ class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]]) extends Evoluti
   override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
     this.islands.foreach(_.registerIslands(islands))
   }
+
+  private def connectNetwork(): Unit = {
+    val connectionsToMake = networkTopology.configure(islands.length)
+    connectionsToMake.foreach(c => {
+      islands(c.from).registerIslands(Seq(islands(c.to)))
+    })
+  }
 }
 
 // =================================================================================================
@@ -70,7 +79,8 @@ class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]]) extends Evoluti
 /** Launches and manages multiple `EvvoIslandActor`s. */
 class RemoteIslandManager[Sol](
     val numIslands: Int,
-    islandBuilder: FinishedEvvoIslandBuilder[Sol],
+    val islandBuilder: FinishedEvvoIslandBuilder[Sol],
+    val networkTopology: NetworkTopology,
     val actorSystemName: String = "EvvoNode",
     val userConfig: String = "src/main/resources/application.conf"
 ) extends EvolutionaryProcess[Sol] {
@@ -103,7 +113,7 @@ class RemoteIslandManager[Sol](
     })
     .map(RemoteEvvoIsland.Wrapper[Sol])
 
-  val islandManager = new IslandManager[Sol](islands)
+  val islandManager = new IslandManager[Sol](islands, networkTopology)
 
   def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     this.islandManager.immigrate(solutions)
@@ -133,13 +143,16 @@ class RemoteIslandManager[Sol](
 // =================================================================================================
 // Local manager
 /** Launches and manages multiple `LocalEvvoIsland`s. */
-class LocalIslandManager[Sol](val numIslands: Int, islandBuilder: FinishedEvvoIslandBuilder[Sol])
+class LocalIslandManager[Sol](
+    val numIslands: Int,
+    islandBuilder: FinishedEvvoIslandBuilder[Sol],
+    val networkTopology: NetworkTopology)
     extends EvolutionaryProcess[Sol] {
 
   private val islands: IndexedSeq[EvolutionaryProcess[Sol]] =
     Vector.fill(numIslands)(islandBuilder.buildLocalEvvo())
 
-  val islandManager = new IslandManager[Sol](islands)
+  val islandManager = new IslandManager[Sol](islands, networkTopology)
 
   def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     this.islandManager.immigrate(solutions)

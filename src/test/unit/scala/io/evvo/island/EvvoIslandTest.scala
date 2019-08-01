@@ -84,8 +84,6 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       island2.currentParetoFrontier().solutions.size shouldBe 0
       noEmigrationIsland.runBlocking(StopAfter(1.second))
       island2.currentParetoFrontier().solutions.size shouldBe 0
-
     }
   }
-
 }
