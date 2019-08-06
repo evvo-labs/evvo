@@ -87,7 +87,7 @@ If you want to jump directly into an example, check out the [quickstart guide](.
 -------------------------------------------------------------------------------
 ### The Model
 #### Asycnchronous Evolutionary Computing
-As described in [John Rachlin's paper on paper mill optimization](https://www.researchgate.net/profile/Richard_Goodwin2/publication/245797473_Cooperative_Multiobjective_Decision_Support_for_the_Paper_Industry/links/0046352ca1becd5890000000.pdf), asynchronous multi-agent evolutionary computing systems consist of a common population and multiple "evolutionary agents" that operate on the population. These agents, working in parallel, gradually push the overall fitness of a population upwards. (Assuming that the modifiers have a chance of improving fitness, and the deletors remove solutions that tend to be worse than average.) This system is easily parallelizable, as there is only one piece of shared memory - the set of solutions currently in the population. Much of the work (the work of computing new solutions, mutating existing solutions, and deciding which solutions to delete) can be distributed across multiple CPU cores, or even multiple machines.
+Asynchronous multi-agent evolutionary computing systems consist of a common population and multiple "evolutionary agents" that operate on the population. These agents, working in parallel, gradually push the overall fitness of a population upwards. (Assuming that the modifiers have a chance of improving fitness, and the deletors remove solutions that tend to be worse than average.) This system is easily parallelizable, as there is only one piece of shared memory - the set of solutions currently in the population. Much of the work (the work of computing new solutions, mutating existing solutions, and deciding which solutions to delete) can be distributed across multiple CPU cores, or even multiple machines.
 
 This diagram illustrates each of the major components in Evvo and their roles:
 ```
@@ -216,58 +216,27 @@ This diagram shows a simplified version of our network model:
 The [quickstart guide](./QUICKSTART.md) will walk you through writing and running a problem using Evvo. It solves a variant on the traveling salesperson problem with two objectives. If you're interested in seeing more of the developer API or understanding how to use Evvo, check this out next. 
 
 -------------------------------------------------------------------------------
-### Running a Custom Optimization Problem
-This is going to change in the future, eventually you'll be able to include Evvo as a [Maven or sbt](#downloads) dependency. If you want to use Evvo before then, all of your code has to be part of the same src directory as Evvo (this is in order to ensure that remote islands can be [deserialized](#serializability)).
+### Downloads
 
-You'll want to check out our getting started (coming soon) for an example of how to use Evvo locally and remotely.
+Evvo v0.0.0 has been released! Keep in mind, consistent with the warning above: the APIs used here are not stable, and this code is not production-ready. But we hope you have fun experimenting with this release!
 
-#### Keeping your Code Private
-While we would love some well groomed examples in our repo, if you want to keep your code private, either put your new code in the [`src/main/scala/io/evvo/ignored`](src/main/scala/com/io/ignored) directory **or** locally ignore your new package/files with `git update-index --assume-unchanged [<file>...]`.
-
-##### Best VCS Practices
-For now, you should create a git repo inside the [`src/main/scala/io/evvo/ignored`](src/main/scala/io/evvo/ignored) directory and use that to version your code.
-
-###### Using Submodules (Advanced)
-Until Evvo is a Maven or sbt dependency, things may look a little tricky. If you need to freeze Evvo's version with the version of your optimization problem repository (`<YOUR_PROJECT>`), you could use 2 [`git submodules`](https://git-scm.com/book/en/v2/Git-Tools-Submodules): one for Evvo and one for your project. If you don't need to, please skip this section. Unfortunately, git doesn't support non-recursive nested submodules, so development would be difficult to do using the repo with the submodules.
-
-Here's how you can set it up:
-
-```bash
-mkdir my_new_project
-cd my_new_project
-git init
-echo "# Uh... it's... it's a dinosaur" > README.md
-
-git submodule add git@github.com:evvo-labs/evvo.git
-git submodule add <YOUR_PROJECT>
-git submodule init
-
-git add -A
-git commit -m "Life finds a way"
+To get the dependency, use this for maven:
+```xml
+<dependency>
+    <groupId>io.evvo</groupId>
+    <artifactId>evvo_2.13</artifactId>
+    <version>0.0.0</version>
+</dependency>
 ```
 
-Every time you want to freeze a version of your code with a version of Evvo, just checkout the Evvo and optimization problem commits that you wish to pair:
-
-```bash
-cd evvo
-git checkout <STABLE_COMMIT>
-cd ../<YOUR_PROJECT_DIR>
-git checkout <STABLE_COMMIT>
-cd ..
-
-git add -A
-git commit -m "Major theme parks have delays. When they opened Disneyland in 1956, nothing worked"
-git push
+Or this, for sbt
+```scala
+resolvers += Resolver.sonatypeRepo("releases")
+libraryDependencies += "io.evvo" %% "evvo" % "0.0.0"
 ```
 
-Now, it is possible, but messy, to hard link the files to get around the lack of support for non-recursive nested submodules to make development possible (instead of just version pinning) using `my_new_project`. Note that it is not possible to hard link directories, so you would have to hard link every file indiviudally. I do not recommend this, but will leave the option open to you. For each file in `<YOUR_PROJECT>`, run:
-
-```bash
-ln <YOUR_PROJECT_DIR>/<YOUR_FILE_PATH> ./evvo/src/main/scala/io/evvo/ignored/<HARD_LINK_NAME>
-```
-
-Note that since this is in the ignored directory, everybody who clones your repo will not have the hard links set up, so you probably want to include a setup script that creates the hard links in `my_new_project`.
-
+-------------------------------------------------------------------------------
+### Parallelism
 #### Setting up Servers
 Evvo is [dockerized](https://www.docker.com/). Follow the [instructions](docker/README.md) to get started running your own network-parallel instance.
 
@@ -278,25 +247,6 @@ See [the relevant section](https://www.oreilly.com/library/view/scala-cookbook/9
 
 If you use a `LocalIslandManager` to create `LocalEvvoIsland`s, your data will still be serialized and deserialized, albeit on the same machine. This means that some of the most flagrant serialization exceptions can be caught early by testing with `LocalIslandManager`. 
 
--------------------------------------------------------------------------------
-### Downloads
-
-Evvo v0.0.0 has been released! Keep in mind, consistent with the warning above: the APIs used here are not stable, and this code is not production-ready. But we hope you have fun experimenting with this release!
-
-From maven:
-```
-<dependency>
-    <groupId>io.evvo</groupId>
-    <artifactId>evvo_2.13</artifactId>
-    <version>0.0.0</version>
-</dependency>
-```
-
-Or SBT:
-```
-resolvers += Resolver.sonatypeRepo("releases")
-libraryDependencies += "io.evvo" %% "evvo" % "0.0.0"
-```
 
 -------------------------------------------------------------------------------
 ### Contributing
