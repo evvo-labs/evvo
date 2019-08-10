@@ -16,7 +16,7 @@ trait ImmigrationStrategy {
 }
 
 /** Only allows new immigrants if they would advance the Pareto frontier on the island. */
-object ElitistImmigrationStrategy extends ImmigrationStrategy {
+case object ElitistImmigrationStrategy extends ImmigrationStrategy {
   override def filter[Sol](
       immigrants: Seq[Scored[Sol]],
       population: Population[Sol]
@@ -28,7 +28,7 @@ object ElitistImmigrationStrategy extends ImmigrationStrategy {
 }
 
 /** An immigration strategy that allows all immigrants. */
-object AllowAllImmigrationStrategy extends ImmigrationStrategy {
+case object AllowAllImmigrationStrategy extends ImmigrationStrategy {
   override def filter[Sol](
       immigrants: Seq[Scored[Sol]],
       population: Population[Sol]

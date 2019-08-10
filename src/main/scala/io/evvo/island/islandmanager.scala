@@ -5,18 +5,26 @@ import java.io.File
 import akka.actor.{ActorSystem, Address, AddressFromURIString, Deploy}
 import akka.remote.RemoteScope
 import com.typesafe.config.ConfigFactory
-import io.evvo.island.population.{NetworkTopology, ParetoFrontier, Scored}
+import io.evvo.island.population.{
+  FullyConnectedNetworkTopology,
+  NetworkTopology,
+  ParetoFrontier,
+  Scored
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.jdk.CollectionConverters._
+import scala.util.Try
 
 /** Common component implementing management of islands.
   *
   * @param islands the islands to manage
   */
-class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]], networkTopology: NetworkTopology)
+private class IslandManager[Sol](
+    islands: Seq[EvolutionaryProcess[Sol]],
+    networkTopology: NetworkTopology)
     extends EvolutionaryProcess[Sol] {
 
   connectNetwork()
@@ -29,7 +37,7 @@ class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]], networkTopology
       // Represents all islands having completed their runs.
       val allIslandsRun = Future.sequence(this.islands.map(_.runAsync(stopAfter)))
       // Wait for that to happen
-      Await.result(allIslandsRun, Duration.Inf)
+      Try { Await.result(allIslandsRun, stopAfter.time * 10) }
       // Then perform cleanup
       this.finalParetoFrontier = Some(this.currentParetoFrontier())
       this.islands.foreach(_.poisonPill())
@@ -80,7 +88,7 @@ class IslandManager[Sol](islands: Seq[EvolutionaryProcess[Sol]], networkTopology
 class RemoteIslandManager[Sol](
     val numIslands: Int,
     val islandBuilder: FinishedEvvoIslandBuilder[Sol],
-    val networkTopology: NetworkTopology,
+    val networkTopology: NetworkTopology = FullyConnectedNetworkTopology(),
     val actorSystemName: String = "EvvoNode",
     val userConfig: String = "src/main/resources/application.conf"
 ) extends EvolutionaryProcess[Sol] {
@@ -112,7 +120,7 @@ class RemoteIslandManager[Sol](
     })
     .map(RemoteEvvoIsland.Wrapper[Sol])
 
-  val islandManager = new IslandManager[Sol](islands, networkTopology)
+  private val islandManager = new IslandManager[Sol](islands, networkTopology)
 
   def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     this.islandManager.immigrate(solutions)
@@ -145,13 +153,13 @@ class RemoteIslandManager[Sol](
 class LocalIslandManager[Sol](
     val numIslands: Int,
     islandBuilder: FinishedEvvoIslandBuilder[Sol],
-    val networkTopology: NetworkTopology)
+    val networkTopology: NetworkTopology = FullyConnectedNetworkTopology())
     extends EvolutionaryProcess[Sol] {
 
   private val islands: IndexedSeq[EvolutionaryProcess[Sol]] =
     Vector.fill(numIslands)(islandBuilder.buildLocalEvvo())
 
-  val islandManager = new IslandManager[Sol](islands, networkTopology)
+  private val islandManager = new IslandManager[Sol](islands, networkTopology)
 
   def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     this.islandManager.immigrate(solutions)

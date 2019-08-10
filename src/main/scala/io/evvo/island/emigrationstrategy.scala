@@ -52,18 +52,14 @@ trait EmigrationTargetStrategy {
   def chooseTargets(numIslands: Int): Seq[Int]
 }
 
-class RoundRobinEmigrationTargetStrategy() extends EmigrationTargetStrategy {
-  var index = 0
+case class RoundRobinEmigrationTargetStrategy() extends EmigrationTargetStrategy {
+  // Incremented to 0 before it's returned, don't worry.
+  private var index = -1
 
   override def chooseTargets(numIslands: Int): Seq[Int] = {
-    val out = Seq(index)
     index = (index + 1) % numIslands
-    out
+    Seq(index)
   }
-}
-
-object RoundRobinEmigrationTargetStrategy {
-  def apply(): RoundRobinEmigrationTargetStrategy = new RoundRobinEmigrationTargetStrategy()
 }
 
 case class SendToAllEmigrationTargetStrategy() extends EmigrationTargetStrategy {
