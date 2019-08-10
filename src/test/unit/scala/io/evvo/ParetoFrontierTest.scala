@@ -70,6 +70,11 @@ class ParetoFrontierTest extends WordSpec with Matchers {
       assert(!pf3.dominatedBy(sol3))
     }
 
+
+    "Be able to .toTable() empty pareto frontiers" in {
+      ParetoFrontier[Int](Set()).toTable()
+    }
+
     "Sort its output by a specified objective in toTable" in {
       val s02 = Scored[Int](Map(("a", Minimize) -> 0, ("b", Minimize) -> 2), 1)
       val s11 = Scored[Int](Map(("a", Minimize) -> 1, ("b", Minimize) -> 1), 2)

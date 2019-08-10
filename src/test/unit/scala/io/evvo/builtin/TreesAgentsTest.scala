@@ -1,4 +1,4 @@
-package io.evvo.agent.defaults
+package io.evvo.builtin
 
 import io.evvo.builtin.trees._
 import io.evvo.island.population.Scored
