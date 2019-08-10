@@ -27,6 +27,10 @@ case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
     * @return A table-formatted string of the scores in the Pareto frontier.
     */
   def toTable(sortByObjective: String = ""): String = {
+    if (solutions.isEmpty) {
+      return ""
+    }
+
     val objectives = solutions.head.score.keys.map(_._1).toVector
     // This is the index in objectives to use as the sort key, either the index of the
     // provided objective or the first objective

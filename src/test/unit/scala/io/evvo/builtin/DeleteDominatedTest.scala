@@ -1,4 +1,4 @@
-package io.evvo.agent.defaults
+package io.evvo.builtin
 
 import io.evvo.builtin.deletors.DeleteDominated
 import io.evvo.island.population.{Maximize, Minimize, Scored}
