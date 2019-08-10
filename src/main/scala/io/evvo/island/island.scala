@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.{Duration, _}
 import scala.concurrent.{Await, Future, Promise}
+import scala.util.Try
 
 /** This component is used to do all the actual work of managing the island, without managing
   * or being tied to where the island is deployed to.
@@ -270,8 +271,14 @@ class RemoteEvvoIsland[Sol](
     LoggingReceive({
       case Run(t) => sender ! this.runBlocking(t)
       case GetParetoFrontier => sender ! this.currentParetoFrontier()
-      case Immigrate(solutions: Seq[Scored[Sol]]) => this.immigrate(solutions)
-      case RegisterIslands(islands: Seq[EvolutionaryProcess[Sol]]) => this.registerIslands(islands)
+      case Immigrate(solutions) =>
+        Try { solutions.asInstanceOf[Seq[Scored[Sol]]] }.fold(
+          failure => this.logger.warning(f"Failed receiving Immigrate message: ${failure}"),
+          this.immigrate)
+      case RegisterIslands(islands) =>
+        Try { islands.asInstanceOf[Seq[EvolutionaryProcess[Sol]]] }.fold(
+          failure => this.logger.warning(f"Failed receiving RegisterIsland message: ${failure}"),
+          this.registerIslands)
     })
 
   override def runBlocking(stopAfter: StopAfter): Unit = {

@@ -39,7 +39,7 @@ class IslandManagerTest extends WordSpec with Matchers {
         // simply constructing the manager registers the islands with each other
         val mgr = new IslandManager[Bitstring](
           Seq(island1, island2, island3),
-          FullyConnectedNetworkTopology)
+          FullyConnectedNetworkTopology())
         island1.immigrate(Seq(Scored(Map(), Seq(true))))
 
         mgr.runBlocking(StopAfter(1.second))

@@ -20,7 +20,8 @@ trait LoggingStrategy {
   def logPopulation(population: Population[_]): String
 }
 
-case class LogPopulationLoggingStrategy(durationBetweenLogs: FiniteDuration = 1.second) extends LoggingStrategy {
+case class LogPopulationLoggingStrategy(durationBetweenLogs: FiniteDuration = 1.second)
+    extends LoggingStrategy {
   override def logPopulation(population: Population[_]): String = {
     f"""
      |Size: ${population.getInformation().numSolutions}
@@ -28,7 +29,6 @@ case class LogPopulationLoggingStrategy(durationBetweenLogs: FiniteDuration = 1.
      """.stripMargin
   }
 }
-
 
 case class NullLoggingStrategy() extends LoggingStrategy {
   override def durationBetweenLogs: FiniteDuration = 1000.days

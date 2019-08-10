@@ -6,7 +6,7 @@ You probably don't need to build this - we build the image on every merge to mas
 For now, we only produce one docker image, which runs the RemoteActorSystem to listen for islands being sent by an IslandManager. To build this docker image, you have to build the jar, then run `docker build` using the top-level directory as the build context. Run this from the top level directory of evvo:
 ```bash 
 mvn clean package
-docker build --build-arg JAR_FILE=evvo-0.0.0-allinone.jar -t evvo:latest -f docker/Dockerfile .
+docker build --build-arg JAR_FILE=evvo_2.13-0.0.0-allinone.jar -t evvo:latest -f docker/Dockerfile .
 ```
 
 To run it:

@@ -16,7 +16,7 @@ trait NetworkTopology {
 /** Represents a connection from `from` to `to`. */
 case class Connection(from: Int, to: Int)
 
-case object RingNetworkTopology extends NetworkTopology {
+case class RingNetworkTopology() extends NetworkTopology {
   override def configure(numIslands: Int): Seq[Connection] = {
     if (numIslands == 1) {
       Seq()
@@ -31,13 +31,13 @@ case object RingNetworkTopology extends NetworkTopology {
   }
 }
 
-case object FullyConnectedNetworkTopology extends NetworkTopology {
+case class FullyConnectedNetworkTopology() extends NetworkTopology {
   override def configure(numIslands: Int): Seq[Connection] = {
     Vector.tabulate(numIslands, numIslands)(Connection).flatten.filterNot(c => c.from == c.to)
   }
 }
 
-case object StarNetworkTopology extends NetworkTopology {
+case class StarNetworkTopology() extends NetworkTopology {
   override def configure(numIslands: Int): Seq[Connection] = {
     // 0 is the center point, connect everything else
     Vector
