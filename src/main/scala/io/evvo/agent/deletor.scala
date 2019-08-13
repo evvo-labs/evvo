@@ -8,6 +8,8 @@ import scala.concurrent.duration._
 /** An [[io.evvo.agent.Agent]] that deletes solutions from the population.
   *
   * @param delete A function that, given a set of solutions, tells you which to delete.
+  * @param population The population to delete from.
+  * @param strategy How often this agent should run.
   */
 class DeletorAgent[Sol](
     delete: DeletorFunction[Sol],
@@ -17,17 +19,8 @@ class DeletorAgent[Sol](
     extends AAgent[Sol](strategy, population, delete.name)(logger) {
 
   override protected def step(): Unit = {
-    val in = population.getSolutions(delete.numInputs)
-    if (delete.shouldRunWithPartialInput || in.length == delete.numInputs) {
-      val toDelete = delete.delete(in)
-      logger.debug(f"Deleted ${toDelete.iterator.size} solutions out of ${in.size}")
-      population.deleteSolutions(toDelete)
-    } else {
-      logger.debug(
-        s"${this}: not enough solutions in population: " +
-          s"got ${in.length}, wanted ${delete.numInputs}"
-      )
-    }
+    val in = population.getSolutions(delete.numRequestedInputs)
+    population.deleteSolutions(delete(in))
   }
 
   override def toString: String = s"DeletorAgent[$name]"

@@ -23,7 +23,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
     }
   }
   val mutatorFunc = new ModifierFunction[S]("modifier") {
-    def modify(seq: IndexedSeq[Scored[S]]): IndexedSeq[S] = {
+    override def modify(seq: IndexedSeq[Scored[S]]): IndexedSeq[S] = {
       agentFunctionCalled("modify") = true
       seq.map(_.solution + 1)
     }
