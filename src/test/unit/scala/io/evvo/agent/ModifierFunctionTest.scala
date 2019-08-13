@@ -12,7 +12,7 @@ class ModifierFunctionTest extends WordSpec {
           Vector(3)
         }
       }
-      assert(modifier.modify(IndexedSeq[Scored[Double]]()) == Vector(3))
+      assert(modifier(IndexedSeq[Scored[Double]]()) == Vector(3))
     }
   }
 

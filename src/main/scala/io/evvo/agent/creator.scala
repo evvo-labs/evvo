@@ -8,6 +8,8 @@ import scala.concurrent.duration._
 /** An [[io.evvo.agent.Agent]] that produces new solutions and adds them to the population.
   *
   * @param create The function that creates new solutions.
+  * @param population The population to put new solutions into.
+  * @param strategy How often this agent should run.
   */
 class CreatorAgent[Sol](
     create: CreatorFunction[Sol],
@@ -16,9 +18,7 @@ class CreatorAgent[Sol](
 )(implicit logger: LoggingAdapter)
     extends AAgent[Sol](strategy, population, create.name)(logger) {
   override protected def step(): Unit = {
-    val toAdd = create.create()
-    logger.debug(s"Created solutions, $toAdd , $this")
-    population.addSolutions(toAdd)
+    population.addSolutions(create())
   }
 
   override def toString: String = s"CreatorAgent[$name]"
