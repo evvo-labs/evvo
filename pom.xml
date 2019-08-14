@@ -190,10 +190,7 @@
                 <version>1.0.0-RC3</version>
                 <configuration>
                     <!-- Only run in src directory, on files different from master. -->
-                    <parameters>src</parameters>
-                    <parameters>--diff</parameters>
                     <configLocation>${project.basedir}/.scalafmt.conf</configLocation>
-                    <configRequired>false</configRequired>
                     <sourceDirectories>
                         <param>${project.basedir}/src/main/scala</param>
                     </sourceDirectories>

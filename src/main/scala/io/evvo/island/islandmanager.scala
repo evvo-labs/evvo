@@ -15,7 +15,6 @@ import io.evvo.island.population.{
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 /** Common component implementing management of islands.
@@ -88,6 +87,7 @@ private class IslandManager[Sol](
 class RemoteIslandManager[Sol](
     val numIslands: Int,
     val islandBuilder: FinishedEvvoIslandBuilder[Sol],
+    val remoteAddresses: Seq[String],
     val networkTopology: NetworkTopology = FullyConnectedNetworkTopology(),
     val actorSystemName: String = "EvvoNode",
     val userConfig: String = "src/main/resources/application.conf"
@@ -95,16 +95,10 @@ class RemoteIslandManager[Sol](
 
   private val configFile = ConfigFactory.parseFile(new File("src/main/resources/application.conf"))
   private val config = configFile
-    .getConfig("IslandManager")
-    .withFallback(configFile)
+    .withFallback(ConfigFactory.parseFile(new File(userConfig)))
     .resolve()
 
-  private val addresses: Vector[Address] = config
-    .getList("nodes.locations")
-    .unwrapped()
-    .asScala
-    .toVector
-    .map(x => AddressFromURIString(x.toString))
+  private val addresses: Seq[Address] = remoteAddresses.map(AddressFromURIString.apply)
 
   implicit val system: ActorSystem = ActorSystem(actorSystemName, config)
 
