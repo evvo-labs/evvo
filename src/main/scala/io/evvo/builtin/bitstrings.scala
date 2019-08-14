@@ -37,10 +37,10 @@ object bitstrings {
 
   /** A mutator for `Bitstring`s that flips a random bit in the bitstring.
     *
-    * @param numInputs The number of solutions to request in the contents of each
+    * @param numRequestedInputs The number of solutions to request in the contents of each
     *                  input set
     */
-  case class Bitflipper(override val numInputs: Int = 32)
+  case class Bitflipper(override val numRequestedInputs: Int = 32)
       extends MutatorFunction[Bitstring]("Bitflipper") {
     override def mutate(bitstring: Bitstring): Bitstring = {
       val index = util.Random.nextInt(bitstring.length)
