@@ -68,7 +68,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
       // need to make sure that each of the three core functions have been called,
       // and they have side effects that will turn the mapping true
       assert(agentFunctionCalled.values.reduce(_ && _))
-      assert(agents.forall(_.numInvocations > 0))
+      assert(agents.forall(_.status().numInvocations > 0))
     }
 
     "not do anything if started twice" in {
@@ -96,7 +96,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
         agent.stop()
         Thread.sleep(100)
         // 2 is the ceiling of 100 / 70, we ought to have the agent run twice.
-        agent.numInvocations shouldBe 2
+        agent.status().numInvocations shouldBe 2
       }
     }
   }

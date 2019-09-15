@@ -56,6 +56,7 @@ private class EvvoIsland[Sol](
   private val creatorAgents = creators.map(c => CreatorAgent(serializationRoundtrip(c), pop))
   private val mutatorAgents = mutators.map(m => ModifierAgent(serializationRoundtrip(m), pop))
   private val deletorAgents = deletors.map(d => DeletorAgent(serializationRoundtrip(d), pop))
+  private val allAgents: Seq[AAgent[Sol]] = creatorAgents ++ mutatorAgents ++ deletorAgents
 
   /** The list of all other islands, to send emigrating solutions to. */
   private var emigrationTargets: IndexedSeq[EvolutionaryProcess[Sol]] = IndexedSeq()
@@ -66,9 +67,7 @@ private class EvvoIsland[Sol](
   override def runAsync(stopAfter: StopAfter): Future[Unit] = {
     log.info(s"Island running with stopAfter=${stopAfter}")
 
-    creatorAgents.foreach(_.start())
-    mutatorAgents.foreach(_.start())
-    deletorAgents.foreach(_.start())
+    allAgents.foreach(_.start())
 
     // Schedule logging and emigration on different threads
     val loggingExecutor = Executors.newSingleThreadScheduledExecutor()
@@ -121,9 +120,7 @@ private class EvvoIsland[Sol](
   }
 
   private def stop(): Unit = {
-    creatorAgents.foreach(_.stop())
-    mutatorAgents.foreach(_.stop())
-    deletorAgents.foreach(_.stop())
+    allAgents.foreach(_.stop())
   }
 
   private def emigrate(): Unit = {
@@ -137,6 +134,8 @@ private class EvvoIsland[Sol](
       })
     }
   }
+
+  override def agentStatuses(): Seq[AgentStatus] = allAgents.map(_.status())
 }
 
 object EvvoIsland {
@@ -199,6 +198,8 @@ class LocalEvvoIsland[Sol](
   override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
     island.registerIslands(islands)
   }
+
+  override def agentStatuses(): Seq[AgentStatus] = island.agentStatuses()
 }
 
 /** A logger that prints info and above. */
@@ -279,6 +280,7 @@ class RemoteEvvoIsland[Sol](
         Try { islands.asInstanceOf[Seq[EvolutionaryProcess[Sol]]] }.fold(
           failure => this.logger.warning(f"Failed receiving RegisterIsland message: ${failure}"),
           this.registerIslands)
+      case GetAgentStatuses => sender ! this.agentStatuses()
     })
 
   override def runBlocking(stopAfter: StopAfter): Unit = {
@@ -304,6 +306,8 @@ class RemoteEvvoIsland[Sol](
   override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
     this.island.registerIslands(islands)
   }
+
+  override def agentStatuses(): Seq[AgentStatus] = island.agentStatuses()
 }
 
 object RemoteEvvoIsland {
@@ -340,6 +344,10 @@ object RemoteEvvoIsland {
     override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
       ref ! RegisterIslands[Sol](islands)
     }
+
+    override def agentStatuses(): Seq[AgentStatus] = {
+      Await.result(ref ? GetAgentStatuses, Duration.Inf).asInstanceOf[Seq[AgentStatus]]
+    }
   }
 
   // All of these are meant to be used as Akka messages.
@@ -350,4 +358,6 @@ object RemoteEvvoIsland {
   private case class Immigrate[Sol](solutions: Seq[Scored[Sol]])
 
   private case class RegisterIslands[Sol](islands: Seq[EvolutionaryProcess[Sol]])
+
+  private case object GetAgentStatuses
 }

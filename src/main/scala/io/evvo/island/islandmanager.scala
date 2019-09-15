@@ -5,12 +5,8 @@ import java.io.File
 import akka.actor.{ActorSystem, Address, AddressFromURIString, Deploy}
 import akka.remote.RemoteScope
 import com.typesafe.config.ConfigFactory
-import io.evvo.island.population.{
-  FullyConnectedNetworkTopology,
-  NetworkTopology,
-  ParetoFrontier,
-  Scored
-}
+import io.evvo.agent.AgentStatus
+import io.evvo.island.population.{FullyConnectedNetworkTopology, NetworkTopology, ParetoFrontier, Scored}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -79,6 +75,8 @@ private class IslandManager[Sol](
       islands(c.from).registerIslands(Seq(islands(c.to)))
     })
   }
+
+  override def agentStatuses(): Seq[AgentStatus] = islands.flatMap(_.agentStatuses())
 }
 
 // =================================================================================================
@@ -139,6 +137,8 @@ class RemoteIslandManager[Sol](
   override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
     this.islandManager.registerIslands(islands)
   }
+
+  override def agentStatuses(): Seq[AgentStatus] = islandManager.agentStatuses()
 }
 
 // =================================================================================================
@@ -178,4 +178,6 @@ class LocalIslandManager[Sol](
   override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
     this.islandManager.registerIslands(islands)
   }
+
+  override def agentStatuses(): Seq[AgentStatus] = islandManager.agentStatuses()
 }

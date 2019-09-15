@@ -1,5 +1,6 @@
 package io.evvo.island
 
+import io.evvo.agent.AgentStatus
 import io.evvo.island.population.{ParetoFrontier, Scored}
 
 import scala.concurrent.Future
@@ -39,6 +40,10 @@ trait EvolutionaryProcess[Sol] {
   /** Registers the given islands as potential destinations for emigrations.
     */
   def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit
+
+  /** @return The status of every agent that is part of this evolutionary process.
+    */
+  def agentStatuses(): Seq[AgentStatus]
 }
 
 /** Defines how long an evolutionary process should be run for.
