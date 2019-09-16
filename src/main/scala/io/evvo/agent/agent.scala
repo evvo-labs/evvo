@@ -11,8 +11,14 @@ trait Agent[Sol] {
 
   def stop(): Unit
 
-  def numInvocations: Int
+  def status(): AgentStatus
 }
+
+/** Represents the state of an agent.
+ * @param name The name of the agent whose state is being represented
+ * @param numInvocations The number of times the agent has run
+ */
+case class AgentStatus(name: String, numInvocations: Int)
 
 /** Common behavior for all agents. Orchestrates the main loop, decides how often to run, etc.
   * All that is left to the subclasses is the actual content of the main loop.
@@ -31,7 +37,7 @@ abstract class AAgent[Sol](
     extends Agent[Sol] {
 
   /** The number of  times this agent has run its function. */
-  var numInvocations: Int = 0
+  private var numInvocations: Int = 0
 
   // consider factoring this out into a separate component and using
   // composition instead of inheriting a thread field. This will reduce the
@@ -114,4 +120,6 @@ abstract class AAgent[Sol](
   protected def step(): Unit
 
   override def toString: String = f"Agent[$name]"
+
+  override def status(): AgentStatus = AgentStatus(name, numInvocations)
 }
