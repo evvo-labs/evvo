@@ -66,5 +66,19 @@ gcloud beta compute \
 Make sure that ingress and egress traffic is allowed on port 3449.
 
 
-#### Running with `Remoting`
-To ensure that the nodes are set up correctly, run an IslandManager that connects to them. Make sure to change `IslandManager.nodes.locations` to point at your nodes.
+#### Running Evvo with distributed worker nodes
+To ensure that the nodes are set up correctly, run an IslandManager that connects to them:
+```scala
+val numIslands = 5
+val islandBuilder = ... // omitted, 
+
+val islandManager = new RemoteIslandManager[Sol](
+    numIslands, 
+    islandBuilder, 
+    Seq("255.255.255.0:3449", "255.255.255.1:3449")
+)
+
+// Run the islandManager
+islandManager.runBlocking(StopAfter(1.second))
+print(islandManager.currentParetoFrontier())
+```
