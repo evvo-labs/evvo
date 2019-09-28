@@ -60,6 +60,25 @@ case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
       """.stripMargin
   }
 
+  /**
+   * @return A csv-formatted string of the scores in the Pareto frontier.
+   */
+  def toCsv(): String = {
+    if (solutions.isEmpty) {
+      return ""
+    }
+
+    val objectives: Vector[String] = solutions.head.score.keys.map(_._1).toVector
+
+    val stringifiedSolutions: String = solutions
+      .map(s => objectives.map(s.scoreOn))
+      .map(_.mkString(","))
+      .mkString("\n")
+
+    s"""${objectives.mkString(",")}
+        |$stringifiedSolutions""".stripMargin
+  }
+
   /** @return Whether this Pareto frontier contains a point that dominates the given solution. */
   def dominates(sol: Scored[Sol]): Boolean = {
     this.solutions.exists(_.dominates(sol))
