@@ -70,23 +70,21 @@ class ParetoFrontierTest extends WordSpec with Matchers {
       assert(!pf3.dominatedBy(sol3))
     }
 
-
-    "Be able to .toTable() empty pareto frontiers" in {
-      ParetoFrontier[Int](Set()).toTable()
+    "Be able to .toCsv() empty pareto frontiers" in {
+      val csv: String = ParetoFrontier[Int](Set()).toCsv()
+      csv shouldBe ""
     }
 
-    "Sort its output by a specified objective in toTable" in {
+    "Be able to .toCsv() non-empty pareto frontiers" in {
       val s02 = Scored[Int](Map(("a", Minimize) -> 0, ("b", Minimize) -> 2), 1)
       val s11 = Scored[Int](Map(("a", Minimize) -> 1, ("b", Minimize) -> 1), 2)
       val s20 = Scored[Int](Map(("a", Minimize) -> 3, ("b", Minimize) -> 0), 3)
       val pf = ParetoFrontier(Set[Scored[Int]](s02, s11, s20))
 
-      val str1 = pf.toTable("a")
-      str1.indexOf("2") should be < str1.indexOf("3")
+      val csv_by_line: Array[String] = pf.toCsv().split("\n").map(_.trim())
 
-      val str2 = pf.toTable("b")
-      // 3,0 should be before 0,2 if sorting by b
-      str2.indexOf("3") should be < str2.indexOf("2")
+      csv_by_line.head shouldBe "a,b"
+      csv_by_line.tail should contain theSameElementsAs(List("0.0,2.0", "1.0,1.0", "3.0,0.0"))
     }
   }
 }

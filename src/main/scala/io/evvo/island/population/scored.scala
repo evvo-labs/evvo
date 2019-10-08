@@ -19,7 +19,7 @@ case class Scored[Sol](
     * @throws IllegalArgumentException if the given strategy isn't in this Scored.
     */
   def scoreOn(objective: String): Double = {
-    for (((name, direction), value) <- score) {
+    for (((name, _), value) <- score) {
       if (name == objective) {
         return value
       }
