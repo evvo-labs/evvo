@@ -16,7 +16,7 @@ class DeletorAgent[Sol](
     population: Population[Sol],
     strategy: AgentStrategy = DeletorAgentDefaultStrategy()
 )(implicit logger: LoggingAdapter)
-    extends AAgent[Sol](strategy, population, delete.name)(logger) {
+    extends AAgent[Sol](delete.name, strategy, population)(logger) {
 
   override protected def step(): Unit = {
     val in = population.getSolutions(delete.numRequestedInputs)

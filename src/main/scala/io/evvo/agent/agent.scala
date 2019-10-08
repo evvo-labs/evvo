@@ -22,17 +22,17 @@ case class AgentStatus(name: String, numInvocations: Int)
 
 /** Common behavior for all agents. Orchestrates the main loop, decides how often to run, etc.
   * All that is left to the subclasses is the actual content of the main loop.
+  * @param name The name of this agent. Used for logging.
   * @param population The population to add solutions to.
   * @param strategy Tells the CreatorAgent how often to run.
   * @param logger Where logs are written to. Not that this must extend the Akka
   *               [[akka.event.LoggingAdapter]] interface, not a more common logback
   *               or slf4s interface.
-  * @param name The name of this agent. Used for logging.
   */
 abstract class AAgent[Sol](
+    protected val name: String,
     protected val strategy: AgentStrategy,
-    protected val population: Population[Sol],
-    protected val name: String
+    protected val population: Population[Sol]
 )(implicit protected val logger: LoggingAdapter)
     extends Agent[Sol] {
 

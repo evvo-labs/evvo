@@ -16,7 +16,7 @@ class CreatorAgent[Sol](
     population: Population[Sol],
     strategy: AgentStrategy = CreatorAgentDefaultStrategy()
 )(implicit logger: LoggingAdapter)
-    extends AAgent[Sol](strategy, population, create.name)(logger) {
+    extends AAgent[Sol](create.name, strategy, population)(logger) {
   override protected def step(): Unit = {
     population.addSolutions(create())
   }
