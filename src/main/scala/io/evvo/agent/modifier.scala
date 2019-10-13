@@ -17,7 +17,7 @@ class ModifierAgent[Sol](
                           population: Population[Sol],
                           strategy: AgentStrategy = ModifierAgentDefaultStrategy()
 )(implicit logger: LoggingAdapter)
-    extends AAgent[Sol](strategy, population, modify.name)(logger) {
+    extends AAgent[Sol](modify.name, strategy, population)(logger) {
 
   override protected def step(): Unit = {
     val in = population.getSolutions(modify.numRequestedInputs)
