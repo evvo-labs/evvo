@@ -27,9 +27,9 @@ trait EvolutionaryProcess[Sol] {
     */
   def currentParetoFrontier(): ParetoFrontier[Sol]
 
-  /** Provides a set of solutions to be added to the population of an EvolutionaryProcess.
+  /** Provides a set of solutions to immigrate (may die in process etc.).
     *
-    * @param solutions the solutions to add
+    * @param solutions the solutions that attempt to replicate across islands.
     */
   def immigrate(solutions: Seq[Scored[Sol]]): Unit
 
@@ -44,6 +44,12 @@ trait EvolutionaryProcess[Sol] {
   /** @return The status of every agent that is part of this evolutionary process.
     */
   def agentStatuses(): Seq[AgentStatus]
+
+  /** Provides a set of solutions to be added to the population of an EvolutionaryProcess.
+   *
+   * @param solutions the solutions to add
+   */
+  def addSolutions(solutions: Seq[Sol]): Unit
 }
 
 /** Defines how long an evolutionary process should be run for.

@@ -61,6 +61,12 @@ private class IslandManager[Sol](
     this.islands.foreach(_.immigrate(solutions))
   }
 
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    this.islands
+      .zip(solutions.grouped(solutions.length / islands.length))  // Splits population into thirds
+      .foreach({case (isle: EvolutionaryProcess[Sol], sols: Seq[Sol]) => isle.addSolutions(sols)})
+  }
+
   override def poisonPill(): Unit = {
     this.islands.foreach(_.poisonPill())
   }
@@ -139,6 +145,10 @@ class RemoteIslandManager[Sol](
   }
 
   override def agentStatuses(): Seq[AgentStatus] = islandManager.agentStatuses()
+
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    this.islandManager.addSolutions(solutions)
+  }
 }
 
 // =================================================================================================
@@ -180,4 +190,8 @@ class LocalIslandManager[Sol](
   }
 
   override def agentStatuses(): Seq[AgentStatus] = islandManager.agentStatuses()
+
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    this.islandManager.addSolutions(solutions)
+  }
 }

@@ -103,6 +103,10 @@ private class EvvoIsland[Sol](
     Await.result(this.runAsync(stopAfter), Duration.Inf)
   }
 
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    pop.addSolutions(solutions)
+  }
+
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     pop.getParetoFrontier()
   }
@@ -164,6 +168,7 @@ class LocalEvvoIsland[Sol](
 )(
     implicit val log: LoggingAdapter = LocalLogger
 ) extends EvolutionaryProcess[Sol] {
+
   private val island = new EvvoIsland(
     creators,
     mutators,
@@ -185,6 +190,10 @@ class LocalEvvoIsland[Sol](
 
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     island.currentParetoFrontier()
+  }
+
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    island.addSolutions(solutions)
   }
 
   override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
@@ -272,6 +281,10 @@ class RemoteEvvoIsland[Sol](
     LoggingReceive({
       case Run(t) => sender ! this.runBlocking(t)
       case GetParetoFrontier => sender ! this.currentParetoFrontier()
+      case AddSolutions(solutions) =>
+        Try { solutions.asInstanceOf[Seq[Sol]] }.fold(
+          failure => this.logger.warning(f"Failed receiving AddSolutions message: ${failure}"),
+          this.addSolutions)
       case Immigrate(solutions) =>
         Try { solutions.asInstanceOf[Seq[Scored[Sol]]] }.fold(
           failure => this.logger.warning(f"Failed receiving Immigrate message: ${failure}"),
@@ -293,6 +306,10 @@ class RemoteEvvoIsland[Sol](
 
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     island.currentParetoFrontier()
+  }
+
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    island.addSolutions(solutions)
   }
 
   override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
@@ -333,6 +350,10 @@ object RemoteEvvoIsland {
       Await.result(ref ? GetParetoFrontier, Duration.Inf).asInstanceOf[ParetoFrontier[Sol]]
     }
 
+    override def addSolutions(solutions: Seq[Sol]): Unit = {
+      ref ! AddSolutions(solutions)
+    }
+
     override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
       ref ! Immigrate(solutions)
     }
@@ -356,6 +377,8 @@ object RemoteEvvoIsland {
   private case object GetParetoFrontier
 
   private case class Immigrate[Sol](solutions: Seq[Scored[Sol]])
+
+  private case class AddSolutions[Sol](solutions: Seq[Sol])
 
   private case class RegisterIslands[Sol](islands: Seq[EvolutionaryProcess[Sol]])
 
