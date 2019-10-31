@@ -9,6 +9,7 @@ import akka.event.{LoggingAdapter, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
 import io.evvo.agent._
+import io.evvo.island.population.HashingStrategy.HashingStrategy
 import io.evvo.island.population._
 import org.slf4j.LoggerFactory
 

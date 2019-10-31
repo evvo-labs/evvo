@@ -11,7 +11,7 @@ import io.evvo.island.population.{FullyConnectedNetworkTopology, NetworkTopology
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.util.Try
+import scala.util.{Random, Try}
 
 /** Common component implementing management of islands.
   *
@@ -62,8 +62,8 @@ private class IslandManager[Sol](
   }
 
   override def addSolutions(solutions: Seq[Sol]): Unit = {
-    this.islands
-      .zip(solutions.grouped(solutions.length / islands.length))  // Splits population into thirds
+    Random.shuffle(islands)  // Don't want to always add to the same islands more
+      .zip(solutions.grouped(solutions.length / islands.length))
       .foreach({case (isle: EvolutionaryProcess[Sol], sols: Seq[Sol]) => isle.addSolutions(sols)})
   }
 
