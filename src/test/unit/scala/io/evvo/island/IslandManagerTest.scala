@@ -21,8 +21,8 @@ class IslandManagerTest extends WordSpec with Matchers {
     override protected def objective(sol: Bitstring): Double = sol.count(identity)
   }
 
-  case object ZeroMax extends Objective[Bitstring]("ZeroMax", Maximize) {
-    override protected def objective(sol: Bitstring): Double = sol.length - sol.count(identity)
+  case object OneMin extends Objective[Bitstring]("OneMin", Minimize) {
+    override protected def objective(sol: Bitstring): Double = sol.count(identity)
   }
 
   // Make sure they aren't creating any solutions
@@ -34,7 +34,7 @@ class IslandManagerTest extends WordSpec with Matchers {
     .withEmigrationStrategy(WholeParetoFrontierEmigrationStrategy())
     .withEmigrationTargetStrategy(SendToAllEmigrationTargetStrategy())
 
-  val builderZeroAndOneMax =  builderOneMax.addObjective(ZeroMax)
+  val builderOneMaxandMin = builderOneMax.addObjective(OneMin)
 
   "A Local Island Manager" should {
     "Use the provided network topology to register islands with each other" in {
@@ -74,15 +74,15 @@ class IslandManagerTest extends WordSpec with Matchers {
 
     "Be able to distribute a population among the islands" in {
       // Add solutions to population, each of which would lie on the pareto frontier of empty pop
-      val solutionsToAdd: Seq[Bitstring] = (0 to 30) // 30 BitStrings
+      val solutionsToAdd: Seq[Bitstring] = (0 until 30) // 30 BitStrings
         .map(bs => (0 until 30) // each of length 30
-          .map(i => if (i <= bs) true else false)) // Containing unique number of trues
+          .map(i => if (i < bs) true else false)) // Containing unique number of trues
 
       // Expression blocks so we can resuse the names island1, etc.
       val _ = {
-        val island1 = builderZeroAndOneMax.buildLocalEvvo()
-        val island2 = builderZeroAndOneMax.buildLocalEvvo()
-        val island3 = builderZeroAndOneMax.buildLocalEvvo()
+        val island1 = builderOneMaxandMin.buildLocalEvvo()
+        val island2 = builderOneMaxandMin.buildLocalEvvo()
+        val island3 = builderOneMaxandMin.buildLocalEvvo()
 
         // simply constructing the manager registers the islands with each other
         val mgr = new IslandManager[Bitstring](
@@ -105,10 +105,10 @@ class IslandManagerTest extends WordSpec with Matchers {
       }
 
       val _ = {
-        val island1 = builderZeroAndOneMax.buildLocalEvvo()
-        val island2 = builderZeroAndOneMax.buildLocalEvvo()
-        val island3 = builderZeroAndOneMax.buildLocalEvvo()
-        val island4 = builderZeroAndOneMax.buildLocalEvvo()
+        val island1 = builderOneMaxandMin.buildLocalEvvo()
+        val island2 = builderOneMaxandMin.buildLocalEvvo()
+        val island3 = builderOneMaxandMin.buildLocalEvvo()
+        val island4 = builderOneMaxandMin.buildLocalEvvo()
 
         // simply constructing the manager registers the islands with each other
         val mgr = new IslandManager[Bitstring](
@@ -128,10 +128,10 @@ class IslandManagerTest extends WordSpec with Matchers {
       }
 
       val _ = {
-        val island1 = builderZeroAndOneMax.buildLocalEvvo()
-        val island2 = builderZeroAndOneMax.buildLocalEvvo()
-        val island3 = builderZeroAndOneMax.buildLocalEvvo()
-        val island4 = builderZeroAndOneMax.buildLocalEvvo()
+        val island1 = builderOneMaxandMin.buildLocalEvvo()
+        val island2 = builderOneMaxandMin.buildLocalEvvo()
+        val island3 = builderOneMaxandMin.buildLocalEvvo()
+        val island4 = builderOneMaxandMin.buildLocalEvvo()
 
         // simply constructing the manager registers the islands with each other
         val mgr = new IslandManager[Bitstring](
