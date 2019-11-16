@@ -46,7 +46,18 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
         .buildLocalEvvo()
     }
 
-    "require at least one Objective, Creator, Mutator, Deletor" in {
+    "allow building without creator" in {
+      EvvoIsland
+        .builder[Bitstring]()
+        .addObjective(new Objective[Bitstring]("Three", Maximize) {
+          override protected def objective(sol: Bitstring): Double = 3d
+        })
+        .addModifier(Bitflipper())
+        .addDeletor(DeleteDominated())
+        .buildLocalEvvo()
+    }
+
+    "require at least one Objective, Mutator, Deletor" in {
       // Leaving this commented out: it's a compile time error. But I'm leaving it here
       // to inform people in the future.
       // val builder = EvvoIsland.builder[Bitstring]().buildLocalEvvo()

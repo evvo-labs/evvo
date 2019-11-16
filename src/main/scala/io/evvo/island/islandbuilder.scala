@@ -23,12 +23,11 @@ import io.evvo.island.population.Objective
   * @param deletors            The functions to be used for deciding which solutions to delete.
   * @param objectives          The functions to maximize.
   * @param immigrationStrategy Used to determine which solutions to accept during immigration.
-  * @tparam HasCreators   HAS_SOME if the builder has at least one creator, HAS_NONE otherwise.
   * @tparam HasModifiers  same as HasCreators
   * @tparam HasDeletors   same as HasCreators
   * @tparam HasObjectives same as HasCreators
   */
-case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives](
+case class UnfinishedEvvoIslandBuilder[Sol, HasModifiers, HasDeletors, HasObjectives](
     creators: Set[CreatorFunction[Sol]] = Set[CreatorFunction[Sol]](),
     modifiers: Set[ModifierFunction[Sol]] = Set[ModifierFunction[Sol]](),
     deletors: Set[DeletorFunction[Sol]] = Set[DeletorFunction[Sol]](),
@@ -39,42 +38,42 @@ case class UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeleto
     loggingStrategy: LoggingStrategy = LogPopulationLoggingStrategy()
 ) {
   def addCreator(creatorFunc: CreatorFunction[Sol])
-    : UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HasModifiers, HasDeletors, HasObjectives] = {
+    : UnfinishedEvvoIslandBuilder[Sol, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(creators = creators + creatorFunc)
   }
 
   def addModifier(modifierFunc: ModifierFunction[Sol])
-    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HAS_SOME, HasDeletors, HasObjectives] = {
+    : UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HasDeletors, HasObjectives] = {
     this.copy(modifiers = modifiers + modifierFunc)
   }
 
   def addDeletor(deletorFunc: DeletorFunction[Sol])
-    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HAS_SOME, HasObjectives] = {
+    : UnfinishedEvvoIslandBuilder[Sol, HasModifiers, HAS_SOME, HasObjectives] = {
     this.copy(deletors = deletors + deletorFunc)
   }
 
   def addObjective(objective: Objective[Sol])
-    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HAS_SOME] = {
+    : UnfinishedEvvoIslandBuilder[Sol, HasModifiers, HasDeletors, HAS_SOME] = {
     this.copy(objectives = objectives + objective)
   }
 
   def withImmigrationStrategy(immigrationStrategy: ImmigrationStrategy)
-    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+    : UnfinishedEvvoIslandBuilder[Sol, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(immigrationStrategy = immigrationStrategy)
   }
 
   def withEmigrationStrategy(emigrationStrategy: EmigrationStrategy)
-    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+    : UnfinishedEvvoIslandBuilder[Sol, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(emigrationStrategy = emigrationStrategy)
   }
 
   def withEmigrationTargetStrategy(emigrationTargetStrategy: EmigrationTargetStrategy)
-    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+    : UnfinishedEvvoIslandBuilder[Sol, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(emigrationTargetStrategy = emigrationTargetStrategy)
   }
 
   def withLoggingStrategy(loggingStrategy: LoggingStrategy)
-    : UnfinishedEvvoIslandBuilder[Sol, HasCreators, HasModifiers, HasDeletors, HasObjectives] = {
+    : UnfinishedEvvoIslandBuilder[Sol, HasModifiers, HasDeletors, HasObjectives] = {
     this.copy(loggingStrategy = loggingStrategy)
   }
 }
@@ -92,7 +91,6 @@ case class FinishedEvvoIslandBuilder[Sol](
     emigrationTargetStrategy: EmigrationTargetStrategy,
     loggingStrategy: LoggingStrategy
 ) {
-  assert(creators.nonEmpty)
   assert(modifiers.nonEmpty)
   assert(deletors.nonEmpty)
   assert(objectives.nonEmpty)
@@ -129,7 +127,7 @@ case class FinishedEvvoIslandBuilder[Sol](
 object EvvoIslandBuilder {
 
   /** @return a new, unfinished EvvoIslandBuilder. */
-  def apply[Sol](): UnfinishedEvvoIslandBuilder[Sol, HAS_NONE, HAS_NONE, HAS_NONE, HAS_NONE] = {
+  def apply[Sol](): UnfinishedEvvoIslandBuilder[Sol, HAS_NONE, HAS_NONE, HAS_NONE] = {
     UnfinishedEvvoIslandBuilder()
   }
 
@@ -139,7 +137,7 @@ object EvvoIslandBuilder {
     * @return A FinishedEvvoIslandBuilder with the same data as `builder`
     */
   implicit def finishBuilder[Sol](
-      builder: UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HAS_SOME, HAS_SOME, HAS_SOME]
+      builder: UnfinishedEvvoIslandBuilder[Sol, HAS_SOME, HAS_SOME, HAS_SOME]
   ): FinishedEvvoIslandBuilder[Sol] = {
     FinishedEvvoIslandBuilder(
       builder.creators,

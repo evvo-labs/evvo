@@ -148,7 +148,7 @@ object EvvoIsland {
   /** @tparam Sol the type of solutions processed by this island.
     * @return A builder for an EvvoIsland.
     */
-  def builder[Sol](): UnfinishedEvvoIslandBuilder[Sol, _, _, _, _] = EvvoIslandBuilder[Sol]()
+  def builder[Sol](): UnfinishedEvvoIslandBuilder[Sol, _, _, _] = EvvoIslandBuilder[Sol]()
 }
 
 // =================================================================================================
