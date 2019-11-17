@@ -11,7 +11,8 @@ import io.evvo.island.population.{FullyConnectedNetworkTopology, NetworkTopology
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.util.Try
+import scala.math.ceil
+import scala.util.{Random, Try}
 
 /** Common component implementing management of islands.
   *
@@ -59,6 +60,12 @@ private class IslandManager[Sol](
 
   override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
     this.islands.foreach(_.immigrate(solutions))
+  }
+
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    Random.shuffle(islands)  // Don't want to always add to the same islands more
+      .zip(solutions.grouped(ceil(solutions.length.toFloat / islands.length).toInt))
+      .foreach({case (isle: EvolutionaryProcess[Sol], sols: Seq[Sol]) => isle.addSolutions(sols)})
   }
 
   override def poisonPill(): Unit = {
@@ -139,6 +146,10 @@ class RemoteIslandManager[Sol](
   }
 
   override def agentStatuses(): Seq[AgentStatus] = islandManager.agentStatuses()
+
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    this.islandManager.addSolutions(solutions)
+  }
 }
 
 // =================================================================================================
@@ -180,4 +191,8 @@ class LocalIslandManager[Sol](
   }
 
   override def agentStatuses(): Seq[AgentStatus] = islandManager.agentStatuses()
+
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    this.islandManager.addSolutions(solutions)
+  }
 }

@@ -9,6 +9,7 @@ import akka.event.{LoggingAdapter, LoggingReceive}
 import akka.pattern.ask
 import akka.util.Timeout
 import io.evvo.agent._
+import io.evvo.island.population.HashingStrategy.HashingStrategy
 import io.evvo.island.population._
 import org.slf4j.LoggerFactory
 
@@ -103,6 +104,10 @@ private class EvvoIsland[Sol](
     Await.result(this.runAsync(stopAfter), Duration.Inf)
   }
 
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    pop.addSolutions(solutions)
+  }
+
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     pop.getParetoFrontier()
   }
@@ -143,7 +148,7 @@ object EvvoIsland {
   /** @tparam Sol the type of solutions processed by this island.
     * @return A builder for an EvvoIsland.
     */
-  def builder[Sol](): UnfinishedEvvoIslandBuilder[Sol, _, _, _, _] = EvvoIslandBuilder[Sol]()
+  def builder[Sol](): UnfinishedEvvoIslandBuilder[Sol, _, _, _] = EvvoIslandBuilder[Sol]()
 }
 
 // =================================================================================================
@@ -164,6 +169,7 @@ class LocalEvvoIsland[Sol](
 )(
     implicit val log: LoggingAdapter = LocalLogger
 ) extends EvolutionaryProcess[Sol] {
+
   private val island = new EvvoIsland(
     creators,
     mutators,
@@ -185,6 +191,10 @@ class LocalEvvoIsland[Sol](
 
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     island.currentParetoFrontier()
+  }
+
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    island.addSolutions(solutions)
   }
 
   override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
@@ -272,6 +282,10 @@ class RemoteEvvoIsland[Sol](
     LoggingReceive({
       case Run(t) => sender ! this.runBlocking(t)
       case GetParetoFrontier => sender ! this.currentParetoFrontier()
+      case AddSolutions(solutions) =>
+        Try { solutions.asInstanceOf[Seq[Sol]] }.fold(
+          failure => this.logger.warning(f"Failed receiving AddSolutions message: ${failure}"),
+          this.addSolutions)
       case Immigrate(solutions) =>
         Try { solutions.asInstanceOf[Seq[Scored[Sol]]] }.fold(
           failure => this.logger.warning(f"Failed receiving Immigrate message: ${failure}"),
@@ -293,6 +307,10 @@ class RemoteEvvoIsland[Sol](
 
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     island.currentParetoFrontier()
+  }
+
+  override def addSolutions(solutions: Seq[Sol]): Unit = {
+    island.addSolutions(solutions)
   }
 
   override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
@@ -333,6 +351,10 @@ object RemoteEvvoIsland {
       Await.result(ref ? GetParetoFrontier, Duration.Inf).asInstanceOf[ParetoFrontier[Sol]]
     }
 
+    override def addSolutions(solutions: Seq[Sol]): Unit = {
+      ref ! AddSolutions(solutions)
+    }
+
     override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
       ref ! Immigrate(solutions)
     }
@@ -356,6 +378,8 @@ object RemoteEvvoIsland {
   private case object GetParetoFrontier
 
   private case class Immigrate[Sol](solutions: Seq[Scored[Sol]])
+
+  private case class AddSolutions[Sol](solutions: Seq[Sol])
 
   private case class RegisterIslands[Sol](islands: Seq[EvolutionaryProcess[Sol]])
 
