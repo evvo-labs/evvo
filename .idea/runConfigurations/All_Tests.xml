@@ -1,70 +1,51 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="All Tests" type="ScalaTestRunConfiguration" factoryName="ScalaTest">
+  <configuration default="false" name="All Tests" type="ScalaTestRunConfiguration" factoryName="ScalaTest" show_console_on_std_err="false" show_console_on_std_out="false">
     <module name="evvo" />
-    <setting name="path" value="" />
-    <setting name="vmparams" value="" />
-    <setting name="params" value="" />
-    <setting name="workingDirectory" value="file://$PROJECT_DIR$" />
-    <setting name="searchForTest" value="In whole project" />
-    <setting name="showProgressMessages" value="true" />
-    <setting name="useSbt" value="false" />
-    <setting name="useUiWithSbt" value="false" />
-    <setting name="jrePath" value="" />
-    <envs />
-    <setting name="testKind" value="All in package" />
-    <setting name="package" value="" />
-    <buffered bufClass="io.evvo.LocalEvvoTest" />
-    <buffered bufClass="io.evvo.LocalEvvoTest" />
-    <buffered bufClass="io.evvo.LocalIslandManagerTest" />
-    <buffered bufClass="io.evvo.LocalIslandManagerTest" />
-    <buffered bufClass="io.evvo.ParetoFrontierTest" />
-    <buffered bufClass="io.evvo.ParetoFrontierTest" />
-    <buffered bufClass="io.evvo.ScoredTest" />
-    <buffered bufClass="io.evvo.ScoredTest" />
-    <buffered bufClass="io.evvo.agent.AgentPropertiesTest" />
-    <buffered bufClass="io.evvo.agent.AgentPropertiesTest" />
-    <buffered bufClass="io.evvo.agent.CreatorAgentDefaultStrategyTest" />
-    <buffered bufClass="io.evvo.agent.CreatorAgentDefaultStrategyTest" />
-    <buffered bufClass="io.evvo.agent.CrossoverFunctionTest" />
-    <buffered bufClass="io.evvo.agent.CrossoverFunctionTest" />
-    <buffered bufClass="io.evvo.agent.DeleteDominatedFunctionTest" />
-    <buffered bufClass="io.evvo.agent.DeleteDominatedFunctionTest" />
-    <buffered bufClass="io.evvo.agent.DeleteWorstHalfByRandomObjectiveTest" />
-    <buffered bufClass="io.evvo.agent.DeleteWorstHalfByRandomObjectiveTest" />
-    <buffered bufClass="io.evvo.agent.DeletorAgentDefaultStrategyTest" />
-    <buffered bufClass="io.evvo.agent.DeletorAgentDefaultStrategyTest" />
-    <buffered bufClass="io.evvo.agent.FunctionSerializabilityTest" />
-    <buffered bufClass="io.evvo.agent.FunctionSerializabilityTest" />
-    <buffered bufClass="io.evvo.agent.ModifierAgentDefaultStrategyTest" />
-    <buffered bufClass="io.evvo.agent.ModifierAgentDefaultStrategyTest" />
-    <buffered bufClass="io.evvo.agent.ModifierFunctionTest" />
-    <buffered bufClass="io.evvo.agent.ModifierFunctionTest" />
-    <buffered bufClass="io.evvo.agent.MutatorFunctionTest" />
-    <buffered bufClass="io.evvo.agent.MutatorFunctionTest" />
-    <buffered bufClass="io.evvo.builtin.BitflipperTest" />
-    <buffered bufClass="io.evvo.builtin.BitflipperTest" />
-    <buffered bufClass="io.evvo.builtin.DeleteDominatedTest" />
-    <buffered bufClass="io.evvo.builtin.DeleteDominatedTest" />
-    <buffered bufClass="io.evvo.builtin.TreesAgentsTest" />
-    <buffered bufClass="io.evvo.builtin.TreesAgentsTest" />
-    <buffered bufClass="io.evvo.builtin.TreesTest" />
-    <buffered bufClass="io.evvo.builtin.TreesTest" />
-    <buffered bufClass="io.evvo.island.AllowAllImmigrationStrategyTest" />
-    <buffered bufClass="io.evvo.island.AllowAllImmigrationStrategyTest" />
-    <buffered bufClass="io.evvo.island.ElitistImmigrationStrategyTest" />
-    <buffered bufClass="io.evvo.island.ElitistImmigrationStrategyTest" />
-    <buffered bufClass="io.evvo.island.EvvoIslandBuilderTest" />
-    <buffered bufClass="io.evvo.island.EvvoIslandBuilderTest" />
-    <buffered bufClass="io.evvo.island.EvvoIslandTest" />
-    <buffered bufClass="io.evvo.island.EvvoIslandTest" />
-    <buffered bufClass="io.evvo.island.IslandManagerTest" />
-    <buffered bufClass="io.evvo.island.IslandManagerTest" />
-    <buffered bufClass="io.evvo.island.population.NetworkTopologyTest" />
-    <buffered bufClass="io.evvo.island.population.NetworkTopologyTest" />
-    <buffered bufClass="io.evvo.island.population.StandardPopulationTest" />
-    <buffered bufClass="io.evvo.island.population.StandardPopulationTest" />
-    <buffered bufClass="unit.io.evvo.island.EmigrationTargetStrategyTest" />
-    <buffered bufClass="unit.io.evvo.island.EmigrationTargetStrategyTest" />
+    <option name="allowRunningInParallel" value="false" />
+    <option name="testKind" value="All in package" />
+    <option name="classBuf">
+      <list>
+        <option value="io.evvo.LocalEvvoTest" />
+        <option value="io.evvo.ParetoFrontierTest" />
+        <option value="io.evvo.ScoredTest" />
+        <option value="io.evvo.LocalIslandManagerTest" />
+        <option value="io.evvo.builtin.BitflipperTest" />
+        <option value="io.evvo.builtin.TreesAgentsTest" />
+        <option value="io.evvo.builtin.TreesTest" />
+        <option value="io.evvo.builtin.DeleteDominatedTest" />
+        <option value="io.evvo.island.IslandManagerTest" />
+        <option value="io.evvo.island.AllowAllImmigrationStrategyTest" />
+        <option value="io.evvo.island.ElitistImmigrationStrategyTest" />
+        <option value="io.evvo.island.EvvoIslandBuilderTest" />
+        <option value="io.evvo.island.EvvoIslandTest" />
+        <option value="io.evvo.island.population.StandardPopulationTest" />
+        <option value="io.evvo.island.population.NetworkTopologyTest" />
+        <option value="io.evvo.agent.DeleteWorstHalfByRandomObjectiveTest" />
+        <option value="io.evvo.agent.CrossoverFunctionTest" />
+        <option value="io.evvo.agent.ModifierFunctionTest" />
+        <option value="io.evvo.agent.MutatorFunctionTest" />
+        <option value="io.evvo.agent.AgentPropertiesTest" />
+        <option value="io.evvo.agent.ModifierAgentDefaultStrategyTest" />
+        <option value="io.evvo.agent.CreatorAgentDefaultStrategyTest" />
+        <option value="io.evvo.agent.DeletorAgentDefaultStrategyTest" />
+        <option value="io.evvo.agent.DeleteDominatedFunctionTest" />
+        <option value="io.evvo.agent.FunctionSerializabilityTest" />
+        <option value="integration.scala.io.evvo.AgentStatusTest" />
+        <option value="integration.scala.io.evvo.AgentStatusTest" />
+      </list>
+    </option>
+    <option name="envs">
+      <map />
+    </option>
+    <option name="javaOptions" value="" />
+    <option name="jrePath" value="" />
+    <option name="searchTest" value="In whole project" />
+    <option name="showProgressMessages" value="true" />
+    <option name="testArgs" value="" />
+    <option name="testPackagePath" value="" />
+    <option name="useSbt" value="false" />
+    <option name="useUiWithSbt" value="false" />
+    <option name="workingDirectory" value="$PROJECT_DIR$" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
