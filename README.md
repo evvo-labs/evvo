@@ -1,4 +1,4 @@
-# Evvo ![travis master status](https://travis-ci.org/evvo-labs/evvo.svg?branch=master) 
+# Evvo ![travis master status](https://travis-ci.org/evvo-labs/evvo.svg?branch=master)
 
 Evvo is the Scala framework for distributed [multi-objective](https://en.wikipedia.org/wiki/Multi-objective_optimization) [evolutionary computing](https://en.wikipedia.org/wiki/Evolutionary_computation).
 
@@ -12,11 +12,11 @@ Evvo supports:
 
 #### NOTE: This code is provided as a public beta
 
-Evvo is in beta. The API is not stable, and is guaranteed to change in the future. This is made clear by the version being `v0.*.*`. Once the major version is `1`, the API will be stable. Do not use this code in production. 
+Evvo is in beta. The API is not stable, and is guaranteed to change in the future. This is made clear by the version being `v0.*.*`. Once the major version is `1`, the API will be stable. Do not use this code in production.
 
 -------------------------------------------------------------------------------
 
-Here's an example showing how simple it is to set up and solve a basic problem (on one machine) using Evvo. Let's say we want to maximize the number of ones in a `Bitstring`. To represent this objective, we'll need to write an `Objective` (who would have guessed?). Then we can use Evvo to search for `Bitstring`s that satisfy the `Objective`. After running for a second, we'll print the current [pareto frontier](https://en.wikipedia.org/wiki/Pareto_efficiency#Use_in_engineering). 
+Here's an example showing how simple it is to set up and solve a basic problem (on one machine) using Evvo. Let's say we want to maximize the number of ones in a `Bitstring`. To represent this objective, we'll need to write an `Objective` (who would have guessed?). Then we can use Evvo to search for `Bitstring`s that satisfy the `Objective`. After running for a second, we'll print the current [pareto frontier](https://en.wikipedia.org/wiki/Pareto_efficiency#Use_in_engineering).
 ```scala
 import io.evvo.agent.defaults.{Bitstring, Bitflipper, BitstringGenerator, DeleteDominated}
 import io.evvo.island.{EvvoIsland, LocalIslandManager, StopAfter}
@@ -70,7 +70,7 @@ If you want to jump directly into an example, check out the [quickstart guide](.
 
 **Agent**: _not_ an Akka actor, but a part of an [asynchronous evolutionary system](#asynchronous-evolutionary-computing). Each one runs on a separate thread.
 
-**Creator Agent**: often shortened to "Creator", a Creator Agent generates a set of solutions and adds those solutions to the _population_. 
+**Creator Agent**: often shortened to "Creator", a Creator Agent generates a set of solutions and adds those solutions to the _population_.
 
 **Modifier Agent**: often shortened to "Modifier", a Modifier Agent retrieves some number of solutions from the _population_, calls a function on that set of solutions to produce new solutions based on the input, and adds those new solutions to the _population_.
 
@@ -141,79 +141,9 @@ This diagram illustrates each of the major components in Evvo and their roles:
                                 and so on
 ```
 
-
-### Distributing islands on a network
-This diagram shows a simplified version of our network model:
-```
-                                                  +------------------------------------------------+
-                                                  |                                                |
-                                                  | Server                                         |
-                                                  |                                                |
-                                                  | +--------------------------------------------+ |
-                                                  | |                                            | |
-                                           +----->| | JVM running ActorSystem with remoting      | |
-                                           |      | |                                            | |
-                                           |      | |  +----------+  +----------+  +----------+  | |
-+---------------------------------+        |      | |  |          |  |          |  |          |  | |
-|                                 |        |      | |  | Island 1 |  | Island 4 |  | Island 7 |  | |
-| IslandManager (client)          |        |      | |  |          |  |          |  |          |  | |
-|                                 |        |      | |  +----------+  +----------+  +----------+  | |
-+---------------------------------+        |      | |                                            | |
-|                                 |        |      | +--------------------------------------------+ |
-|  - Round robin deploys Islands  |<-------+      |                                                |
-|     to remote ActorSystems      |        |      +------------------------------------------------+
-|                                 |        |             ^
-|  - Combines results at end      |        |             |  Some gossip happens over network
-|     of optimization             |        |             |  Some gossip happens within a server
-|                                 |        |             v
-+---------------------------------+        |      +------------------------------------------------+
-                                           |      |                                                |
-                                           |      | Server                                         |
-                                           |      |                                                |
-                                           |      | +--------------------------------------------+ |
-                                           |      | |                                            | |
-                                           +----->| | JVM running ActorSystem with remoting      | |
-                                           |      | |                                            | |
-                                           |      | |  +----------+  +----------+  +----------+  | |
-                                           |      | |  |          |  |          |  |          |  | |
-                                           |      | |  | Island 2 |  | Island 5 |  | Island 8 |  | |
-                                           |      | |  |          |  |          |  |          |  | |
-                                           |      | |  +----------+  +----------+  +----------+  | |
-                                           |      | |                                            | |
-                                           |      | +--------------------------------------------+ |
-                                           |      |                                                |
-                                           |      +------------------------------------------------+
-                                           |             ^
-                                           |             |
-                                           |             v
-                                           |      +------------------------------------------------+
-                                           |      |                                                |
-                                           |      | Server                                         |
-                                           |      |                                                |
-                                           |      | +--------------------------------------------+ |
-                                           |      | |                                            | |
-                                           +----->| | JVM running ActorSystem with remoting      | |
-                                                  | |                                            | |
-                                                  | |  +----------+  +----------+                | |
-                                                  | |  |          |  |          |                | |
-                                                  | |  | Island 3 |  | Island 6 |                | |
-                                                  | |  |          |  |          |                | |
-                                                  | |  +----------+  +----------+                | |
-                                                  | |                                            | |
-                                                  | +--------------------------------------------+ |
-                                                  |                                                |
-                                                  +------------------------------------------------+
-
-                                                                          .
-                                                                          .
-                                                                          .
-
-                                                     and so on, until your server budget runs out
-```
-
 -------------------------------------------------------------------------------
 ### Quickstart
-The [quickstart guide](./QUICKSTART.md) will walk you through writing and running a problem using Evvo. It solves a variant on the traveling salesperson problem with two objectives. If you're interested in seeing more of the developer API or understanding how to use Evvo, check this out next. 
+The [quickstart guide](./QUICKSTART.md) will walk you through writing and running a problem using Evvo. It solves a variant on the traveling salesperson problem with two objectives. If you're interested in seeing more of the developer API or understanding how to use Evvo, check this out next.
 
 -------------------------------------------------------------------------------
 ### Downloads
@@ -241,11 +171,11 @@ libraryDependencies += "io.evvo" %% "evvo" % "0.0.0"
 Evvo is [dockerized](https://www.docker.com/). Follow the [instructions](docker/README.md) to get started running your own network-parallel instance.
 
 #### Serializability
-Because we have to ship Islands to remote servers, Islands need to be [serializable](https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html). All of the code provided by Evvo is serializable, but the creators, modifiers, deletors, and objectives that you provide must also be serializable for the Islands to serialize and deserialize correctly. 
+Because we have to ship Islands to remote servers, Islands need to be [serializable](https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html). All of the code provided by Evvo is serializable, but the creators, modifiers, deletors, and objectives that you provide must also be serializable for the Islands to serialize and deserialize correctly.
 
 See [the relevant section](https://www.oreilly.com/library/view/scala-cookbook/9781449340292/ch12s08.html) of the Scala cookbook on serialization. Note that serialized classes should also have referential transparency, that is, they should not reference variables from an external scope. A class defined within an object (or another class, or a code block) that references variablees defined in the outer object (or class, or code block) may cause serialization issues if those values are not present in the deserialization context. In general, extending `Creator`, `Modifier`, or `DeletorFunction`, with case classes, and ensuring that those case classes take all the data they need as arguments will be sufficient to ensure that there are no serialization issues.
 
-If you use a `LocalIslandManager` to create `LocalEvvoIsland`s, your data will still be serialized and deserialized, albeit on the same machine. This means that some of the most flagrant serialization exceptions can be caught early by testing with `LocalIslandManager`. 
+If you use a `LocalIslandManager` to create `LocalEvvoIsland`s, your data will still be serialized and deserialized, albeit on the same machine. This means that some of the most flagrant serialization exceptions can be caught early by testing with `LocalIslandManager`.
 
 
 -------------------------------------------------------------------------------
