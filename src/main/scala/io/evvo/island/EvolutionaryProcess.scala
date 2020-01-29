@@ -37,10 +37,6 @@ trait EvolutionaryProcess[Sol] {
     */
   def poisonPill(): Unit
 
-  /** Registers the given islands as potential destinations for emigrations.
-    */
-  def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit
-
   /** @return The status of every agent that is part of this evolutionary process.
     */
   def agentStatuses(): Seq[AgentStatus]

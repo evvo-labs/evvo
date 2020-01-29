@@ -29,8 +29,9 @@ class EvvoIsland[Sol](
   private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
   private val allAgents: Seq[AAgent[Sol]] = creatorAgents ++ mutatorAgents ++ deletorAgents
 
-  /** The list of all other islands, to send emigrating solutions to. */
-  private var emigrationTargets: IndexedSeq[EvolutionaryProcess[Sol]] = IndexedSeq()
+  /** The list of all other islands. */
+  // TODO validate these as URLs
+  private var otherIslands: IndexedSeq[String] = IndexedSeq()
 
   /** The index of the current "target" that will receive the next emigration. */
   private var currentEmigrationTargetIndex: Int = 0
@@ -96,24 +97,22 @@ class EvvoIsland[Sol](
     stop()
   }
 
-  override def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit = {
-    emigrationTargets = emigrationTargets ++ islands
-  }
-
   private def stop(): Unit = {
     allAgents.foreach(_.stop())
   }
 
   private def emigrate(): Unit = {
-    if (emigrationTargets.isEmpty) {
+    if (otherIslands.isEmpty) {
       // TODO log
     } else {
-      val emigrants = emigrationStrategy.chooseSolutions(this.pop)
-      val emigrationTargets = emigrationTargetStrategy.chooseTargets(this.emigrationTargets.length)
+      val emigrationTargets = emigrationTargetStrategy.chooseTargets(this.otherIslands.length)
       emigrationTargets.foreach(target => {
-        this.emigrationTargets(target).immigrate(emigrants)
+        this.sendSolutionsTo(this.otherIslands(target))
       })
     }
+  }
+  private def sendSolutionsTo(str: String): Unit = {
+    // TODO HTTP stuff here
   }
 
   override def agentStatuses(): Seq[AgentStatus] = allAgents.map(_.status())
