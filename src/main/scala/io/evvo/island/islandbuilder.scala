@@ -1,6 +1,5 @@
 package io.evvo.island
 
-import akka.actor.{ActorSystem, Props}
 import io.evvo.agent.{CreatorFunction, DeletorFunction, ModifierFunction}
 import io.evvo.island.EvvoIslandBuilder.HAS_SOME
 import io.evvo.island.population.Objective
@@ -95,23 +94,8 @@ case class FinishedEvvoIslandBuilder[Sol](
   assert(deletors.nonEmpty)
   assert(objectives.nonEmpty)
 
-  def toProps()(implicit system: ActorSystem): Props = {
-    Props(
-      new RemoteEvvoIsland[Sol](
-        creators.toVector,
-        modifiers.toVector,
-        deletors.toVector,
-        objectives.toVector,
-        immigrationStrategy,
-        emigrationStrategy,
-        emigrationTargetStrategy,
-        loggingStrategy
-      )
-    )
-  }
-
-  def buildLocalEvvo(): EvolutionaryProcess[Sol] = {
-    new LocalEvvoIsland[Sol](
+  def build(): EvolutionaryProcess[Sol] = {
+    new EvvoIsland[Sol](
       creators.toVector,
       modifiers.toVector,
       deletors.toVector,

@@ -1,6 +1,5 @@
 package io.evvo.agent
 
-import akka.event.LoggingAdapter
 import io.evvo.island.population.Population
 
 import scala.concurrent.duration._
@@ -15,8 +14,7 @@ class CreatorAgent[Sol](
     create: CreatorFunction[Sol],
     population: Population[Sol],
     strategy: AgentStrategy = CreatorAgentDefaultStrategy()
-)(implicit logger: LoggingAdapter)
-    extends AAgent[Sol](create.name, strategy, population)(logger) {
+) extends AAgent[Sol](create.name, strategy, population) {
   override protected def step(): Unit = {
     population.addSolutions(create())
   }
@@ -31,7 +29,7 @@ object CreatorAgent {
       create: CreatorFunction[Sol],
       population: Population[Sol],
       strategy: AgentStrategy = CreatorAgentDefaultStrategy()
-  )(implicit logger: LoggingAdapter): CreatorAgent[Sol] =
+  ): CreatorAgent[Sol] =
     new CreatorAgent(create, population, strategy)
 }
 

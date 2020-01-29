@@ -3,31 +3,23 @@
   */
 package integration.scala.io.evvo
 
-import io.evvo.LocalEvvoTestFixtures.{
-  NumInversions,
-  ReverseListCreator,
-  Solution,
-  SwapTwoElementsModifier
-}
-import io.evvo.NullLogger
+import io.evvo.LocalEvvoTestFixtures.{NumInversions, ReverseListCreator, SwapTwoElementsModifier}
 import io.evvo.agent.{CreatorFunction, DeletorFunction, MutatorFunction}
 import io.evvo.builtin.deletors.DeleteWorstHalfByRandomObjective
 import io.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
-
-import scala.concurrent.duration._
 import io.evvo.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
 
-class AgentStatusTest extends WordSpec with Matchers {
+import scala.concurrent.duration._
 
-  implicit val log = NullLogger
+class AgentStatusTest extends WordSpec with Matchers {
 
   "LocalIslandManager" should {
     "Be able to return agents" taggedAs (Performance, Slow) in {
       type Solution = List[Int]
       val creator: CreatorFunction[Solution] = new ReverseListCreator(10)
       val modifier: MutatorFunction[Solution] = new SwapTwoElementsModifier()
-      val deletor: DeletorFunction[Solution] = new DeleteWorstHalfByRandomObjective()
+      val deletor: DeletorFunction[Solution] = DeleteWorstHalfByRandomObjective()
 
       new NumInversions()
       val evvo: EvolutionaryProcess[Solution] = EvvoIslandBuilder[Solution]()
@@ -35,7 +27,7 @@ class AgentStatusTest extends WordSpec with Matchers {
         .addModifier(modifier)
         .addDeletor(deletor)
         .addObjective(new NumInversions())
-        .buildLocalEvvo()
+        .build()
 
       assert(evvo.agentStatuses().forall(_.numInvocations == 0))
       evvo.runBlocking(StopAfter(300.millis))

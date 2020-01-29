@@ -24,8 +24,8 @@ case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
   }
 
   /**
-   * @return A csv-formatted string of the scores in the Pareto frontier.
-   */
+    * @return A csv-formatted string of the scores in the Pareto frontier.
+    */
   def toCsv(): String = {
     if (solutions.isEmpty) {
       return ""

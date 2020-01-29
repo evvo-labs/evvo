@@ -18,7 +18,7 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
       .withImmigrationStrategy(ElitistImmigrationStrategy)
 
     "be able to produce LocalIslands" in {
-      completeBuilder.buildLocalEvvo()
+      completeBuilder.build()
     }
 
     "allow adding items in any order" in {
@@ -31,7 +31,7 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
         })
         .addModifier(Bitflipper())
 
-      builder.buildLocalEvvo()
+      builder.build()
     }
 
     "allow building without immigration strategy" in {
@@ -43,7 +43,7 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
         .addCreator(BitstringGenerator(length = 16))
         .addModifier(Bitflipper())
         .addDeletor(DeleteDominated())
-        .buildLocalEvvo()
+        .build()
     }
 
     "allow building without creator" in {
@@ -54,7 +54,7 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
         })
         .addModifier(Bitflipper())
         .addDeletor(DeleteDominated())
-        .buildLocalEvvo()
+        .build()
     }
 
     "require at least one Objective, Mutator, Deletor" in {
@@ -76,7 +76,7 @@ class EvvoIslandBuilderTest extends WordSpec with Matchers {
         .withEmigrationTargetStrategy(RoundRobinEmigrationTargetStrategy())
         .withImmigrationStrategy(AllowAllImmigrationStrategy)
         .withLoggingStrategy(NullLoggingStrategy())
-        .buildLocalEvvo()
+        .build()
     }
   }
 }

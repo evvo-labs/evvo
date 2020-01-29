@@ -1,14 +1,11 @@
 package io.evvo.island
 
-import io.evvo.NullLogger
 import io.evvo.island.population.{Maximize, Objective, Scored, StandardPopulation}
 import org.scalatest.{Matchers, WordSpec}
 
 class ElitistImmigrationStrategyTest extends WordSpec with Matchers {
   "ElitistImmigrationStrategy" should {
     "allow immigrants on the pareto frontier" in {
-      implicit val log = NullLogger
-
       val objective = new Objective[Int]("test", Maximize) {
         override protected def objective(sol: Int): Double = sol.toDouble
       }

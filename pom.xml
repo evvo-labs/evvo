@@ -53,25 +53,7 @@
             <version>0.2.0</version>
         </dependency>
 
-        <!-- Akka -->
-        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-actor -->
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_${scala.compat.version}</artifactId>
-            <version>${akka.version}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-cluster -->
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-cluster_${scala.compat.version}</artifactId>
-            <version>${akka.version}</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-slf4j -->
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-slf4j_${scala.compat.version}</artifactId>
-            <version>${akka.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>

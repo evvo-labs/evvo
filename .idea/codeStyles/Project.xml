@@ -529,6 +529,8 @@
           <option value="spark.Spark._" />
         </array>
       </option>
+      <option name="SCALAFMT_CONFIG_PATH" value="$PROJECT_DIR$/.scalafmt.conf" />
+      <option name="SCALAFMT_REFORMAT_ON_FILES_SAVE" value="true" />
       <option name="FORMATTER" value="1" />
     </ScalaCodeStyleSettings>
     <XML>

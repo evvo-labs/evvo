@@ -1,6 +1,5 @@
 package io.evvo.agent
 
-import akka.event.LoggingAdapter
 import io.evvo.island.population.Population
 
 import scala.concurrent.duration._
@@ -15,8 +14,7 @@ class DeletorAgent[Sol](
     delete: DeletorFunction[Sol],
     population: Population[Sol],
     strategy: AgentStrategy = DeletorAgentDefaultStrategy()
-)(implicit logger: LoggingAdapter)
-    extends AAgent[Sol](delete.name, strategy, population)(logger) {
+) extends AAgent[Sol](delete.name, strategy, population) {
 
   override protected def step(): Unit = {
     val in = population.getSolutions(delete.numRequestedInputs)
@@ -33,7 +31,7 @@ object DeletorAgent {
       delete: DeletorFunction[Sol],
       population: Population[Sol],
       strategy: AgentStrategy = DeletorAgentDefaultStrategy()
-  )(implicit logger: LoggingAdapter): DeletorAgent[Sol] =
+  ): DeletorAgent[Sol] =
     new DeletorAgent(delete, population, strategy)
 }
 

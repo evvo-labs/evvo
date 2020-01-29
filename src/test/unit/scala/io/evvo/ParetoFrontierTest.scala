@@ -84,7 +84,7 @@ class ParetoFrontierTest extends WordSpec with Matchers {
       val csv_by_line: Array[String] = pf.toCsv().split("\n").map(_.trim())
 
       csv_by_line.head shouldBe "a,b"
-      csv_by_line.tail should contain theSameElementsAs(List("0.0,2.0", "1.0,1.0", "3.0,0.0"))
+      csv_by_line.tail should contain theSameElementsAs (List("0.0,2.0", "1.0,1.0", "3.0,0.0"))
     }
   }
 }

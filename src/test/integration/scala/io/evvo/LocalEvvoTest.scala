@@ -31,10 +31,8 @@ class LocalEvvoTest extends WordSpec with Matchers {
       .addDeletor(DeleteWorstHalfByRandomObjective())
       .addObjective(new NumInversions())
 
-    islandBuilder.buildLocalEvvo()
+    islandBuilder.build()
   }
-
-  implicit val log = NullLogger
 
   "Local Evvo" should {
     val timeout = 1

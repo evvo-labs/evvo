@@ -46,9 +46,9 @@ trait EvolutionaryProcess[Sol] {
   def agentStatuses(): Seq[AgentStatus]
 
   /** Provides a set of solutions to be added to the population of an EvolutionaryProcess.
-   *
-   * @param solutions the solutions to add
-   */
+    *
+    * @param solutions the solutions to add
+    */
   def addSolutions(solutions: Seq[Sol]): Unit
 }
 

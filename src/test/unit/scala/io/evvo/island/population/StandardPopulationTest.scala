@@ -1,12 +1,9 @@
 package io.evvo.island.population
 
-import akka.event.LoggingAdapter
-import io.evvo.NullLogger
 import io.evvo.island.population
 import org.scalatest._
 
 class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter {
-  implicit val log: LoggingAdapter = NullLogger
 
   val identityFitness = new Objective[Double]("Identity", Minimize) {
     override protected def objective(sol: Double): Double = sol
