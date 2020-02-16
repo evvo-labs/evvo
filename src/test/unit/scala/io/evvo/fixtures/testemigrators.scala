@@ -1,17 +1,19 @@
-package io.evvo.migration
+package unit.scala.io.evvo.fixtures
+
 import io.evvo.island.EmigrationTargetStrategy
 import io.evvo.island.population.Scored
+import io.evvo.migration.{Emigrator, Immigrator}
 
-// TODO move to test directory?
-// TODO this will break if you have multiple immigrators of different types in one JVM
-object local {
-  private var immigratorQueues = Map[Immigrator[_], Seq[Scored[_]]]()
-  private var immigrators = IndexedSeq[Immigrator[_]]()
+object testemigrators {
+  var immigratorQueues = Map[Immigrator[_], Seq[Scored[_]]]()
+  var immigrators = IndexedSeq[Immigrator[_]]()
 
   class LocalImmigrator[Sol]() extends Immigrator[Sol] {
-    immigratorQueues += (this -> Seq[Scored[Sol]]())
+    immigrators +:= this
+    immigratorQueues = immigratorQueues + (this -> Seq[Scored[Sol]]())
 
     override def immigrate(numberOfImmigrants: Int): Seq[Scored[Sol]] = {
+      println("immigrating", immigratorQueues)
       val result = immigratorQueues(this).take(numberOfImmigrants)
       immigratorQueues.updated(this, immigratorQueues(this).drop(numberOfImmigrants))
       result.asInstanceOf[Seq[Scored[Sol]]]
@@ -22,10 +24,17 @@ object local {
 
     override def emigrate(solutions: Seq[Scored[Sol]]): Unit = {
       val targets = targetStrategy.chooseTargets(immigrators.length)
+      println("emigrating", immigratorQueues)
+      println("targets", targets)
       targets.foreach(
         index =>
-          immigratorQueues
+          immigratorQueues = immigratorQueues
             .updated(immigrators(index), immigratorQueues(immigrators(index)) ++ solutions))
     }
+  }
+
+  def reset(): Unit = {
+    this.immigratorQueues = Map()
+    this.immigrators = IndexedSeq()
   }
 }
