@@ -6,7 +6,7 @@ import scala.util.chaining._
   *
   * @param solutions A non-dominated set.
   */
-case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
+case class ParetoFrontier[Sol](solutions: Set[Scored[Sol]]) {
   if (!ParetoFrontier.isParetoFrontier(solutions)) {
     throw new IllegalArgumentException(s"""
          |`solutions` must be valid pareto frontier, was ${solutions}
@@ -17,7 +17,7 @@ case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
   override def toString: String = {
     val contents = solutions
       .map(_.score.toVector.map {
-        case ((name, dir), score) => name -> score
+        case (name, (dir, score)) => name -> score
       }.toMap)
       .mkString("\n  ")
     f"ParetoFrontier(\n  ${contents})"
@@ -31,7 +31,7 @@ case class ParetoFrontier[Sol] private (solutions: Set[Scored[Sol]]) {
       return ""
     }
 
-    val objectives: Vector[String] = solutions.head.score.keys.map(_._1).toVector
+    val objectives: Vector[String] = solutions.head.score.keys.toVector
 
     val stringifiedSolutions: String = solutions
       .map(s => objectives.map(s.scoreOn))

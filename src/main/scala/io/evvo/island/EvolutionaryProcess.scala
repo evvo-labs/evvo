@@ -27,11 +27,8 @@ trait EvolutionaryProcess[Sol] {
     */
   def currentParetoFrontier(): ParetoFrontier[Sol]
 
-  /** Provides a set of solutions to immigrate (may die in process etc.).
-    *
-    * @param solutions the solutions that attempt to replicate across islands.
-    */
-  def immigrate(solutions: Seq[Scored[Sol]]): Unit
+  def immigrate(): Unit
+  def emigrate(): Unit
 
   /** Sends a poison pill to the evolutionary process.
     */

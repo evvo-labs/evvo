@@ -5,6 +5,7 @@ import java.util.concurrent.{Executors, TimeUnit}
 
 import io.evvo.agent._
 import io.evvo.island.population._
+import io.evvo.migration.{Emigrator, Immigrator}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future, Promise}
@@ -12,14 +13,15 @@ import scala.concurrent.{Await, Future, Promise}
 /** This component is used to do all the actual work of managing the island, without managing
   * or being tied to where the island is deployed to.
   */
-class EvvoIsland[Sol](
+class EvvoIsland[Sol: Manifest](
     creators: Vector[CreatorFunction[Sol]],
     mutators: Vector[ModifierFunction[Sol]],
     deletors: Vector[DeletorFunction[Sol]],
     fitnesses: Vector[Objective[Sol]],
+    immigrator: Immigrator[Sol],
     immigrationStrategy: ImmigrationStrategy,
+    emigrator: Emigrator[Sol],
     emigrationStrategy: EmigrationStrategy,
-    emigrationTargetStrategy: EmigrationTargetStrategy,
     loggingStrategy: LoggingStrategy
 ) extends EvolutionaryProcess[Sol] {
 
@@ -29,45 +31,29 @@ class EvvoIsland[Sol](
   private val deletorAgents = deletors.map(d => DeletorAgent(d, pop))
   private val allAgents: Seq[AAgent[Sol]] = creatorAgents ++ mutatorAgents ++ deletorAgents
 
-  /** The list of all other islands. */
-  // TODO validate these as URLs
-  private var otherIslands: IndexedSeq[String] = IndexedSeq()
-
-  /** The index of the current "target" that will receive the next emigration. */
-  private var currentEmigrationTargetIndex: Int = 0
-
-//  override def receive: Receive =
-//    LoggingReceive({
-//      case Run(t) => sender ! this.runBlocking(t)
-//      case GetParetoFrontier => sender ! this.currentParetoFrontier()
-//      case AddSolutions(solutions) =>
-//        Try { solutions.asInstanceOf[Seq[Sol]] }.fold(
-//          failure => this.logger.warning(f"Failed receiving AddSolutions message: ${failure}"),
-//          this.addSolutions)
-//      case Immigrate(solutions) =>
-//        Try { solutions.asInstanceOf[Seq[Scored[Sol]]] }.fold(
-//          failure => this.logger.warning(f"Failed receiving Immigrate message: ${failure}"),
-//          this.immigrate)
-//      case RegisterIslands(islands) =>
-//        Try { islands.asInstanceOf[Seq[EvolutionaryProcess[Sol]]] }.fold(
-//          failure => this.logger.warning(f"Failed receiving RegisterIsland message: ${failure}"),
-//          this.registerIslands)
-//      case GetAgentStatuses => sender ! this.agentStatuses()
-//    })
   override def runAsync(stopAfter: StopAfter): Future[Unit] = {
     allAgents.foreach(_.start())
+
+    val immigrationExecutor = Executors.newSingleThreadScheduledExecutor()
+    immigrationExecutor.scheduleAtFixedRate(
+      () => this.immigrate(),
+      this.immigrationStrategy.durationBetweenRuns.toMillis,
+      this.immigrationStrategy.durationBetweenRuns.toMillis,
+      TimeUnit.MILLISECONDS
+    )
 
     val emigrationExecutor = Executors.newSingleThreadScheduledExecutor()
     emigrationExecutor.scheduleAtFixedRate(
       () => this.emigrate(),
-      emigrationStrategy.durationBetweenRuns.toMillis,
-      emigrationStrategy.durationBetweenRuns.toMillis,
+      this.emigrationStrategy.durationBetweenRuns.toMillis,
+      this.emigrationStrategy.durationBetweenRuns.toMillis,
       TimeUnit.MILLISECONDS)
 
     val done = Promise[Unit]()
     val timer = new java.util.Timer()
     val shutDown = new TimerTask {
       override def run(): Unit = {
+        immigrationExecutor.shutdown()
         emigrationExecutor.shutdown()
         done.success(())
       }
@@ -75,6 +61,15 @@ class EvvoIsland[Sol](
     timer.schedule(shutDown, stopAfter.time.toMillis)
 
     done.future
+  }
+
+  override def immigrate(): Unit = {
+    val immigrants = this.immigrator.immigrate(this.immigrationStrategy.numberOfImmigrantsPerBatch)
+    this.immigrationStrategy.addImmigrants(immigrants, this.pop)
+  }
+
+  override def emigrate(): Unit = {
+    this.emigrator.emigrate(this.emigrationStrategy.chooseSolutions(this.pop))
   }
 
   def runBlocking(stopAfter: StopAfter): Unit = {
@@ -89,10 +84,6 @@ class EvvoIsland[Sol](
     pop.getParetoFrontier()
   }
 
-  override def immigrate(solutions: Seq[Scored[Sol]]): Unit = {
-    pop.addSolutions(immigrationStrategy.filter(solutions, pop).map(_.solution))
-  }
-
   override def poisonPill(): Unit = {
     stop()
   }
@@ -101,27 +92,13 @@ class EvvoIsland[Sol](
     allAgents.foreach(_.stop())
   }
 
-  private def emigrate(): Unit = {
-    if (otherIslands.isEmpty) {
-      // TODO log
-    } else {
-      val emigrationTargets = emigrationTargetStrategy.chooseTargets(this.otherIslands.length)
-      emigrationTargets.foreach(target => {
-        this.sendSolutionsTo(this.otherIslands(target))
-      })
-    }
-  }
-  private def sendSolutionsTo(str: String): Unit = {
-    // TODO HTTP stuff here
-  }
-
   override def agentStatuses(): Seq[AgentStatus] = allAgents.map(_.status())
 }
 
-object EvvoIsland {
-
-  /** @tparam Sol the type of solutions processed by this island.
-    * @return A builder for an EvvoIsland.
-    */
-  def builder[Sol](): UnfinishedEvvoIslandBuilder[Sol, _, _, _] = EvvoIslandBuilder[Sol]()
-}
+//object EvvoIsland {
+// TODO builder
+//  /** @tparam Sol the type of solutions processed by this island.
+//    * @return A builder for an EvvoIsland.
+//    */
+//  def builder[Sol](): UnfinishedEvvoIslandBuilder[Sol, _, _, _] = EvvoIslandBuilder[Sol]()
+//}

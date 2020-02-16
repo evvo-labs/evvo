@@ -5,10 +5,6 @@ PreCommit:
     description: Don't commit to master
     branch_patterns: ['master']
 
-  Scalastyle:
-    enabled: true
-    flags: ['-w', 'true', '-c', './project/scalastyle_config.xml', 'src']
-
   # brew install --HEAD olafurpg/scalafmt/scalafmt
   CustomScript:
     enabled: true

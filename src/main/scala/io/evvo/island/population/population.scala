@@ -17,6 +17,12 @@ trait Population[Sol] {
     */
   def addSolutions(solutions: Iterable[Sol]): Unit
 
+  /** Adds the given scored solutions, subject to any additional constraints
+    * imposed on the solutions by the population.
+    * @param solutions the solutions to add
+    */
+  def addScoredSolutions(solutions: Iterable[Scored[Sol]]): Unit
+
   /** Selects a random sample of the population.
     *
     * Returns an array instead of a set for performance to minimize the number of times
@@ -43,11 +49,10 @@ trait Population[Sol] {
   *
   * @tparam Sol the type of the solutions in the population
   */
-case class StandardPopulation[Sol](
-    objectivesIter: Iterable[Objective[Sol]],
-    hashing: HashingStrategy.Value = HashingStrategy.ON_SCORES
+case class StandardPopulation[Sol: Manifest](
+    objectivesIter: Seq[Objective[Sol]],
 ) extends Population[Sol] {
-  private val objectives = objectivesIter.iterator.toSet
+  private val objectives = objectivesIter.toSet
   private var population = Set[Scored[Sol]]()
 
   override def addSolutions(solutions: Iterable[Sol]): Unit = {
@@ -57,11 +62,15 @@ case class StandardPopulation[Sol](
 //    )
   }
 
+  override def addScoredSolutions(solutions: Iterable[Scored[Sol]]): Unit = {
+    population ++= solutions
+  }
+
   private def score(solution: Sol): Scored[Sol] = {
     val scores = this.objectives
-      .map(func => (func.name, func.optimizationDirection) -> func.score(solution))
+      .map(func => (func.name, func.optimizationDirection -> func.score(solution)))
       .toMap
-    val out = Scored(scores, solution, hashing)
+    val out = Scored(scores, solution)
 //    logger.debug(s"StandardPopulation: created $out")
     out
   }

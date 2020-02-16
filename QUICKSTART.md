@@ -51,7 +51,7 @@ package object tsp {
 Note that this could just as easily be wrapped in a case class, but as you'll see below, it is more ergonomic to deal with an `IndexedSeq` directly.
 
 ### Objectives 
-As this is the _bi-objective_ TSP problem, there are two objectives. Minimize `cost1`, and minimize `cost2`. Sounds pretty simple. "Minimizing `cost1`" means minimizing the sum of the costs of getting from each city to the next in a given `Tour`. So, we should be able to loop through the tour, adding the cost at each city. 
+As this is the _bi-objective_ TSP problem, there are two objectives. Minimize() `cost1`, and minimize `cost2`. Sounds pretty simple. "Minimizing `cost1`" means minimizing the sum of the costs of getting from each city to the next in a given `Tour`. So, we should be able to loop through the tour, adding the cost at each city. 
 
 In other words, it'll look something like this:
 ```scala
@@ -74,7 +74,7 @@ The free-floating function defined above won't work with Evvo. For that, we'll h
 
 ```scala
 case class CostObjective(override val name: String, cost: CostMatrix)
-  extends Objective[Tour](name, Minimize) {
+  extends Objective[Tour](name, Minimize()) {
   
   override protected def objective(sol: Tour): Double = {
     sol.sliding(2).map { case Vector(u, v) => cost(u, v) }.sum + cost(sol.last, sol.head)
@@ -82,7 +82,7 @@ case class CostObjective(override val name: String, cost: CostMatrix)
 }
 ```
 
-There are a few important things to note here. First: this class still accepts a name and a CostMatrix. This allows the same case class to be used for each of the two objectives. They only need to differ in their data, not their behavior. And notice that `Objective` is type-bounded by the type of our solution: in this case, `Tour`. When extending `Objective`, we pass in the name (used for logging), but we also pass in `Minimize`. This signals to Evvo that the goal is to minimize the output of the `objective(Tour)`  method.
+There are a few important things to note here. First: this class still accepts a name and a CostMatrix. This allows the same case class to be used for each of the two objectives. They only need to differ in their data, not their behavior. And notice that `Objective` is type-bounded by the type of our solution: in this case, `Tour`. When extending `Objective`, we pass in the name (used for logging), but we also pass in `Minimize()`. This signals to Evvo that the goal is to minimize the output of the `objective(Tour)`  method.
 
 Now, we'll have to read our TSP2 data from somewhere, and put it into two instances of the `CostObjective` class, but that can wait. First, let's take a look at what agents we need to write.
 

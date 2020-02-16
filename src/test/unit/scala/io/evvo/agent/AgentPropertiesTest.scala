@@ -24,7 +24,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
       seq.map(_.solution + 1)
     }
   }
-  val modifierInput: Set[Scored[S]] = Set[Scored[S]](Scored(Map(("Score1", Minimize) -> 3), 2))
+  val modifierInput: Set[Scored[S]] = Set[Scored[S]](Scored(Map(("Score1", Minimize() -> 3)), 2))
   val deletorFunc = new DeletorFunction[S]("deletor") {
     override def delete(sols: IndexedSeq[Scored[S]]): Iterable[Scored[S]] = {
       agentFunctionCalled("delete") = true
@@ -33,7 +33,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   }
   val deletorInput: Set[Scored[S]] = modifierInput
   val strategy: AgentStrategy = _ => 70.millis
-  val fitnessFunc: Objective[S] = new Objective[S]("Double", Minimize) {
+  val fitnessFunc: Objective[S] = new Objective[S]("Double", Minimize()) {
     override protected def objective(sol: S): Double = sol.toDouble
   }
   var pop: StandardPopulation[S] = _
