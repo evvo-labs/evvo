@@ -8,7 +8,8 @@ import io.evvo.island.population._
 import io.evvo.migration.{Emigrator, Immigrator}
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future, Promise}
+import scala.concurrent.ExecutionContext.global
+import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 
 /** This component is used to do all the actual work of managing the island, without managing
   * or being tied to where the island is deployed to.
@@ -49,18 +50,13 @@ class EvvoIsland[Sol: Manifest](
       this.emigrationStrategy.durationBetweenRuns.toMillis,
       TimeUnit.MILLISECONDS)
 
-    val done = Promise[Unit]()
-    val timer = new java.util.Timer()
-    val shutDown = new TimerTask {
-      override def run(): Unit = {
-        immigrationExecutor.shutdown()
-        emigrationExecutor.shutdown()
-        done.success(())
-      }
+    implicit val ec: ExecutionContext = ExecutionContext.global
+    Future {
+      Thread.sleep(stopAfter.time.toMillis)
+      immigrationExecutor.shutdownNow()
+      emigrationExecutor.shutdownNow()
+      print("DONE")
     }
-    timer.schedule(shutDown, stopAfter.time.toMillis)
-
-    done.future
   }
 
   override def immigrate(): Unit = {
@@ -73,7 +69,7 @@ class EvvoIsland[Sol: Manifest](
   }
 
   def runBlocking(stopAfter: StopAfter): Unit = {
-    Await.result(this.runAsync(stopAfter), Duration.Inf)
+    Await.ready(this.runAsync(stopAfter), Duration.Inf)
   }
 
   override def addSolutions(solutions: Seq[Sol]): Unit = {

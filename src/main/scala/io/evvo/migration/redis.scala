@@ -38,8 +38,7 @@ object redis {
     * Uses Redis as a message-passing system for immigration. Only works properly if all other
     * islands are using a RedisEmigrator.
     */
-  class RedisImmigrator[Sol: Manifest](redisClient: RedisClient)(implicit parser: Parse[Sol])
-      extends Immigrator[Sol] {
+  class RedisImmigrator[Sol: Manifest](redisClient: RedisClient) extends Immigrator[Sol] {
     val uuid: UUID = UUID.randomUUID()
 
     /** What is the list value that this immigration UUID should pop from? */
@@ -51,7 +50,7 @@ object redis {
         Serialization.formats(FullTypeHints(List(classOf[Minimize], classOf[Maximize])))
       val result = redisClient.pipeline(redisClient => {
         redisClient.lrange[String](this.queueKey, 0, numberOfImmigrants)
-        redisClient.ltrim(this.queueKey, 0, numberOfImmigrants)
+        redisClient.ltrim(this.queueKey, numberOfImmigrants, -1)
       })
       result.fold(Seq[Scored[Sol]]())(
         _.asInstanceOf[List[Option[List[Option[String]]]]].head

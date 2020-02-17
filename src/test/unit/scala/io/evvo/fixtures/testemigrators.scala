@@ -13,7 +13,6 @@ object testemigrators {
     immigratorQueues = immigratorQueues + (this -> Seq[Scored[Sol]]())
 
     override def immigrate(numberOfImmigrants: Int): Seq[Scored[Sol]] = {
-      println("immigrating", immigratorQueues)
       val result = immigratorQueues(this).take(numberOfImmigrants)
       immigratorQueues.updated(this, immigratorQueues(this).drop(numberOfImmigrants))
       result.asInstanceOf[Seq[Scored[Sol]]]
@@ -24,8 +23,6 @@ object testemigrators {
 
     override def emigrate(solutions: Seq[Scored[Sol]]): Unit = {
       val targets = targetStrategy.chooseTargets(immigrators.length)
-      println("emigrating", immigratorQueues)
-      println("targets", targets)
       targets.foreach(
         index =>
           immigratorQueues = immigratorQueues
