@@ -1,8 +1,8 @@
 package unit.scala.io.evvo.fixtures
 
 import io.evvo.island.EmigrationTargetStrategy
-import io.evvo.island.population.Scored
-import io.evvo.migration.{Emigrator, Immigrator}
+import io.evvo.island.population.{ParetoFrontier, Scored}
+import io.evvo.migration.{Emigrator, Immigrator, ParetoFrontierRecorder}
 
 object testemigrators {
   var immigratorQueues = Map[Immigrator[_], Seq[Scored[_]]]()
@@ -33,5 +33,9 @@ object testemigrators {
   def reset(): Unit = {
     this.immigratorQueues = Map()
     this.immigrators = IndexedSeq()
+  }
+
+  case class LocalParetoFrontierIgnorer[Sol]() extends ParetoFrontierRecorder[Sol] {
+    override def record(pf: ParetoFrontier[Sol]): Unit = {}
   }
 }

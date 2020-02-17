@@ -11,7 +11,7 @@ import io.evvo.island.{
   StopAfter
 }
 import io.evvo.island.population.{Maximize, Objective}
-import io.evvo.migration.redis.{RedisEmigrator, RedisImmigrator}
+import io.evvo.migration.redis.{RedisEmigrator, RedisImmigrator, RedisParetoFrontierRecorder}
 
 import scala.concurrent.duration._
 
@@ -38,7 +38,8 @@ object Maximize1BitsExample {
       immigrationStrategy = AllowAllImmigrationStrategy(),
       emigrator = new RedisEmigrator[Bitstring](redisClient),
       emigrationStrategy = RandomSampleEmigrationStrategy(32),
-      loggingStrategy = LogPopulationLoggingStrategy()
+      loggingStrategy = LogPopulationLoggingStrategy(),
+      paretoFrontierRecorder = new RedisParetoFrontierRecorder[Bitstring](redisClient)
     )
 
     // Run

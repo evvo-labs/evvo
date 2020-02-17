@@ -4,7 +4,11 @@ import io.evvo.island.population.{Maximize, Objective}
 import io.evvo.tags.Slow
 import org.scalatest.{BeforeAndAfter, Matchers, WordSpec}
 import unit.scala.io.evvo.fixtures.testemigrators
-import unit.scala.io.evvo.fixtures.testemigrators.{LocalEmigrator, LocalImmigrator}
+import unit.scala.io.evvo.fixtures.testemigrators.{
+  LocalEmigrator,
+  LocalImmigrator,
+  LocalParetoFrontierIgnorer
+}
 
 class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
   // private because EvvoIsland is private, required to compile.
@@ -24,7 +28,8 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       ElitistImmigrationStrategy(),
       new LocalEmigrator[Int](SendToAllEmigrationTargetStrategy()),
       RandomSampleEmigrationStrategy(4),
-      LogPopulationLoggingStrategy()
+      LogPopulationLoggingStrategy(),
+      LocalParetoFrontierIgnorer()
     )
 
     island2 = new EvvoIsland(
@@ -36,7 +41,8 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
       AllowAllImmigrationStrategy(),
       new LocalEmigrator[Int](SendToAllEmigrationTargetStrategy()),
       RandomSampleEmigrationStrategy(4),
-      LogPopulationLoggingStrategy()
+      LogPopulationLoggingStrategy(),
+      LocalParetoFrontierIgnorer()
     )
   }
 
@@ -77,7 +83,8 @@ class EvvoIslandTest extends WordSpec with Matchers with BeforeAndAfter {
         ElitistImmigrationStrategy(),
         new LocalEmigrator[Int](SendToAllEmigrationTargetStrategy()),
         NoEmigrationEmigrationStrategy,
-        LogPopulationLoggingStrategy()
+        LogPopulationLoggingStrategy(),
+        LocalParetoFrontierIgnorer()
       )
 
       // Because island2 wasn't changed, in conjunction with the above test, the change in

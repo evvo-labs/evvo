@@ -7,7 +7,11 @@ import io.evvo.island.population.{Minimize, Objective, ParetoFrontier}
 import io.evvo.island._
 import io.evvo.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
-import unit.scala.io.evvo.fixtures.testemigrators.{LocalEmigrator, LocalImmigrator}
+import unit.scala.io.evvo.fixtures.testemigrators.{
+  LocalEmigrator,
+  LocalImmigrator,
+  LocalParetoFrontierIgnorer
+}
 
 import scala.concurrent.duration._
 
@@ -35,6 +39,7 @@ class LocalEvvoTest extends WordSpec with Matchers {
       new LocalEmigrator[Solution](SendToAllEmigrationTargetStrategy()),
       RandomSampleEmigrationStrategy(n = 16),
       LogPopulationLoggingStrategy(),
+      LocalParetoFrontierIgnorer()
     )
   }
 

@@ -5,7 +5,7 @@ import java.util.concurrent.{Executors, TimeUnit}
 
 import io.evvo.agent._
 import io.evvo.island.population._
-import io.evvo.migration.{Emigrator, Immigrator}
+import io.evvo.migration.{Emigrator, Immigrator, ParetoFrontierRecorder}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.global
@@ -23,7 +23,8 @@ class EvvoIsland[Sol: Manifest](
     immigrationStrategy: ImmigrationStrategy,
     emigrator: Emigrator[Sol],
     emigrationStrategy: EmigrationStrategy,
-    loggingStrategy: LoggingStrategy
+    loggingStrategy: LoggingStrategy,
+    paretoFrontierRecorder: ParetoFrontierRecorder[Sol]
 ) extends EvolutionaryProcess[Sol] {
 
   private val pop: Population[Sol] = StandardPopulation(fitnesses)
@@ -55,7 +56,7 @@ class EvvoIsland[Sol: Manifest](
       Thread.sleep(stopAfter.time.toMillis)
       immigrationExecutor.shutdownNow()
       emigrationExecutor.shutdownNow()
-      print("DONE")
+      paretoFrontierRecorder.record(this.currentParetoFrontier())
     }
   }
 

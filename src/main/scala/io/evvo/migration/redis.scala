@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.redis.RedisClient
 import com.redis.serialization.Parse
-import io.evvo.island.population.{Maximize, Minimize, Scored}
+import io.evvo.island.population.{Maximize, Minimize, ParetoFrontier, Scored}
 import org.json4s._
 import org.json4s.native.Serialization
 object redis {
@@ -60,6 +60,20 @@ object redis {
                 Serialization.read[Scored[Sol]](str)
             }
           }))
+    }
+  }
+
+  class RedisParetoFrontierRecorder[Sol: Manifest](redisClient: RedisClient)
+      extends ParetoFrontierRecorder[Sol] {
+
+    // TODO: Should be different per island
+    val storageKey: String = f"$ns::pareto_frontiers"
+
+    override def record(pf: ParetoFrontier[Sol]): Unit = {
+      implicit val formats: Formats =
+        Serialization.formats(FullTypeHints(List(classOf[Minimize], classOf[Maximize])))
+
+      redisClient.rpush(storageKey, Serialization.write(pf))
     }
   }
 }
