@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: evvo-batch
 spec:
-#  completions: 3
+  completions: 3
   parallelism: 3
   template:
     metadata:
