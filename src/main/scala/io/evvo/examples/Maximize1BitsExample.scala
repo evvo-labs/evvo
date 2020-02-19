@@ -27,6 +27,8 @@ object Maximize1BitsExample {
     // Connect to redis
     val redisClient = new RedisClient(args(0), args(1).toInt)
 
+    val duration = args(2).toInt.seconds
+
     // Create 1 island to maximize bits
 
     val evvoIsland = new EvvoIsland[Bitstring](
@@ -43,7 +45,7 @@ object Maximize1BitsExample {
     )
 
     // Run
-    evvoIsland.runBlocking(StopAfter(1.second))
+    evvoIsland.runBlocking(StopAfter(duration))
     println(evvoIsland.currentParetoFrontier().toCsv())
     sys.exit(0)
   }

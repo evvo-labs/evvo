@@ -35,7 +35,7 @@ object deletors {
       } else {
         val objectiveList = s.head.score.keys.toVector
         val objective = objectiveList(util.Random.nextInt(objectiveList.size))
-
+        implicit val ordering: Ordering[Double] = Ordering.Double.TotalOrdering
         s.toVector
           .sortBy(item => {
             val (dir, score) = item.score(objective)
