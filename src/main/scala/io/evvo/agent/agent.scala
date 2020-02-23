@@ -1,6 +1,7 @@
 package io.evvo.agent
 
 import io.evvo.island.population.Population
+import io.evvo.island.utilities.log
 
 import scala.concurrent.duration._
 
@@ -42,7 +43,7 @@ abstract class AAgent[Sol](
   private val thread = new Thread {
     override def run(): Unit = {
       var waitTime: Duration = strategy.waitTime(population.getInformation())
-//      logger.debug(s"${name}: Waiting for ${waitTime}")
+      log.debug(s"${name}: Waiting for ${waitTime}")
       // The whole main loop in is in a try/catch block so we can log on exit, particularly
       // if there was an uncaught exception or a ThreadInterruptedException.
       try {
@@ -56,10 +57,10 @@ abstract class AAgent[Sol](
             step()
           } catch {
             case e: Exception => {
-//              logger.warning(
-//                f"${this}: Agent ${name} encountered an exception during a step, " +
-//                  f"stack trace: ${e.getStackTrace.mkString("\n")}"
-//              )
+              log.error(
+                f"${this}: Agent ${name} encountered an exception during a step, " +
+                  f"stack trace: ${e.getStackTrace.mkString("\n")}"
+              )
             }
           }
           Thread.sleep(waitTime.toMillis)
@@ -68,46 +69,46 @@ abstract class AAgent[Sol](
           if (numInvocations % 33 == 0) {
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)
-//            logger.debug(s"${name}: Waiting for ${waitTime}")
+            log.debug(s"${name}: Waiting for ${waitTime}")
           }
           if (numInvocations % 100 == 0) {
-//            logger.debug(s"${this} hit ${numInvocations} invocations")
+            log.debug(s"${this} hit ${numInvocations} invocations")
           }
         }
-//        logger.debug(f"${this}-${name}: Interrupted during while loop, terminating gracefully.")
+        log.debug(f"${this}-${name}: Interrupted during while loop, terminating gracefully.")
       } catch {
         // if interrupted, silently exit. This thread is interrupted only when AAgent.stop() is
         // called, so there's nothing more to do.
         case e: InterruptedException =>
-//          logger.info(f"${this}-${name}: Interrupted during sleep, terminating gracefully.")
+          log.info(f"${this}-${name}: Interrupted during sleep, terminating gracefully.")
         case e: Exception =>
-//          logger.error(
-//            f"${this}-${name}: Unexpected exception ${e}, stopping thread. " +
-//              f"Stack trace: ${e.getStackTrace.mkString("\n")}"
-//          )
+          log.error(
+            f"${this}-${name}: Unexpected exception ${e}, stopping thread. " +
+              f"Stack trace: ${e.getStackTrace.mkString("\n")}"
+          )
       }
-//      logger.info(f"${this}-${name}: finished running")
+      log.info(f"${this}-${name}: finished running")
     }
   }
 
   override def start(): Unit = {
     if (!thread.isAlive) {
-//      logger.info(s"${this}-${name}: Starting agent")
+      log.info(s"${this}-${name}: Starting agent")
       thread.start()
     } else {
-//      logger.warning(s"${this}-${name}: trying to start already started agent")
+      log.warn(s"${this}-${name}: trying to start already started agent")
     }
   }
 
   override def stop(): Unit = {
     if (thread.isAlive) {
-//      logger.info(s"${this}-${name}: stopping after ${numInvocations} invocations")
+      log.info(s"${this}-${name}: stopping after ${numInvocations} invocations")
       thread.interrupt()
     } else {
-//      logger.warning(
-//        s"${this}-${name}: trying to stop already stopped agent, " +
-//          s"with ${numInvocations} invocations"
-//      )
+      log.warn(
+        s"${this}-${name}: trying to stop already stopped agent, " +
+          s"with ${numInvocations} invocations"
+      )
     }
   }
 
