@@ -6,6 +6,7 @@ import java.util.concurrent.{Executors, TimeUnit}
 import io.evvo.agent._
 import io.evvo.island.population._
 import io.evvo.migration.{Emigrator, Immigrator, ParetoFrontierRecorder}
+import utilities.log
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.global
@@ -70,7 +71,9 @@ class EvvoIsland[Sol: Manifest](
   }
 
   def runBlocking(stopAfter: StopAfter): Unit = {
+    log.info(s"Running blocking for $stopAfter seconds")
     Await.ready(this.runAsync(stopAfter), Duration.Inf)
+    log.info(s"Completed run for $stopAfter seconds")
   }
 
   override def addSolutions(solutions: Seq[Sol]): Unit = {

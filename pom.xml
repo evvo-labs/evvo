@@ -52,8 +52,12 @@
             <artifactId>scala-parallel-collections_${scala.compat.version}</artifactId>
             <version>0.2.0</version>
         </dependency>
-
-
+        <!-- https://mvnrepository.com/artifact/com.typesafe.scala-logging/scala-logging -->
+        <dependency>
+            <groupId>com.typesafe.scala-logging</groupId>
+            <artifactId>scala-logging_2.13</artifactId>
+            <version>3.9.2</version>
+        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
