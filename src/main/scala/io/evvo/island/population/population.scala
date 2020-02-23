@@ -58,9 +58,9 @@ case class StandardPopulation[Sol: Manifest](
 
   override def addSolutions(solutions: Iterable[Sol]): Unit = {
     population ++= solutions.iterator.map(score)
-    log.debug(
-      f"Added ${solutions.iterator.size} solutions, new population size ${population.size}"
-    )
+//    log.debug(
+//      f"Added ${solutions.iterator.size} solutions, new population size ${population.size}"
+//    )
   }
 
   override def addScoredSolutions(solutions: Iterable[Scored[Sol]]): Unit = {
@@ -72,7 +72,7 @@ case class StandardPopulation[Sol: Manifest](
       .map(func => (func.name, func.optimizationDirection -> func.score(solution)))
       .toMap
     val out = Scored(scores, solution)
-    log.debug(s"StandardPopulation: created $out")
+//    log.debug(s"StandardPopulation: created $out")
     out
   }
 
@@ -90,7 +90,7 @@ case class StandardPopulation[Sol: Manifest](
 
   override def getInformation(): PopulationInformation = {
     val out = PopulationInformation(this.population.size)
-    log.debug(s"StandardPopulation: getInformation returning ${out}")
+//    log.debug(s"StandardPopulation: getInformation returning ${out}")
     out
   }
 }

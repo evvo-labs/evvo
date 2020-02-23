@@ -69,9 +69,9 @@ abstract class AAgent[Sol](
           if (numInvocations % 33 == 0) {
             val nextInformation = population.getInformation()
             waitTime = strategy.waitTime(nextInformation)
-            log.debug(s"${name}: Waiting for ${waitTime}")
+//            log.debug(s"${name}: Waiting for ${waitTime}")
           }
-          if (numInvocations % 100 == 0) {
+          if (numInvocations % 100000 == 0) {
             log.debug(s"${this} hit ${numInvocations} invocations")
           }
         }
@@ -87,7 +87,7 @@ abstract class AAgent[Sol](
               f"Stack trace: ${e.getStackTrace.mkString("\n")}"
           )
       }
-      log.info(f"${this}-${name}: finished running")
+//      log.info(f"${this}-${name}: finished running")
     }
   }
 
