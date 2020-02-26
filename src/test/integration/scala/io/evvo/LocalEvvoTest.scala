@@ -3,8 +3,8 @@ package io.evvo
 import io.evvo.LocalEvvoTestFixtures._
 import io.evvo.agent.{CreatorFunction, MutatorFunction}
 import io.evvo.builtin.deletors.DeleteDominated
-import io.evvo.island.population.{Minimize, Objective, ParetoFrontier}
 import io.evvo.island._
+import io.evvo.island.population.{Minimize, Objective, ParetoFrontier}
 import io.evvo.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
 import unit.scala.io.evvo.fixtures.testemigrators.{
@@ -56,7 +56,9 @@ class LocalEvvoTest extends WordSpec with Matchers {
       evvo2.runBlocking(terminate)
       val pareto: ParetoFrontier[Solution] = ParetoFrontier[Solution](
         evvo.currentParetoFrontier().solutions ++ evvo2.currentParetoFrontier().solutions)
-      assert(pareto.solutions.exists(_.score("Inversions")._2 == 0d))
+      assert(
+        pareto.solutions.exists(_.score("Inversions")._2 == 0d),
+        pareto.solutions.map(_.score("Inversions")._2).fold(Double.MaxValue)(math.min))
     }
   }
 }
