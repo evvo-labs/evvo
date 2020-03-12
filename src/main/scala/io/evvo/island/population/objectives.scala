@@ -2,7 +2,7 @@ package io.evvo.island.population
 
 /** An objective is a goal to be maximized (or minimized) by the evolutionary process.
   * @param name                  the name of this objective
-  * @param optimizationDirection one of `Minimize` or `Maximize`
+  * @param optimizationDirection one of `Minimize()` or `Maximize()`
   * @param precision             how many decimal points to round to. For example, if given 1,
   *                              .015 and .018 will be considered equal.
   */
@@ -27,7 +27,7 @@ abstract class Objective[Sol](
   }
 }
 
-/** An OptimizationDirection is either Minimize or Maximize. */
+/** An OptimizationDirection is either Minimize() or Maximize(). */
 sealed trait OptimizationDirection
-case object Minimize extends OptimizationDirection
-case object Maximize extends OptimizationDirection
+case class Minimize() extends OptimizationDirection
+case class Maximize() extends OptimizationDirection

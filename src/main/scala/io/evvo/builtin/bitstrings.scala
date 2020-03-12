@@ -9,7 +9,12 @@ object bitstrings {
     * efficient implementation, but by giving it a name it should be possible to transfer over
     * to some more sophisticated bitstring representation later.
     */
-  type Bitstring = Seq[Boolean]
+  case class Bitstring(bits: Seq[Boolean]) {
+    override def toString: String =
+      bits
+        .map(if (_) "1" else "0")
+        .foldLeft("")(_ + _)
+  }
 
   /** A creator that generates `Bitstring`s by filling them with random bits.
     *
@@ -20,18 +25,21 @@ object bitstrings {
       extends CreatorFunction[Bitstring]("BitstringGenerator") {
     override def create(): Iterable[Bitstring] = {
       // `<`, because we want the proportion of `true` to increase if `proportionOnes` increases
-      Vector.fill(32)(Vector.fill(length)(util.Random.nextDouble() < proportionOnes))
+      Vector.fill(32)(Bitstring(Vector.fill(length)(util.Random.nextDouble() < proportionOnes)))
     }
   }
 
   /** A mutator for `Bitstring`s that swaps two random bits in a solution. */
   case class Bitswapper() extends MutatorFunction[Bitstring]("Bitswapper") {
     override def mutate(bitstring: Bitstring): Bitstring = {
-      val index1 = util.Random.nextInt(bitstring.length)
-      val index2 = util.Random.nextInt(bitstring.length)
+      val index1 = util.Random.nextInt(bitstring.bits.length)
+      val index2 = util.Random.nextInt(bitstring.bits.length)
 
       // not mutation, doesn't need an intermediate temp variable
-      bitstring.updated(index1, bitstring(index2)).updated(index2, bitstring(index1))
+      Bitstring(
+        bitstring.bits
+          .updated(index1, bitstring.bits(index2))
+          .updated(index2, bitstring.bits(index1)))
     }
   }
 
@@ -43,8 +51,8 @@ object bitstrings {
   case class Bitflipper(override val numRequestedInputs: Int = 32)
       extends MutatorFunction[Bitstring]("Bitflipper") {
     override def mutate(bitstring: Bitstring): Bitstring = {
-      val index = util.Random.nextInt(bitstring.length)
-      bitstring.updated(index, !bitstring(index))
+      val index = util.Random.nextInt(bitstring.bits.length)
+      Bitstring(bitstring.bits.updated(index, !bitstring.bits(index)))
     }
   }
 }

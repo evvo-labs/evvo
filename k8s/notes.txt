@@ -1,0 +1,3 @@
+minikube start
+k apply -f ./k8s/redis-pod.yaml
+k apply -f ./k8s/redis-service.yaml

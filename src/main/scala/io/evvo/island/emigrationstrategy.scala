@@ -16,8 +16,7 @@ trait EmigrationStrategy {
     */
   def chooseSolutions[Sol](population: Population[Sol]): Seq[Scored[Sol]]
 
-  /** @return How often should emigration happen?
-    */
+  /** @return How often should emigration happen?  */
   def durationBetweenRuns: FiniteDuration
 }
 

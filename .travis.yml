@@ -10,10 +10,12 @@ before_script:
 #  - git config --global user.name "Travis CI"
   - sh travis/travis_setup.sh
 
+service:
+  - redis-server
+
 script:
   # Allow changes to overcommit
   - mvn clean package
-
 
 notifications:
   slack:

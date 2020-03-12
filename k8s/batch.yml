@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: evvo-batch
+spec:
+  completions: 3
+  parallelism: 3
+  template:
+    metadata:
+      name: evvo
+    spec:
+      containers:
+        - name: evvo-container
+          image: evvo:latest
+          imagePullPolicy: IfNotPresent
+      restartPolicy: OnFailure

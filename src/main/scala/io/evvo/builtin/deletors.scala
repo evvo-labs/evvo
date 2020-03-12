@@ -35,13 +35,17 @@ object deletors {
       } else {
         val objectiveList = s.head.score.keys.toVector
         val objective = objectiveList(util.Random.nextInt(objectiveList.size))
-
-        val ordering = objective match {
-          case (_, Minimize) => Ordering.Double.TotalOrdering.reverse
-          case (_, Maximize) => Ordering.Double.TotalOrdering
-        }
-
-        s.toVector.sortBy(_.score(objective))(ordering).take(s.size / 2)
+        implicit val ordering: Ordering[Double] = Ordering.Double.TotalOrdering
+        s.toVector
+          .sortBy(item => {
+            val (dir, score) = item.score(objective)
+            score * (if (dir == Minimize()) {
+                       -1
+                     } else {
+                       1
+                     })
+          })
+          .take(s.size / 2)
       }
     }
   }

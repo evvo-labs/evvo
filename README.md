@@ -20,10 +20,10 @@ Here's an example showing how simple it is to set up and solve a basic problem (
 ```scala
 import io.evvo.agent.defaults.{Bitstring, Bitflipper, BitstringGenerator, DeleteDominated}
 import io.evvo.island.{EvvoIsland, LocalIslandManager, StopAfter}
-import io.evvo.island.population.{Maximize, Objective}
+import io.evvo.island.population.{Maximize(), Objective}
 import scala.concurrent.duration._
 
-object Maximize1Bits extends Objective[Bitstring]("1Bits", Maximize) {
+object Maximize()1Bits extends Objective[Bitstring]("1Bits", Maximize()) {
   override protected def objective(sol: Bitstring): Double = {
     sol.count(identity) // Bitstrings are represented as Seq[Boolean], count `true`s
   }
@@ -34,7 +34,7 @@ val islandBuilder = EvvoIsland.builder[Bitstring]()
   .addCreator(BitstringGenerator(length=16))
   .addModifier(Bitflipper())
   .addDeletor(DeleteDominated[Bitstring]())
-  .addObjective(Maximize1Bits)
+  .addObjective(Maximize()1Bits)
 
 val islandManager = new LocalIslandManager(numIslands = 1, islandBuilder)
 islandManager.runBlocking(StopAfter(1.second))
@@ -49,7 +49,7 @@ ParetoFrontier(Map(1Bits -> 16.0))
 
 This means that there was one solution on the pareto frontier, which scored `16.0` according to the objective named `"1Bits"`. Since the generated `Bitstring`s only have 16 bits, the best possible score is `16.0` bits that are 1. Note that the pareto frontier doesn't print the actual solutions. The solutions are available within the `ParetoFrontier` class, but the `toString` method prints only the scores, because solutions to more complex problems are very large.
 
-If our [built-in](./src/main/scala/com/io/agent/defaults/defaults.scala) _Creators_, _Modifiers_, and _Deletors_ do not work for your problem, you can define your own as easily as we defined `Maximize1Bits`.
+If our [built-in](./src/main/scala/com/io/agent/defaults/defaults.scala) _Creators_, _Modifiers_, and _Deletors_ do not work for your problem, you can define your own as easily as we defined `Maximize()1Bits`.
 
 If you want to jump directly into an example, check out the [quickstart guide](./QUICKSTART.md). It assumes some familiarity with evolutionary computing concepts, so you may need to cross reference the terminology and diagrams in this file while you are working through the example.
 

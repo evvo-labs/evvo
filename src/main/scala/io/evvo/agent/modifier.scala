@@ -1,6 +1,5 @@
 package io.evvo.agent
 
-import akka.event.LoggingAdapter
 import io.evvo.island.population.Population
 
 import scala.concurrent.duration._
@@ -13,11 +12,10 @@ import scala.concurrent.duration._
   * @param strategy How often this agent should run.
   */
 class ModifierAgent[Sol](
-                          modify: ModifierFunction[Sol],
-                          population: Population[Sol],
-                          strategy: AgentStrategy = ModifierAgentDefaultStrategy()
-)(implicit logger: LoggingAdapter)
-    extends AAgent[Sol](modify.name, strategy, population)(logger) {
+    modify: ModifierFunction[Sol],
+    population: Population[Sol],
+    strategy: AgentStrategy = ModifierAgentDefaultStrategy()
+) extends AAgent[Sol](modify.name, strategy, population) {
 
   override protected def step(): Unit = {
     val in = population.getSolutions(modify.numRequestedInputs)
@@ -34,7 +32,7 @@ object ModifierAgent {
       modifier: ModifierFunction[Sol],
       population: Population[Sol],
       strategy: AgentStrategy = ModifierAgentDefaultStrategy()
-  )(implicit logger: LoggingAdapter): ModifierAgent[Sol] =
+  ): ModifierAgent[Sol] =
     new ModifierAgent[Sol](modifier, population, strategy)
 }
 

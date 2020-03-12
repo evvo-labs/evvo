@@ -1,17 +1,21 @@
 package io.evvo.island.population
 
-import akka.event.LoggingAdapter
-import io.evvo.NullLogger
 import io.evvo.island.population
 import org.scalatest._
 
 class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter {
-  implicit val log: LoggingAdapter = NullLogger
 
-  val identityFitness = new Objective[Double]("Identity", Minimize) {
+  val popSize = 10
+
+  val returnOne: Objective[Double] = new Objective[Double]("one", Maximize()) {
+    override protected def objective(sol: Double): Double = 1
+  }
+
+  val identityFitness = new Objective[Double]("Identity", Minimize()) {
     override protected def objective(sol: Double): Double = sol
   }
-  val fitnesses = Set(identityFitness)
+  val fitnesses = Seq[Objective[Double]](identityFitness)
+  var pop: StandardPopulation[Double] = StandardPopulation(fitnesses)
 
   "An empty population" should {
     val emptyPop = StandardPopulation(fitnesses)
@@ -22,7 +26,7 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
     }
 
     "not do anything when deleted from" in {
-      emptyPop.deleteSolutions(Seq(Scored(Map(("a", Minimize) -> 1.0), 1.0)))
+      emptyPop.deleteSolutions(Seq(Scored(Map(("a", Minimize() -> 1.0)), 1.0)))
 
       val sols = emptyPop.getSolutions(1)
       sols.length shouldBe 0
@@ -45,13 +49,9 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
       info.numSolutions shouldBe 0
     }
   }
-  val popSize = 10
-  val returnOne: Objective[Double] = new Objective[Double]("one", Maximize) {
-    override protected def objective(sol: Double): Double = 1
-  }
-  "A non-empty population hashing on solutions" should {
+  "A non-empty population " should {
     before {
-      pop = population.StandardPopulation(fitnesses, HashingStrategy.ON_SOLUTIONS)
+      pop = StandardPopulation(fitnesses)
       pop.addSolutions((1 to popSize).map(_.toDouble))
     }
 
@@ -92,7 +92,7 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
       info.numSolutions shouldBe 10
     }
   }
-  val uniqueScore: Objective[Double] = new Objective[Double]("one", Maximize) {
+  val uniqueScore: Objective[Double] = new Objective[Double]("one", Maximize()) {
     var counter = 0
 
     override protected def objective(sol: Double): Double = {
@@ -100,36 +100,18 @@ class StandardPopulationTest extends WordSpec with Matchers with BeforeAndAfter 
       counter
     }
   }
-  var pop: StandardPopulation[Double] = _
 
-  "A population hashing on solutions" should {
+  "A population" should {
 
-    "not allow duplicate solutions" in {
-      val pop = StandardPopulation(Vector(uniqueScore), HashingStrategy.ON_SOLUTIONS)
-      pop.addSolutions(Vector(1, 1))
-      val sol = pop.getSolutions(2)
-      sol.length shouldBe 1
-    }
-
-    "allow duplicate scores for different solutions" in {
-      val pop = StandardPopulation(Vector(returnOne), HashingStrategy.ON_SOLUTIONS)
-      pop.addSolutions(Vector(1, 2))
-      val sol = pop.getSolutions(2)
-      sol.length shouldBe 2
-    }
-  }
-
-  "A population hashing on scores" should {
-
-    "not allow duplicate scores" in {
-      val pop = StandardPopulation(Vector(returnOne), HashingStrategy.ON_SCORES)
+    "not allow duplicates by score" in {
+      val pop = StandardPopulation(Vector(returnOne))
       pop.addSolutions(Vector(1, 2))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 1
     }
 
-    "allow duplicate solutions for different scores" in {
-      val pop = StandardPopulation(Vector(uniqueScore), HashingStrategy.ON_SCORES)
+    "allow duplicate solutions with different scores" in {
+      val pop = StandardPopulation(Vector(uniqueScore))
       pop.addSolutions(Vector(1, 1))
       val sol = pop.getSolutions(2)
       sol.length shouldBe 2

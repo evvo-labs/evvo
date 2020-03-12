@@ -6,10 +6,10 @@ import org.scalatest.{Matchers, WordSpec}
 
 class DeleteWorstHalfByRandomObjectiveTest extends WordSpec with Matchers {
   "DeleteWorstHalfByRandomObjective" should {
-    val scored1 = Scored(Map(("a", Maximize) -> 1), 12)
-    val scored2 = Scored(Map(("a", Maximize) -> 2), 13)
-    val scored3 = Scored(Map(("a", Maximize) -> 3), 14)
-    val scored4 = Scored(Map(("a", Maximize) -> 4), 14)
+    val scored1 = Scored(Map(("a", Maximize() -> 1)), 12)
+    val scored2 = Scored(Map(("a", Maximize() -> 2)), 13)
+    val scored3 = Scored(Map(("a", Maximize() -> 3)), 14)
+    val scored4 = Scored(Map(("a", Maximize() -> 4)), 14)
 
     val deletor = (DeleteWorstHalfByRandomObjective[Int]().delete _).andThen(_.toVector)
 
@@ -25,8 +25,8 @@ class DeleteWorstHalfByRandomObjectiveTest extends WordSpec with Matchers {
     }
 
     "sometimes pick different objectives" in {
-      val scored1 = Scored(Map(("a", Maximize) -> 1, ("b", Minimize) -> 1), 12)
-      val scored2 = Scored(Map(("a", Maximize) -> 2, ("b", Minimize) -> 2), 12)
+      val scored1 = Scored(Map(("a", Maximize() -> 1), ("b", Minimize() -> 1)), 12)
+      val scored2 = Scored(Map(("a", Maximize() -> 2), ("b", Minimize() -> 2)), 12)
 
       // it should have two results, one when it picks "a", one when it picks "b"
       Vector.fill(100)(deletor(Vector(scored1, scored2))).toSet should have size 2

@@ -2,11 +2,16 @@ package io.evvo
 
 import io.evvo.LocalEvvoTestFixtures._
 import io.evvo.agent.{CreatorFunction, MutatorFunction}
-import io.evvo.builtin.deletors.DeleteWorstHalfByRandomObjective
+import io.evvo.builtin.deletors.DeleteDominated
+import io.evvo.island._
 import io.evvo.island.population.{Minimize, Objective, ParetoFrontier}
-import io.evvo.island.{EvolutionaryProcess, EvvoIslandBuilder, StopAfter}
 import io.evvo.tags.{Performance, Slow}
 import org.scalatest.{Matchers, WordSpec}
+import unit.scala.io.evvo.fixtures.testemigrators.{
+  LocalEmigrator,
+  LocalImmigrator,
+  LocalParetoFrontierIgnorer
+}
 
 import scala.concurrent.duration._
 
@@ -24,17 +29,19 @@ class LocalEvvoTest extends WordSpec with Matchers {
     * @return
     */
   def getEvvo(listLength: Int): EvolutionaryProcess[Solution] = {
-
-    val islandBuilder = EvvoIslandBuilder[Solution]()
-      .addCreator(new ReverseListCreator(listLength))
-      .addModifier(new SwapTwoElementsModifier())
-      .addDeletor(DeleteWorstHalfByRandomObjective())
-      .addObjective(new NumInversions())
-
-    islandBuilder.buildLocalEvvo()
+    new EvvoIsland[Solution](
+      Vector(new ReverseListCreator(10)),
+      Vector(new SwapTwoElementsModifier()),
+      Vector(DeleteDominated()),
+      Vector(new NumInversions()),
+      new LocalImmigrator[Solution](),
+      AllowAllImmigrationStrategy(),
+      new LocalEmigrator[Solution](SendToAllEmigrationTargetStrategy()),
+      RandomSampleEmigrationStrategy(n = 16),
+      LogPopulationLoggingStrategy(),
+      LocalParetoFrontierIgnorer()
+    )
   }
-
-  implicit val log = NullLogger
 
   "Local Evvo" should {
     val timeout = 1
@@ -43,9 +50,15 @@ class LocalEvvoTest extends WordSpec with Matchers {
       val terminate = StopAfter(timeout.seconds)
 
       val evvo = getEvvo(listLength)
-      evvo.runBlocking(terminate)
-      val pareto: ParetoFrontier[Solution] = evvo.currentParetoFrontier()
-      assert(pareto.solutions.exists(_.score(("Inversions", Minimize)) == 0d))
+      val evvo2 = getEvvo(listLength)
+
+      evvo.runAsync(terminate)
+      evvo2.runBlocking(terminate)
+      val pareto: ParetoFrontier[Solution] = ParetoFrontier[Solution](
+        evvo.currentParetoFrontier().solutions ++ evvo2.currentParetoFrontier().solutions)
+      assert(
+        pareto.solutions.exists(_.score("Inversions")._2 == 0d),
+        pareto.solutions.map(_.score("Inversions")._2).fold(Double.MaxValue)(math.min))
     }
   }
 }
@@ -67,7 +80,7 @@ object LocalEvvoTestFixtures {
     }
   }
 
-  class NumInversions extends Objective[Solution]("Inversions", Minimize) {
+  class NumInversions extends Objective[Solution]("Inversions", Minimize()) {
     override protected def objective(sol: Solution): Double = {
       // Old way of doing it: still works, but more clear with tails: left for clarity
       //      (for ((elem, index) <- sol.zipWithIndex) yield {

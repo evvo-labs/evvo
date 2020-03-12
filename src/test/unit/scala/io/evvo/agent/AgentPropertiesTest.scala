@@ -1,7 +1,5 @@
 package io.evvo.agent
 
-import akka.event.LoggingAdapter
-import io.evvo._
 import io.evvo.island.population.{Minimize, Objective, Scored, StandardPopulation}
 import io.evvo.tags.Slow
 import org.scalatest.{BeforeAndAfter, Matchers, WordSpecLike}
@@ -10,8 +8,6 @@ import scala.collection.mutable
 import scala.concurrent.duration._
 
 class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter {
-
-  implicit val log: LoggingAdapter = NullLogger
 
   // TODO reimplement this using http://doc.scalatest.org/3.0.1/#org.scalatest.PropSpec@testMatrix
 
@@ -28,7 +24,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
       seq.map(_.solution + 1)
     }
   }
-  val modifierInput: Set[Scored[S]] = Set[Scored[S]](Scored(Map(("Score1", Minimize) -> 3), 2))
+  val modifierInput: Set[Scored[S]] = Set[Scored[S]](Scored(Map(("Score1", Minimize() -> 3)), 2))
   val deletorFunc = new DeletorFunction[S]("deletor") {
     override def delete(sols: IndexedSeq[Scored[S]]): Iterable[Scored[S]] = {
       agentFunctionCalled("delete") = true
@@ -37,7 +33,7 @@ class AgentPropertiesTest extends WordSpecLike with Matchers with BeforeAndAfter
   }
   val deletorInput: Set[Scored[S]] = modifierInput
   val strategy: AgentStrategy = _ => 70.millis
-  val fitnessFunc: Objective[S] = new Objective[S]("Double", Minimize) {
+  val fitnessFunc: Objective[S] = new Objective[S]("Double", Minimize()) {
     override protected def objective(sol: S): Double = sol.toDouble
   }
   var pop: StandardPopulation[S] = _

@@ -27,28 +27,21 @@ trait EvolutionaryProcess[Sol] {
     */
   def currentParetoFrontier(): ParetoFrontier[Sol]
 
-  /** Provides a set of solutions to immigrate (may die in process etc.).
-    *
-    * @param solutions the solutions that attempt to replicate across islands.
-    */
-  def immigrate(solutions: Seq[Scored[Sol]]): Unit
+  def immigrate(): Unit
+  def emigrate(): Unit
 
   /** Sends a poison pill to the evolutionary process.
     */
   def poisonPill(): Unit
-
-  /** Registers the given islands as potential destinations for emigrations.
-    */
-  def registerIslands(islands: Seq[EvolutionaryProcess[Sol]]): Unit
 
   /** @return The status of every agent that is part of this evolutionary process.
     */
   def agentStatuses(): Seq[AgentStatus]
 
   /** Provides a set of solutions to be added to the population of an EvolutionaryProcess.
-   *
-   * @param solutions the solutions to add
-   */
+    *
+    * @param solutions the solutions to add
+    */
   def addSolutions(solutions: Seq[Sol]): Unit
 }
 

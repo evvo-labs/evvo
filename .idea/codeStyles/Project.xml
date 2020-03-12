@@ -529,7 +529,10 @@
           <option value="spark.Spark._" />
         </array>
       </option>
+      <option name="SCALAFMT_CONFIG_PATH" value="$PROJECT_DIR$/.scalafmt.conf" />
+      <option name="SCALAFMT_REFORMAT_ON_FILES_SAVE" value="true" />
       <option name="FORMATTER" value="1" />
+      <option name="USE_SCALADOC2_FORMATTING" value="true" />
     </ScalaCodeStyleSettings>
     <XML>
       <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
