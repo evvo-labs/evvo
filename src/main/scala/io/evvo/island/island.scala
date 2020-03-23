@@ -39,7 +39,7 @@ class EvvoIsland[Sol: Manifest](
 
     val immigrationExecutor = Executors.newSingleThreadScheduledExecutor()
     immigrationExecutor.scheduleAtFixedRate(
-      () => this.immigrate(),
+      this.immigrate _,
       this.immigrationStrategy.durationBetweenRuns.toMillis,
       this.immigrationStrategy.durationBetweenRuns.toMillis,
       TimeUnit.MILLISECONDS
@@ -47,18 +47,31 @@ class EvvoIsland[Sol: Manifest](
 
     val emigrationExecutor = Executors.newSingleThreadScheduledExecutor()
     emigrationExecutor.scheduleAtFixedRate(
-      () => this.emigrate(),
+      this.emigrate _,
       this.emigrationStrategy.durationBetweenRuns.toMillis,
       this.emigrationStrategy.durationBetweenRuns.toMillis,
       TimeUnit.MILLISECONDS)
+
+    val loggingExecutor = Executors.newSingleThreadScheduledExecutor()
+    loggingExecutor.scheduleAtFixedRate(
+      this.doLog _,
+      this.loggingStrategy.durationBetweenLogs.toMillis,
+      this.loggingStrategy.durationBetweenLogs.toMillis,
+      TimeUnit.MILLISECONDS
+    )
 
     implicit val ec: ExecutionContext = ExecutionContext.global
     Future {
       Thread.sleep(stopAfter.time.toMillis)
       immigrationExecutor.shutdownNow()
       emigrationExecutor.shutdownNow()
+      loggingExecutor.shutdownNow()
       paretoFrontierRecorder.record(this.currentParetoFrontier())
     }
+  }
+
+  private def doLog(): Unit = {
+    log.info(this.loggingStrategy.logPopulation(this.pop))
   }
 
   override def immigrate(): Unit = {
