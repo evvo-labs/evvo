@@ -37,10 +37,6 @@ object DeletorAgent {
 
 case class DeletorAgentDefaultStrategy() extends AgentStrategy {
   override def waitTime(populationInformation: PopulationInformation): Duration = {
-    if (populationInformation.numSolutions < 100) {
-      30.millis // give creators a chance!
-    } else {
-      0.millis
-    }
+    0.millis
   }
 }
