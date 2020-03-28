@@ -26,6 +26,7 @@ case class LogPopulationLoggingStrategy(durationBetweenLogs: FiniteDuration = 1.
     f"""
      |Size: ${population.getInformation().numSolutions}
      |Pareto Frontier: ${population.getParetoFrontier()}
+     |Solutions: ${population.getParetoFrontier().solutions.map(_.solution).mkString("\n")}
      """.stripMargin
   }
 }
