@@ -66,6 +66,7 @@ class EvvoIsland[Sol: Manifest](
       immigrationExecutor.shutdownNow()
       emigrationExecutor.shutdownNow()
       loggingExecutor.shutdownNow()
+      allAgents.foreach(_.stop())
       paretoFrontierRecorder.record(this.currentParetoFrontier())
     }
   }
