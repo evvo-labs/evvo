@@ -65,12 +65,6 @@ abstract class AAgent[Sol](
           }
           Thread.sleep(waitTime.toMillis)
 
-          // this is arbitrary
-//          if (numInvocations % 1000 == 0) {
-//            val nextInformation = population.getInformation()
-//            waitTime = strategy.waitTime(nextInformation)
-//            log.debug(s"${name}: Waiting for ${waitTime}")
-//          }
           if (numInvocations % 100000 == 0) {
             log.debug(s"${this}: ${name} hit ${numInvocations} invocations")
           }

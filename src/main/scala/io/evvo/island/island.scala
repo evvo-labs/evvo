@@ -97,14 +97,6 @@ class EvvoIsland[Sol: Manifest](
     pop.getParetoFrontier()
   }
 
-  override def poisonPill(): Unit = {
-    stop()
-  }
-
-  private def stop(): Unit = {
-    allAgents.foreach(_.stop())
-  }
-
   override def agentStatuses(): Seq[AgentStatus] = allAgents.map(_.status())
 }
 
