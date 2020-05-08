@@ -1,6 +1,5 @@
 package io.evvo.island
 
-import java.util.TimerTask
 import java.util.concurrent.{Executors, TimeUnit}
 
 import io.evvo.agent._
@@ -9,8 +8,7 @@ import io.evvo.migration.{Emigrator, Immigrator, ParetoFrontierRecorder}
 import utilities.log
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.ExecutionContext.global
-import scala.concurrent.{Await, ExecutionContext, Future, Promise}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 /** This component is used to do all the actual work of managing the island, without managing
   * or being tied to where the island is deployed to.
