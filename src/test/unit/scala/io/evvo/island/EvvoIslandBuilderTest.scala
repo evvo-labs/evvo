@@ -1,26 +1,34 @@
-//
-//package io.evvo.island
-//
-//import io.evvo.builtin.bitstrings.{Bitflipper, Bitstring, BitstringGenerator}
-//import io.evvo.builtin.deletors.DeleteDominated
-//import io.evvo.island.population.{Maximize(), Objective}
-//import org.scalatest.{Matchers, WordSpec}
-//
-//class EvvoIslandBuilderTest extends WordSpec with Matchers {
-//  "EvvoIslandBuilders" should {
-//    val completeBuilder = EvvoIsland
-//      .builder[Bitstring]()
-//      .addObjective(new Objective[Bitstring]("Three", Maximize()) {
-//        override protected def objective(sol: Bitstring): Double = 3d
-//      })
-//      .addCreator(BitstringGenerator(length = 16))
-//      .addModifier(Bitflipper())
-//      .addDeletor(DeleteDominated())
-//      .withImmigrator(ElitistImmigrationStrategy())
-//
-//    "be able to produce LocalIslands" in {
-//      completeBuilder.build()
-//    }
+package io.evvo.island
+
+import io.evvo.builtin.bitstrings.{Bitflipper, Bitstring, BitstringGenerator}
+import io.evvo.builtin.deletors.DeleteDominated
+import io.evvo.island.population.{Maximize, Objective}
+import io.evvo.migration.closedborders.{DoNotRecord, DoNothingEmigrator, DoNothingImmigrator}
+import org.scalatest.{Matchers, WordSpec}
+
+class EvvoIslandBuilderTest extends WordSpec with Matchers {
+
+  "EvvoIslandBuilders" should {
+    val completeBuilder = EvvoIsland
+      .builder[Bitstring]()
+      .addObjective(new Objective[Bitstring]("Three", Maximize()) {
+        override protected def objective(sol: Bitstring): Double = 3d
+      })
+      .addCreator(BitstringGenerator(length = 16))
+      .addModifier(Bitflipper())
+      .addDeletor(DeleteDominated())
+      .withImmigrator(DoNothingImmigrator())
+      .withImmigrationStrategy(ElitistImmigrationStrategy())
+      .withEmigrator(DoNothingEmigrator())
+      .withEmigrationStrategy(NoEmigrationEmigrationStrategy)
+      .withParetoFrontierRecorder(DoNotRecord())
+      .withLoggingStrategy(LogPopulationLoggingStrategy())
+
+    "be able to produce EvvoIslands" in {
+      completeBuilder.build()
+    }
+
+//    TODO: This will all make more sense once we have Local Immigrators/Emigrators.
 //
 //    "allow adding items in any order" in {
 //      val builder = EvvoIsland
@@ -79,5 +87,5 @@
 //        .withLoggingStrategy(NullLoggingStrategy())
 //        .build()
 //    }
-//  }
-//}
+  }
+}

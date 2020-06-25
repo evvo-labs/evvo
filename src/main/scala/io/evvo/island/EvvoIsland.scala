@@ -99,10 +99,11 @@ class EvvoIsland[Sol: Manifest](
   override def agentStatuses(): Seq[AgentStatus] = allAgents.map(_.status())
 }
 
-//object EvvoIsland {
-// TODO builder
-//  /** @tparam Sol the type of solutions processed by this island.
-//    * @return A builder for an EvvoIsland.
-//    */
-//  def builder[Sol](): UnfinishedEvvoIslandBuilder[Sol, _, _, _] = EvvoIslandBuilder[Sol]()
-//}
+object EvvoIsland {
+
+  /** @tparam Sol the type of solutions processed by this island.
+    * @return A builder for an EvvoIsland.
+    */
+  def builder[Sol: Manifest](): UnfinishedEvvoIslandBuilder[Sol, _, _, _, _, _, _, _, _, _] =
+    EvvoIslandBuilder[Sol]()
+}

@@ -119,6 +119,21 @@ case class UnfinishedEvvoIslandBuilder[
     this.copy(immigrator = Some(immigrator))
   }
 
+  def withImmigrationStrategy(
+      immigrationStrategy: ImmigrationStrategy): UnfinishedEvvoIslandBuilder[
+    Sol,
+    HasModifiers,
+    HasDeletors,
+    HasFitnesses,
+    HasImmigrator,
+    HAS_SOME,
+    HasEmigrator,
+    HasEmigrationStrategy,
+    HasLoggingStrategy,
+    HasParetoFrontierRecorder] = {
+    this.copy(immigrationStrategy = Some(immigrationStrategy))
+  }
+
   def withEmigrator(emigrator: Emigrator[Sol]): UnfinishedEvvoIslandBuilder[
     Sol,
     HasModifiers,
@@ -205,7 +220,7 @@ case class FinishedEvvoIslandBuilder[Sol: Manifest](
       immigrator,
       immigrationStrategy,
       emigrator,
-      emigrationStrategy: EmigrationStrategy,
+      emigrationStrategy,
       loggingStrategy,
       paretoFrontierRecorder
     )
