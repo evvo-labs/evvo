@@ -64,6 +64,7 @@ class EvvoIsland[Sol: Manifest](
       immigrationExecutor.shutdownNow()
       emigrationExecutor.shutdownNow()
       loggingExecutor.shutdownNow()
+      allAgents.foreach(_.stop())
       paretoFrontierRecorder.record(this.currentParetoFrontier())
     }
   }
@@ -93,14 +94,6 @@ class EvvoIsland[Sol: Manifest](
 
   override def currentParetoFrontier(): ParetoFrontier[Sol] = {
     pop.getParetoFrontier()
-  }
-
-  override def poisonPill(): Unit = {
-    stop()
-  }
-
-  private def stop(): Unit = {
-    allAgents.foreach(_.stop())
   }
 
   override def agentStatuses(): Seq[AgentStatus] = allAgents.map(_.status())

@@ -1,7 +1,7 @@
 package io.evvo.island
 
 import io.evvo.agent.AgentStatus
-import io.evvo.island.population.{ParetoFrontier, Scored}
+import io.evvo.island.population.ParetoFrontier
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
@@ -29,10 +29,6 @@ trait EvolutionaryProcess[Sol] {
 
   def immigrate(): Unit
   def emigrate(): Unit
-
-  /** Sends a poison pill to the evolutionary process.
-    */
-  def poisonPill(): Unit
 
   /** @return The status of every agent that is part of this evolutionary process.
     */
